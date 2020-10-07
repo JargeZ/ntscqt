@@ -1,6 +1,11 @@
 # VHS GUI Tool
 [![Demo](demo.gif)](https://youtu.be/uqT3Z0kfF24)
 Полное демо: [youtu.be/uqT3Z0kfF24](https://youtu.be/uqT3Z0kfF24)
+
+## Download
+#### For windows:
+You can [download latest version here](https://github.com/JargeZ/ntsc/releases/latest/download/ntscQT.exe) or from [releases page](https://github.com/JargeZ/ntsc/releases)
+
 ## Warning
 Если вам нужно обработать только какую-то часть видео, сначала вырежьте её через видеоредактор, где вы работаете и пропустите через программу только этот кусок.\
 В программе есть возможность выключить применение эффекта во время рендера и включить только в нужный момент, но это всё равно будет дольше, чем заранее подготовить нужный кусок.
