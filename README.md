@@ -1,5 +1,30 @@
-# NTSC video emulator
+# VHS GUI Tool
+[![Demo](demo.gif)](https://youtu.be/uqT3Z0kfF24)
+Полное демо: [youtu.be/uqT3Z0kfF24](https://youtu.be/uqT3Z0kfF24)
+## Warning
+Если вам нужно обработать только какую-то часть видео, сначала вырежьте её через видеоредактор, где вы работаете и пропустите через программу только этот кусок.\
+В программе есть возможность выключить применение эффекта во время рендера и включить только в нужный момент, но это всё равно будет дольше, чем заранее подготовить нужный кусок.
 
+`This code is *SLOW*. It's designed to be as accurate as I can make it, not fast. You may want to take any Simpsons episodes you will be editing and cut them up first in Adobe Premiere (or your favorite video editor) then run the exported "clip show" through this program instead of wasting CPU cycles on whole episodes.`
+
+#Использование (RU)
+Откройте видео и играйтесь ползунками
+- Поле с номером **Seed** генерирует случайные параметры обработки, которые всегда будут одинаковы для одной и той же цифры
+- **Preview height** указывает размер кадра, который обрабатывается для предпросмотра. Меньше - быстрее.
+- **Render height** изначально становится такой, как у видео, которое вы загрузили. Если установить значение меньше, то при рендере входное видео будет ресайзиться и обработается быстрее
+- **Pause Render** позволяет поставить рендер на паузу и изменить параметры обработки, чтобы достичь изменяемого эффекта в видео. Также ползунки можно крутить прям во время рендера без паузы.
+- **LivePreview** можно включить во время рендера, тогда в окне предпросмотра будет показываться каждый обрабатываемся кадр, тогда как изанчально только каждый 10-й
+#Usage (EN)
+You can open the video and experiment with all parameters
+- **Seed** field generates random processing parameters that will always be the same for the same value
+- Preview height indicates the size of the frame that is processed for preview. Less is faster.
+- The **Render height** initially becomes the same as the video you uploaded. If you set the value less, the video will be resized and processed faster
+- **Pause Render** allows you to pause the render and change the processing parameters to achieve a variable effect in the video. Also, the sliders can be turned directly during rendering without pause.
+- **LivePreview** can be turned on during rendering, then every frame being processed will be shown in the preview window, default only every 10th frame shown
+
+#
+##### Original readme (оригинальное описание)
+#### NTSC video emulator
 ![alt text](ntsc.gif)
 
 This is a python3.6 rewrite of https://github.com/joncampbell123/composite-video-simulator
