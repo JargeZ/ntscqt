@@ -1,6 +1,5 @@
-import os
 import sys
-
+from pathlib import Path
 import cv2
 import numpy
 from PyQt5 import QtWidgets, QtCore, QtGui
@@ -44,6 +43,9 @@ class ExampleApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.add_slider("_video_noise", 0, 4200)
         self.add_slider("_video_scanline_phase_shift", 0, 270)
         self.add_slider("_video_scanline_phase_shift_offset", 0, 3)
+
+        self.add_slider("_head_switching_speed", 0, 100)
+
         self.add_checkbox("_vhs_head_switching", (1, 1))
         self.add_checkbox("_color_bleed_before", (1, 2))
         self.add_checkbox("_enable_ringing2", (2, 1))
@@ -260,9 +262,9 @@ class ExampleApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         # открыть диалог выбора директории и установить значение переменной
         # равной пути к выбранной директории
         if file:
-            norm_path = os.path.normpath(file[0])
+            norm_path = Path(file[0])
             print(f"file: {norm_path}")
-            cap = cv2.VideoCapture(norm_path)
+            cap = cv2.VideoCapture(str(norm_path))
             print(f"cap: {cap} isOpened: {cap.isOpened()}")
             self.input_video = {
                 "cap": cap,
@@ -284,14 +286,14 @@ class ExampleApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         # file_dialog.setNameFilters([self.tr('MP4 file (*.mp4)'), self.tr('All Files (*)')])
         # file_dialog.setDefaultSuffix('.mp4')
         target_file = QFileDialog.getSaveFileName(self, 'Render As', '', "Video mp4 (*.mp4);;All Files (*)")
+        print(f"Save picked as: {target_file}")
         if not target_file[0]:
             return None
         if target_file[1] == 'Video mp4 (*.mp4)' and target_file[0][-4:] != '.mp4':
             target_file = target_file[0] + '.mp4'
         else:
             target_file = target_file[0]
-
-        target_file = os.path.normpath(target_file)
+        target_file = Path(target_file)
         render_data = {
             "target_file": target_file,
             "nt": self.nt,
