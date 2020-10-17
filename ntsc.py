@@ -284,6 +284,7 @@ class Ntsc:
         self._vhs_edge_wave = 0  # 0..10
 
         self._vhs_head_switching = False  # turn this on only on frames height 486 pixels or more
+        self._head_switching_speed = 0  # 0..100 this is /1000 increment for _vhs_head_switching_point 0 is static
         self._vhs_head_switching_point = 1.0 - (4.5 + 0.01) / 262.5  # 4 scanlines NTSC up from vsync
         self._vhs_head_switching_phase = (1.0 - 0.01) / 262.5  # 4 scanlines NTSC up from vsync
         self._vhs_head_switching_phase_noise = 1.0 / 500 / 262.5  # 1/500th of a scanline
@@ -410,6 +411,7 @@ class Ntsc:
 
         t = twidth * (262.5 if self._output_ntsc else 312.5)
         p = int(fmod(self._vhs_head_switching_point + noise, 1.0) * t)
+        self._vhs_head_switching_point += self._head_switching_speed/1000
         y = int(p // twidth * 2) + field
         p = int(fmod(self._vhs_head_switching_phase + noise, 1.0) * t)
         x = p % twidth
