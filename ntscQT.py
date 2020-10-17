@@ -246,7 +246,8 @@ class ExampleApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         slider.setMaximum(max_val)
         slider.setMinimum(min_val)
         slider.setMouseTracking(False)
-        slider.setTickPosition(QSlider.TicksLeft)
+        if max_val < 100 and slider_value_type == int:
+            slider.setTickPosition(QSlider.TicksLeft)
         slider.setOrientation(QtCore.Qt.Horizontal)
         slider.setObjectName(f"{param_name}")
         slider.blockSignals(False)
