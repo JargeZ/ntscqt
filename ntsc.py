@@ -1,11 +1,9 @@
 import math
-import os
 import random
-import sys
 from enum import Enum
+from pathlib import Path
 from typing import List
 
-import cv2
 import numpy
 import scipy
 from scipy.signal import lfilter
@@ -19,7 +17,8 @@ M_PI = math.pi
 Int_MIN_VALUE = -2147483648
 Int_MAX_VALUE = 2147483647
 
-RingPattern = np.load(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'ringPattern.npy'))
+
+RingPattern = str((Path(__file__).parent/'ringPattern.npy').resolve())
 
 
 def ringing(img2d, alpha=0.5, noiseSize=0, noiseValue=2, clip=True, seed=None):
