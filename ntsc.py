@@ -1,5 +1,6 @@
 import math
 import random
+import sys
 from enum import Enum
 from pathlib import Path
 from typing import List
@@ -17,8 +18,10 @@ M_PI = math.pi
 Int_MIN_VALUE = -2147483648
 Int_MAX_VALUE = 2147483647
 
-
-RingPattern = str((Path(__file__).parent/'ringPattern.npy').resolve())
+ring_pattern_real_path = 'ringPattern.npy'
+if getattr(sys, 'frozen', False):
+    ring_pattern_real_path = f'{sys._MEIPASS}\\ringPattern.npy'
+RingPattern = np.load(ring_pattern_real_path)
 
 
 def ringing(img2d, alpha=0.5, noiseSize=0, noiseValue=2, clip=True, seed=None):
