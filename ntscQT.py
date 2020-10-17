@@ -369,6 +369,8 @@ def main():
     locale = QtCore.QLocale.system().name()
     if translator.load(locale + '.qm', 'translate'):
         print(f'Localization loaded: {locale}' )  # name, dir
+    else:
+        print("Using default translation")
 
     app = QtWidgets.QApplication(sys.argv)  # Новый экземпляр QApplication
     app.installTranslator(translator)
