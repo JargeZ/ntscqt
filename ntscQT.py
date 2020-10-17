@@ -25,7 +25,37 @@ class ExampleApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         # и т.д. в файле design.py
         super().__init__()
         self.setupUi(self)  # Это нужно для инициализации нашего дизайна
-
+        self.strings = {
+            "_composite_preemphasis": self.tr("Composite preemphasis"),
+            "_vhs_out_sharpen": self.tr("VHS out sharpen"),
+            "_vhs_edge_wave": self.tr("Edge wave"),
+            "_output_vhs_tape_speed": self.tr("VHS tape speed"),
+            "_ringing": self.tr("Ringing"),
+            "_ringing_power": self.tr("Ringing power"),
+            "_ringing_shift": self.tr("Ringing shift"),
+            "_freq_noise_size": self.tr("Freq noise size"),
+            "_freq_noise_amplitude": self.tr("Freq noise amplitude"),
+            "_color_bleed_horiz": self.tr("Color bleed horiz"),
+            "_color_bleed_vert": self.tr("Color bleed vert"),
+            "_video_chroma_noise": self.tr("Video chroma noise"),
+            "_video_chroma_phase_noise": self.tr("Video chroma phase noise"),
+            "_video_chroma_loss": self.tr("Video chroma loss"),
+            "_video_noise": self.tr("Video noise"),
+            "_video_scanline_phase_shift": self.tr("Video scanline phase shift"),
+            "_video_scanline_phase_shift_offset": self.tr("Video scanline phase shift offset"),
+            "_head_switching_speed": self.tr("Head switch move speed"),
+            "_vhs_head_switching": self.tr("Head switching"),
+            "_color_bleed_before": self.tr("Color bleed before"),
+            "_enable_ringing2": self.tr("Enable ringing2"),
+            "_composite_in_chroma_lowpass": self.tr("Composite in chroma lowpass"),
+            "_composite_out_chroma_lowpass": self.tr("Composite out chroma lowpass"),
+            "_composite_out_chroma_lowpass_lite": self.tr("Composite out chroma lowpass lite"),
+            "_emulating_vhs": self.tr("VHS emulating"),
+            "_nocolor_subcarrier": self.tr("Nocolor subcarrier"),
+            "_vhs_chroma_vert_blend": self.tr("VHS chroma vert blend"),
+            "_vhs_svideo_out": self.tr("VHS svideo out"),
+            "_output_ntsc": self.tr("NTSC output"),
+        }
         self.add_slider("_composite_preemphasis", 0, 10, float)
         self.add_slider("_vhs_out_sharpen", 1, 5)
         self.add_slider("_vhs_edge_wave", 0, 10)
@@ -136,6 +166,7 @@ class ExampleApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
     @QtCore.pyqtSlot(int)
     def update_seed(self, seed):
         self.nt = random_ntsc(seed)
+        self.nt._enable_ringing2 = True
         self.sync_nt_to_sliders()
 
     @QtCore.pyqtSlot(str)
@@ -189,16 +220,16 @@ class ExampleApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         setattr(self.nt, parameter_name, value)
         self.nt_update_preview()
 
-    def add_checkbox(self, name, pos):
+    def add_checkbox(self, param_name, pos):
         checkbox = QCheckBox()
-        checkbox.setText(name)
-        checkbox.setObjectName(name)
+        checkbox.setText(self.strings[param_name])
+        checkbox.setObjectName(param_name)
         checkbox.stateChanged.connect(self.value_changed_slot)
         # checkbox.mouseReleaseEvent(lambda: self.controls_set())
-        self.nt_controls[name] = checkbox
+        self.nt_controls[param_name] = checkbox
         self.checkboxesLayout.addWidget(checkbox, pos[0], pos[1])
 
-    def add_slider(self, name, min_val, max_val, slider_value_type=int):
+    def add_slider(self, param_name, min_val, max_val, slider_value_type=int):
         slider_layout = QHBoxLayout()
         if slider_value_type is int:
             slider = QSlider()
@@ -217,11 +248,12 @@ class ExampleApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         slider.setMouseTracking(False)
         slider.setTickPosition(QSlider.TicksLeft)
         slider.setOrientation(QtCore.Qt.Horizontal)
-        slider.setObjectName(f"{name}")
+        slider.setObjectName(f"{param_name}")
         slider.blockSignals(False)
 
         label = QLabel()
-        label.setText(name)
+        # label.setText(description or name)
+        label.setText(self.strings[param_name])
 
         # todo: сделать рандомайзер вместо бокса
         # box.setMinimum(min_val)
@@ -229,7 +261,7 @@ class ExampleApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         # box.valueChanged.connect(slider.setValue)
         # slider.valueChanged.connect(box.setValue)
         value_label = QLabel()
-        value_label.setObjectName(name)
+        value_label.setObjectName(param_name)
         # slider.valueChanged.connect(lambda intval: value_label.setText(str(intval)))
 
         slider_layout.addWidget(label)
@@ -237,7 +269,7 @@ class ExampleApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         # slider_layout.addWidget(box)
         slider_layout.addWidget(value_label)
 
-        self.nt_controls[name] = slider
+        self.nt_controls[param_name] = slider
         self.controlLayout.addLayout(slider_layout)
 
     def set_current_frame(self):
@@ -332,7 +364,15 @@ class ExampleApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
 
 
 def main():
+    translator = QtCore.QTranslator()
+
+    locale = QtCore.QLocale.system().name()
+    if translator.load(locale + '.qm', 'translate'):
+        print(f'Localization loaded: {locale}' )  # name, dir
+
     app = QtWidgets.QApplication(sys.argv)  # Новый экземпляр QApplication
+    app.installTranslator(translator)
+
     window = ExampleApp()  # Создаём объект класса ExampleApp
     window.show()  # Показываем окно
     app.exec_()  # и запускаем приложение
