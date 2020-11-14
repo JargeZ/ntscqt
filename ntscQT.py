@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QSlider, QHBoxLayout, QLabel, QCheckBox, QFileDialog
 from numpy import ndarray
 
 from Renderer import Renderer
-from funcs import resize_to_height
+from funcs import resize_to_height, pick_save_file
 from ntsc import random_ntsc
 from ui import mainWindow
 from ui.DoubleSlider import DoubleSlider
@@ -17,6 +17,7 @@ class ExampleApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
     def __init__(self):
         self.current_frame = False
         self.input_video = {}
+        self.orig_wh = (0, 0)
         self.compareMode = False
         self.isRenderActive = False
         self.mainEffect = True
@@ -24,6 +25,8 @@ class ExampleApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         # Это здесь нужно для доступа к переменным, методам
         # и т.д. в файле design.py
         super().__init__()
+        self.supported_video_type = ['.mp4', '.mkv', '.avi', '.webm', '.mpg']
+        self.supported_image_type = ['.png', '.jpg', '.jpeg', '.gif']
         self.setupUi(self)  # Это нужно для инициализации нашего дизайна
         self.strings = {
             "_composite_preemphasis": self.tr("Composite preemphasis"),
@@ -88,10 +91,12 @@ class ExampleApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.add_checkbox("_vhs_svideo_out", (5, 2))
         self.add_checkbox("_output_ntsc", (6, 1))
 
-        self.previewHeightBox.valueChanged.connect(self.set_current_frame)
-
-        self.openFile.clicked.connect(self.open_video)
-        self.renderVideoButton.clicked.connect(self.render)
+        self.previewHeightBox.valueChanged.connect(
+            lambda: self.set_current_frame(self.current_frame)
+        )
+        self.openFile.clicked.connect(self.open_file)
+        self.renderVideoButton.clicked.connect(self.render_video)
+        self.saveImageButton.clicked.connect(self.render_image)
         self.stopRenderButton.clicked.connect(self.stop_render)
         self.compareModeButton.stateChanged.connect(self.toggle_compare_mode)
         self.toggleMainEffect.stateChanged.connect(self.toggle_main_effect)
@@ -118,7 +123,7 @@ class ExampleApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         # перенесём объект в другой поток
         self.videoRenderer.moveToThread(self.thread)
         # после чего подключим все сигналы и слоты
-        self.videoRenderer.newFrame.connect(self.update_preview)
+        self.videoRenderer.newFrame.connect(self.render_preview)
         self.videoRenderer.frameMoved.connect(self.videoTrackSlider.setValue)
         self.videoRenderer.renderStateChanged.connect(self.set_render_state)
         self.videoRenderer.sendStatus.connect(self.update_status)
@@ -273,60 +278,107 @@ class ExampleApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.nt_controls[param_name] = slider
         self.controlLayout.addLayout(slider_layout)
 
-    def set_current_frame(self):
+    def get_current_video_frame(self):
         preview_h = self.previewHeightBox.value()
         if not self.input_video or preview_h < 10:
             return None
         frame_no = self.videoTrackSlider.value()
         self.input_video["cap"].set(1, frame_no)
         ret, frame = self.input_video["cap"].read()
+        return frame
 
-        orig_wh = (int(self.input_video["width"]), int(self.input_video["height"]))
+    def set_current_frame(self, frame):
+        current_frame_valid = isinstance(frame, ndarray)
+        preview_h = self.previewHeightBox.value()
+        if not current_frame_valid or preview_h < 10:
+            self.update_status("Trying to set invalid current frame")
+            return None
+
+        self.current_frame = frame
         try:
-            crop_wh = resize_to_height(orig_wh, preview_h)
-            self.current_frame = cv2.resize(frame, crop_wh)
+            crop_wh = resize_to_height(self.orig_wh, preview_h)
+            self.preview = cv2.resize(frame, crop_wh)
         except ZeroDivisionError:
             self.update_status("ZeroDivisionError :DDDDDD")
             pass
         self.nt_update_preview()
 
-    def open_video(self):
+    def open_file(self):
         file = QtWidgets.QFileDialog.getOpenFileName(self, "Select File")
-        # открыть диалог выбора директории и установить значение переменной
-        # равной пути к выбранной директории
         if file:
-            norm_path = Path(file[0])
-            print(f"file: {norm_path}")
-            cap = cv2.VideoCapture(str(norm_path))
-            print(f"cap: {cap} isOpened: {cap.isOpened()}")
-            self.input_video = {
-                "cap": cap,
-                "width": int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
-                "height": int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
-                "frames_count": int(cap.get(cv2.CAP_PROP_FRAME_COUNT)),
-                "orig_fps": int(cap.get(cv2.CAP_PROP_FPS)),
-                "path": norm_path
-            }
-            print(f"selfinput: {self.input_video}")
-            self.set_current_frame()
-            self.renderHeightBox.setValue(self.input_video["height"])
-            self.videoTrackSlider.setMinimum(1)
-            self.videoTrackSlider.setMaximum(self.input_video["frames_count"])
-            self.videoTrackSlider.valueChanged.connect(self.set_current_frame)
-
-    def render(self):
-        # file_dialog = QtWidgets.QFileDialog()
-        # file_dialog.setNameFilters([self.tr('MP4 file (*.mp4)'), self.tr('All Files (*)')])
-        # file_dialog.setDefaultSuffix('.mp4')
-        target_file = QFileDialog.getSaveFileName(self, 'Render As', '', "Video mp4 (*.mp4);;All Files (*)")
-        print(f"Save picked as: {target_file}")
-        if not target_file[0]:
-            return None
-        if target_file[1] == 'Video mp4 (*.mp4)' and target_file[0][-4:] != '.mp4':
-            target_file = target_file[0] + '.mp4'
+            path = Path(file[0])
         else:
-            target_file = target_file[0]
-        target_file = Path(target_file)
+            return None
+        file_suffix = path.suffix.lower()
+        if file_suffix in self.supported_video_type:
+            self.set_video_mode()
+            self.open_video(path)
+        elif file_suffix in self.supported_image_type:
+            self.set_image_mode()
+            self.open_image(path)
+        else:
+            self.update_status(f"Unsopported file type {file_suffix}")
+
+    def set_video_mode(self):
+        self.videoTrackSlider.blockSignals(False)
+        self.videoTrackSlider.show()
+        self.pauseRenderButton.show()
+        self.stopRenderButton.show()
+        self.livePreviewCheckbox.show()
+        self.renderVideoButton.show()
+
+    def set_image_mode(self):
+        self.videoTrackSlider.blockSignals(True)
+        self.videoTrackSlider.hide()
+        self.pauseRenderButton.hide()
+        self.stopRenderButton.hide()
+        self.livePreviewCheckbox.hide()
+        self.renderVideoButton.hide()
+
+    def open_image(self, path: Path):
+        img = cv2.imread(str(path.resolve()))
+        height, width, channels = img.shape
+        self.orig_wh = width, height
+        if height > 1337:
+            self.renderHeightBox.setValue(600)
+            self.update_status(self.tr('The image resolution is large. For the best effect, the output height is set to 600'))
+        else:
+            self.renderHeightBox.setValue(height)
+        self.set_current_frame(img)
+
+    def open_video(self, path: Path):
+        print(f"file: {path}")
+        cap = cv2.VideoCapture(str(path))
+        print(f"cap: {cap} isOpened: {cap.isOpened()}")
+        self.input_video = {
+            "cap": cap,
+            "width": int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
+            "height": int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
+            "frames_count": int(cap.get(cv2.CAP_PROP_FRAME_COUNT)),
+            "orig_fps": int(cap.get(cv2.CAP_PROP_FPS)),
+            "path": path
+        }
+        print(f"selfinput: {self.input_video}")
+        self.orig_wh = (int(self.input_video["width"]), int(self.input_video["height"]))
+        self.set_current_frame(self.get_current_video_frame())
+        self.renderHeightBox.setValue(self.input_video["height"])
+        self.videoTrackSlider.setMinimum(1)
+        self.videoTrackSlider.setMaximum(self.input_video["frames_count"])
+        self.videoTrackSlider.valueChanged.connect(
+            lambda: self.set_current_frame(self.get_current_video_frame())
+        )
+
+    def render_image(self):
+        target_file = pick_save_file(self, title='Save frame as', suffix='.png')
+        render_h = self.renderHeightBox.value()
+        crop_wh = resize_to_height(self.orig_wh, render_h)
+        image = cv2.resize(self.current_frame, crop_wh)
+        image = self.nt_process(image)
+        cv2.imwrite(str(target_file.resolve()), image)
+
+    def render_video(self):
+        target_file = pick_save_file(self, title='Render video as', suffix='.mp4')
+
         render_data = {
             "target_file": target_file,
             "nt": self.nt,
@@ -338,6 +390,12 @@ class ExampleApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.videoRenderer.render_data = render_data
         self.thread.start()
 
+    def nt_process(self, frame) -> ndarray:
+        _ = self.nt.composite_layer(frame, frame, field=2, fieldno=2)
+        ntsc_out_image = cv2.convertScaleAbs(_)
+        ntsc_out_image[1:-1:2] = ntsc_out_image[0:-2:2] / 2 + ntsc_out_image[2::2] / 2
+        return ntsc_out_image
+
     def nt_update_preview(self):
         current_frame_valid = isinstance(self.current_frame, ndarray)
         render_on_pause = self.pauseRenderButton.isChecked()
@@ -345,21 +403,20 @@ class ExampleApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             return None
 
         if not self.mainEffect:
-            self.update_preview(self.current_frame)
+            self.render_preview(self.preview)
             return None
 
-        frame = self.nt.composite_layer(self.current_frame, self.current_frame, field=2, fieldno=2)
-        norm_image = cv2.convertScaleAbs(frame)
-        norm_image[1:-1:2] = norm_image[0:-2:2] / 2 + norm_image[2::2] / 2
+        ntsc_out_image = self.nt_process(self.preview)
+
         if self.compareMode:
-            norm_image = numpy.concatenate(
-                (self.current_frame[:self.current_frame.shape[0] // 2], norm_image[norm_image.shape[0] // 2:])
+            ntsc_out_image = numpy.concatenate(
+                (self.preview[:self.preview.shape[0] // 2], ntsc_out_image[ntsc_out_image.shape[0] // 2:])
             )
 
-        self.update_preview(norm_image)
+        self.render_preview(ntsc_out_image)
 
     @QtCore.pyqtSlot(object)
-    def update_preview(self, img):
+    def render_preview(self, img):
         image = QtGui.QImage(img.data, img.shape[1], img.shape[0], QtGui.QImage.Format_RGB888).rgbSwapped()
         self.image_frame.setPixmap(QtGui.QPixmap.fromImage(image))
 
