@@ -18,9 +18,9 @@ M_PI = math.pi
 Int_MIN_VALUE = -2147483648
 Int_MAX_VALUE = 2147483647
 
-ring_pattern_real_path = 'ringPattern.npy'
+ring_pattern_real_path = 'app/ringPattern.npy'
 if getattr(sys, 'frozen', False):
-    ring_pattern_real_path = f'{sys._MEIPASS}\\ringPattern.npy'
+    ring_pattern_real_path = f'{sys._MEIPASS}\\app\\ringPattern.npy'
 RingPattern = np.load(ring_pattern_real_path)
 
 

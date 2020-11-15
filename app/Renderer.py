@@ -5,7 +5,7 @@ import cv2
 from PyQt5 import QtCore
 import ffmpeg
 
-from funcs import resize_to_height
+from app.funcs import resize_to_height
 
 
 class Renderer(QtCore.QObject):
