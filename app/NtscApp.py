@@ -101,6 +101,8 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.toggleMainEffect.stateChanged.connect(self.toggle_main_effect)
         self.pauseRenderButton.clicked.connect(self.toggle_pause_render)
         self.livePreviewCheckbox.stateChanged.connect(self.toggle_live_preview)
+        self.refreshFrameButton.clicked.connect(self.nt_update_preview)
+        self.openImageUrlButton.clicked.connect(self.open_image_by_url)
 
         self.seedSpinBox.valueChanged.connect(self.update_seed)
         self.seedSpinBox.setValue(3)
@@ -306,6 +308,19 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
 
         self.nt_update_preview()
 
+    @QtCore.pyqtSlot()
+    def open_image_by_url(self):
+        url, ok = QInputDialog.getText(self, self.tr('Open image by url'), self.tr('Image url:'))
+        if ok:
+            cap = cv2.VideoCapture(url)
+            if cap.isOpened():
+                ret, img = cap.read()
+                self.set_image_mode()
+                self.open_image(img)
+            else:
+                self.update_status(self.tr('Error opening image url :('))
+                return None
+
     def open_file(self):
         file = QtWidgets.QFileDialog.getOpenFileName(self, "Select File")
         if file:
@@ -318,7 +333,8 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             self.open_video(path)
         elif file_suffix in self.supported_image_type:
             self.set_image_mode()
-            self.open_image(path)
+            img = cv2.imread(str(path.resolve()))
+            self.open_image(img)
         else:
             self.update_status(f"Unsopported file type {file_suffix}")
 
@@ -338,13 +354,13 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.livePreviewCheckbox.hide()
         self.renderVideoButton.hide()
 
-    def open_image(self, path: Path):
-        img = cv2.imread(str(path.resolve()))
+    def open_image(self, img: numpy.ndarray):
         height, width, channels = img.shape
         self.orig_wh = width, height
         if height > 1337:
             self.renderHeightBox.setValue(600)
-            self.update_status(self.tr('The image resolution is large. For the best effect, the output height is set to 600'))
+            self.update_status(
+                self.tr('The image resolution is large. For the best effect, the output height is set to 600'))
         else:
             self.renderHeightBox.setValue(height)
         self.set_current_frame(img)
