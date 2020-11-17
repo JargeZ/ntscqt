@@ -28,8 +28,8 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         # Это здесь нужно для доступа к переменным, методам
         # и т.д. в файле design.py
         super().__init__()
-        self.supported_video_type = ['.mp4', '.mkv', '.avi', '.webm', '.mpg']
-        self.supported_image_type = ['.png', '.jpg', '.jpeg', '.gif', '.webp']
+        self.supported_video_type = ['.mp4', '.mkv', '.avi', '.webm', '.mpg', '.gif']
+        self.supported_image_type = ['.png', '.jpg', '.jpeg', '.webp']
         self.setupUi(self)  # Это нужно для инициализации нашего дизайна
         self.strings = {
             "_composite_preemphasis": self.tr("Composite preemphasis"),
