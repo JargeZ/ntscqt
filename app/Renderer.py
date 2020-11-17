@@ -31,7 +31,8 @@ class Renderer(QtCore.QObject):
             str(tmp_output.resolve()),
             fourcc,
             self.render_data["input_video"]["orig_fps"],
-            render_wh
+            # create container as amended with fix crash when frame not divided by 4
+            (render_wh[0] - render_wh[0] % 4, render_wh[1])
         )
 
         frame_index = 0
