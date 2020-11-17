@@ -396,7 +396,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
 
     def render_image(self):
         target_file = pick_save_file(self, title='Save frame as', suffix='.png')
-        if not target_file and not self.current_frame:
+        if target_file is None or not isinstance(self.current_frame, ndarray):
             return None
         render_h = self.renderHeightBox.value()
         crop_wh = resize_to_height(self.orig_wh, render_h)
@@ -408,7 +408,8 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
 
     def render_video(self):
         target_file = pick_save_file(self, title='Render video as', suffix='.mp4')
-
+        if not target_file:
+            return None
         render_data = {
             "target_file": target_file,
             "nt": self.nt,
