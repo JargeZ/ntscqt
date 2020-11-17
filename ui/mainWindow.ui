@@ -46,6 +46,31 @@
       <item>
        <layout class="QHBoxLayout" name="positionControlLayout">
         <item>
+         <widget class="QPushButton" name="refreshFrameButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>27</width>
+            <height>28</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>🔄</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QScrollBar" name="videoTrackSlider">
           <property name="tabletTracking">
            <bool>false</bool>
@@ -182,11 +207,22 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="openFile">
-        <property name="text">
-         <string>Open file (video or image)</string>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="QPushButton" name="openFile">
+          <property name="text">
+           <string>Open file (video or image)</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="openImageUrlButton">
+          <property name="text">
+           <string>Open image url</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
