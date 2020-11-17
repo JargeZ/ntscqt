@@ -361,12 +361,14 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
     def open_image(self, img: numpy.ndarray):
         height, width, channels = img.shape
         self.orig_wh = width, height
+
         if height > 1337:
             self.renderHeightBox.setValue(600)
             self.update_status(
                 self.tr('The image resolution is large. For the best effect, the output height is set to 600'))
         else:
-            self.renderHeightBox.setValue(height)
+            self.renderHeightBox.setValue(height // 120 * 120)
+
         self.set_current_frame(img)
 
     def open_video(self, path: Path):
