@@ -1,4 +1,6 @@
 from pathlib import Path
+from typing import Tuple
+
 import cv2
 import numpy
 from PyQt5 import QtWidgets, QtCore, QtGui
@@ -14,13 +16,15 @@ from ui.DoubleSlider import DoubleSlider
 
 class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
     def __init__(self):
-        self.current_frame = False
+        self.current_frame: numpy.ndarray = False
+        self.preview: numpy.ndarray = False
         self.input_video = {}
-        self.orig_wh = (0, 0)
-        self.compareMode = False
-        self.isRenderActive = False
-        self.mainEffect = True
+        self.orig_wh: Tuple[int, int] = (0, 0)
+        self.compareMode: bool = False
+        self.isRenderActive: bool = False
+        self.mainEffect: bool = True
         self.nt_controls = {}
+        self.nt: Ntsc = None
         # Это здесь нужно для доступа к переменным, методам
         # и т.д. в файле design.py
         super().__init__()
