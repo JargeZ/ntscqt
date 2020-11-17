@@ -2,7 +2,7 @@ from pathlib import Path
 import cv2
 import numpy
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import QSlider, QHBoxLayout, QLabel, QCheckBox
+from PyQt5.QtWidgets import QSlider, QHBoxLayout, QLabel, QCheckBox, QInputDialog
 from numpy import ndarray
 
 from app.Renderer import Renderer
