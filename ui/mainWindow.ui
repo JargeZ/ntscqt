@@ -32,11 +32,20 @@
         <property name="minimumSize">
          <size>
           <width>854</width>
-          <height>480</height>
+          <height>500</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>1000</width>
+          <height>500</height>
          </size>
         </property>
         <property name="text">
          <string>ImageFrameTextLabel</string>
+        </property>
+        <property name="scaledContents">
+         <bool>false</bool>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -102,6 +111,9 @@
             <width>136</width>
             <height>16777215</height>
            </size>
+          </property>
+          <property name="toolTip">
+           <string comment="When rendering, every frame is displayed. Otherwise, only every 10th" extracomment="фаыва"/>
           </property>
           <property name="text">
            <string>LivePreview</string>

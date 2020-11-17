@@ -18,6 +18,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
     def __init__(self):
         self.current_frame: numpy.ndarray = False
         self.preview: numpy.ndarray = False
+        self.scale_pixmap = False
         self.input_video = {}
         self.orig_wh: Tuple[int, int] = (0, 0)
         self.compareMode: bool = False
@@ -446,6 +447,10 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
 
     @QtCore.pyqtSlot(object)
     def render_preview(self, img):
-        image = QtGui.QImage(img.data.tobytes(), img.shape[1], img.shape[0], QtGui.QImage.Format_RGB888).rgbSwapped()
-        self.image_frame.setPixmap(QtGui.QPixmap.fromImage(image))
+        image = QtGui.QImage(img.data.tobytes(), img.shape[1], img.shape[0], QtGui.QImage.Format_RGB888)\
+            .rgbSwapped()
+        if self.scale_pixmap:
+            self.image_frame.setPixmap(QtGui.QPixmap.fromImage(image).scaledToHeight(480))
+        else:
+            self.image_frame.setPixmap(QtGui.QPixmap.fromImage(image))
 
