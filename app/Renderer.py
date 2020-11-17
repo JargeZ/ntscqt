@@ -1,11 +1,10 @@
 import time
-from alive_progress import alive_bar
 
 import cv2
 from PyQt5 import QtCore
 import ffmpeg
 
-from app.funcs import resize_to_height
+from app.funcs import resize_to_height, trim_to_4width
 
 
 class Renderer(QtCore.QObject):
@@ -37,36 +36,38 @@ class Renderer(QtCore.QObject):
 
         frame_index = 0
         self.renderStateChanged.emit(True)
-        with alive_bar(self.render_data["input_video"]["frames_count"]) as progress_bar:
-            while self.render_data["input_video"]["cap"].isOpened():
-                if self.pause:
-                    self.sendStatus.emit(f"{status_string} [P]")
-                    time.sleep(0.3)
-                    continue
+        while self.render_data["input_video"]["cap"].isOpened():
 
-                # Capture frame-by-frame
-                frame_index += 1
-                self.render_data["input_video"]["cap"].set(1, frame_index)
-                ret, frame = self.render_data["input_video"]["cap"].read()
-                if not ret or not self.running:
-                    break
+            if self.pause:
+                self.sendStatus.emit(f"{status_string} [P]")
+                time.sleep(0.3)
+                continue
 
-                if orig_wh != render_wh:
-                    frame = cv2.resize(frame, render_wh)
+            frame_index += 1
+            self.render_data["input_video"]["cap"].set(1, frame_index)
+            ret, frame = self.render_data["input_video"]["cap"].read()
+            if not ret or not self.running:
+                break
 
-                if self.mainEffect:
-                    frame = self.render_data["nt"].composite_layer(frame, frame, field=2, fieldno=2)
-                    frame = cv2.convertScaleAbs(frame)
-                    frame[1:-1:2] = frame[0:-2:2] / 2 + frame[2::2] / 2
+            if orig_wh != render_wh:
+                frame = cv2.resize(frame, render_wh)
 
-                if frame_index % 10 == 0 or self.liveView:
-                    self.frameMoved.emit(frame_index)
-                    self.newFrame.emit(frame)
+            #  crash workaround
+            if render_wh[0] % 4 != 0:
+                frame = trim_to_4width(frame)
 
-                progress_bar()
-                status_string = f'Progress: {frame_index}/{self.render_data["input_video"]["frames_count"]}'
-                self.sendStatus.emit(status_string)
-                video.write(frame)
+            if self.mainEffect:
+                frame = self.render_data["nt"].composite_layer(frame, frame, field=2, fieldno=2)
+                frame = cv2.convertScaleAbs(frame)
+                frame[1:-1:2] = frame[0:-2:2] / 2 + frame[2::2] / 2
+
+            if frame_index % 10 == 0 or self.liveView:
+                self.frameMoved.emit(frame_index)
+                self.newFrame.emit(frame)
+
+            status_string = f'Progress: {frame_index}/{self.render_data["input_video"]["frames_count"]}'
+            self.sendStatus.emit(status_string)
+            video.write(frame)
 
         video.release()
         audio_orig = (

@@ -6,8 +6,8 @@ from PyQt5.QtWidgets import QSlider, QHBoxLayout, QLabel, QCheckBox
 from numpy import ndarray
 
 from app.Renderer import Renderer
-from app.funcs import resize_to_height, pick_save_file
-from app.ntsc import random_ntsc
+from app.funcs import resize_to_height, pick_save_file, trim_to_4width
+from app.ntsc import random_ntsc, Ntsc
 from ui import mainWindow
 from ui.DoubleSlider import DoubleSlider
 
@@ -300,6 +300,10 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         except ZeroDivisionError:
             self.update_status("ZeroDivisionError :DDDDDD")
             pass
+
+        if self.preview.shape[1] % 4 != 0:
+            self.preview = trim_to_4width(self.preview)
+
         self.nt_update_preview()
 
     def open_file(self):
@@ -372,6 +376,8 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         render_h = self.renderHeightBox.value()
         crop_wh = resize_to_height(self.orig_wh, render_h)
         image = cv2.resize(self.current_frame, crop_wh)
+        if image.shape[1] % 4 != 0:
+            image = trim_to_4width(image)
         image = self.nt_process(image)
         cv2.imwrite(str(target_file.resolve()), image)
 
