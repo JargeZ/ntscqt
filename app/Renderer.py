@@ -35,6 +35,10 @@ class Renderer(QtCore.QObject):
             (render_wh[0] - render_wh[0] % 4, render_wh[1])
         )
 
+        print(f'Input video: {str(self.render_data["input_video"]["path"].resolve())}')
+        print(f'Temp output: {str(tmp_output.resolve())}')
+        print(f'Output video: {str(self.render_data["target_file"].resolve())}')
+
         frame_index = 0
         self.renderStateChanged.emit(True)
         while self.render_data["input_video"]["cap"].isOpened():
