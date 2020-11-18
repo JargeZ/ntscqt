@@ -1,4 +1,5 @@
 # VHS GUI Tool
+#### AKA `Line maker 10.0`
 [![Demo](demo.gif)](https://youtu.be/uqT3Z0kfF24)
 Полное демо: [youtu.be/uqT3Z0kfF24](https://youtu.be/uqT3Z0kfF24)
 
