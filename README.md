@@ -1,11 +1,17 @@
 # VHS GUI Tool
 #### AKA `Line maker 10.0`
 [![Demo](demo.gif)](https://youtu.be/uqT3Z0kfF24)
-Полное демо: [youtu.be/uqT3Z0kfF24](https://youtu.be/uqT3Z0kfF24)
-
+Demo:\
+[![Programm interface](https://i.imgur.com/BXLqOMN.png)](https://youtu.be/uqT3Z0kfF24)
+[![VHS tom cat](https://i.imgur.com/BiPpjoD.png)](https://youtu.be/Jr7Jmn81WNQ)
 ## Download
 #### For windows:
 You can [download latest version here](https://github.com/JargeZ/ntsc/releases/latest/download/ntscQT.exe) or from [releases page](https://github.com/JargeZ/ntsc/releases)
+
+### WTF
+Эта простая программа сделана на основе алгоритма, который позволяет добиться эффекта реального старого магнитофона или VHS, а не простое размытие и шумы со статическими эффектами, как на многих видео simpsonwave и подобных. Я надеюсь, что этот инструмент поможет вам в творчестве, если вы решите стилизовать картинки или видео под старинные кадры.
+<hr>
+This simple program is made on the basis of an algorithm that allows you to achieve the effect of a real old tape recorder or VHS, rather than simple blur and noise with static effects, as in many simpsonwave videos and the like. I hope this tool will help you in your creative work if you decide to stylize pictures or videos to look like old video.
 
 ## Warning
 Если вам нужно обработать только какую-то часть видео, сначала вырежьте её через видеоредактор, где вы работаете и пропустите через программу только этот кусок.\
@@ -20,6 +26,7 @@ You can [download latest version here](https://github.com/JargeZ/ntsc/releases/l
 - **Render height** изначально становится такой, как у видео, которое вы загрузили. Если установить значение меньше, то при рендере входное видео будет ресайзиться и обработается быстрее
 - **Pause Render** позволяет поставить рендер на паузу и изменить параметры обработки, чтобы достичь изменяемого эффекта в видео. Также ползунки можно крутить прям во время рендера без паузы.
 - **LivePreview** можно включить во время рендера, тогда в окне предпросмотра будет показываться каждый обрабатываемся кадр, тогда как изанчально только каждый 10-й
+- **Кнопка :arrows_counterclockwise:** обновляет эффект для кадра, так можно оценить параметры в динамике.
 # Usage (EN)
 You can open the video and experiment with all parameters
 - **Seed** field generates random processing parameters that will always be the same for the same value
@@ -27,6 +34,7 @@ You can open the video and experiment with all parameters
 - The **Render height** initially becomes the same as the video you uploaded. If you set the value less, the video will be resized and processed faster
 - **Pause Render** allows you to pause the render and change the processing parameters to achieve a variable effect in the video. Also, the sliders can be turned directly during rendering without pause.
 - **LivePreview** can be turned on during rendering, then every frame being processed will be shown in the preview window, default only every 10th frame shown
+- **:arrows_counterclockwise: button** re-render the current frame effect
 
 #
 ##### Original readme (оригинальное описание)
