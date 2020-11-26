@@ -16,13 +16,11 @@ def pick_save_file(self, title='Render As', pre_path='', suffix: str = None) -> 
     print(f"Save picked as: {target_file}")
     if not target_file[0]:
         return None
+
     path = Path(target_file[0])
     if path.suffix != suffix:
         path = path.parent / (path.name + suffix)
-    # if target_file[1] == f'File {suffix} (*{suffix})' and target_file[0][-4:] != suffix:
-    #     target_file = target_file[0] + suffix
-    # else:
-    #     target_file = target_file[0]
+
     return path
 
 
