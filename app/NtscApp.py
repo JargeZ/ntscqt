@@ -337,8 +337,8 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             self.set_video_mode()
             self.open_video(path)
         elif file_suffix in self.supported_image_type:
+            img = cv2.imdecode(numpy.fromfile(path, dtype=numpy.uint8), cv2.IMREAD_COLOR)
             self.set_image_mode()
-            img = cv2.imread(str(path.resolve()))
             self.open_image(img)
         else:
             self.update_status(f"Unsopported file type {file_suffix}")
@@ -404,7 +404,11 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         if image.shape[1] % 4 != 0:
             image = trim_to_4width(image)
         image = self.nt_process(image)
-        cv2.imwrite(str(target_file.resolve()), image)
+        is_success, im_buf_arr = cv2.imencode(".png", image)
+        if not is_success:
+            self.update_status("Error while saving (!is_success)")
+            return None
+        im_buf_arr.tofile(target_file)
 
     def render_video(self):
         target_file = pick_save_file(self, title='Render video as', suffix='.mp4')
