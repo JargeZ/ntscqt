@@ -35,7 +35,11 @@ You can open the video and experiment with all parameters
 - **Pause Render** allows you to pause the render and change the processing parameters to achieve a variable effect in the video. Also, the sliders can be turned directly during rendering without pause.
 - **LivePreview** can be turned on during rendering, then every frame being processed will be shown in the preview window, default only every 10th frame shown
 - **:arrows_counterclockwise: button** re-render the current frame effect
+- - -
+> You can find more info there [/releases](https://github.com/JargeZ/ntsc/releases)\
+> Больше описания и скриншотов есть по ссылке [/releases](https://github.com/JargeZ/ntsc/releases)
 
+- - - 
 #
 ##### Original readme (оригинальное описание)
 #### NTSC video emulator
