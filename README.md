@@ -1,11 +1,13 @@
-# VHS GUI Tool
+# VHS GUI Tool [<img src="https://evo.audio/wp-content/uploads/2020/07/Download-Mint-Button.svg" height="25">](https://github.com/JargeZ/ntsc/releases/latest/download/ntscQT.exe)
 #### AKA `Line maker 10.0`
 [![Demo](demo.gif)](https://youtu.be/uqT3Z0kfF24)
 Demo:\
 [![Programm interface](https://i.imgur.com/BXLqOMN.png)](https://youtu.be/uqT3Z0kfF24)
 [![VHS tom cat](https://i.imgur.com/BiPpjoD.png)](https://youtu.be/Jr7Jmn81WNQ)
-## Download
+
 #### For windows:
+[<img src="https://phonelumi.com/wp-content/uploads/2017/02/button-dl.svg" height="50">](https://github.com/JargeZ/ntsc/releases/latest/download/ntscQT.exe)
+
 You can [download latest version here](https://github.com/JargeZ/ntsc/releases/latest/download/ntscQT.exe) or from [releases page](https://github.com/JargeZ/ntsc/releases)
 
 ### WTF
