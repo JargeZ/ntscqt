@@ -22,6 +22,8 @@ This simple program is made on the basis of an algorithm that allows you to achi
 
 `This code is *SLOW*. It's designed to be as accurate as I can make it, not fast. You may want to take any Simpsons episodes you will be editing and cut them up first in Adobe Premiere (or your favorite video editor) then run the exported "clip show" through this program instead of wasting CPU cycles on whole episodes.`
 
+`Этот код *ОЧЕНЬ МЕДЛЕННЫЙ*. Он был разработан настолько точным, насколько насколько было возможно, но он медленный. Возможно, вам будет лучше взять, напримре, какую-то серию Симпсонов, которую Вы хотите отредактировать и вырезать из неё нужный фрагмент в Adobe Premiere (или в Вашем любимом редакторе), а затем пропустить экспортированный клип через эту программу вместо того, чтобы тратить мощности процессора на целый эпизод.`
+
 # Использование (RU)
 Откройте видео и играйтесь ползунками
 - Поле с номером **Seed** генерирует случайные параметры обработки, которые всегда будут одинаковы для одной и той же цифры
