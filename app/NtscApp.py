@@ -27,6 +27,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.mainEffect: bool = True
         self.nt_controls = {}
         self.nt: Ntsc = None
+        self.pro_mode_elements = []
         # Это здесь нужно для доступа к переменным, методам
         # и т.д. в файле design.py
         super().__init__()
@@ -68,33 +69,33 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.add_slider("_vhs_out_sharpen", 1, 5)
         self.add_slider("_vhs_edge_wave", 0, 10)
         # self.add_slider("_output_vhs_tape_speed", 0, 10)
-        self.add_slider("_ringing", 0, 1, float)
+        self.add_slider("_ringing", 0, 1, float, pro=True)
         self.add_slider("_ringing_power", 0, 10)
-        self.add_slider("_ringing_shift", 0, 3, float)
-        self.add_slider("_freq_noise_size", 0, 2, float)
-        self.add_slider("_freq_noise_amplitude", 0, 5)
+        self.add_slider("_ringing_shift", 0, 3, float, pro=True)
+        self.add_slider("_freq_noise_size", 0, 2, float, pro=True)
+        self.add_slider("_freq_noise_amplitude", 0, 5, pro=True)
         self.add_slider("_color_bleed_horiz", 0, 10)
         self.add_slider("_color_bleed_vert", 0, 10)
         self.add_slider("_video_chroma_noise", 0, 16384)
         self.add_slider("_video_chroma_phase_noise", 0, 50)
-        self.add_slider("_video_chroma_loss", 0, 100_000)
+        self.add_slider("_video_chroma_loss", 0, 30_000)
         self.add_slider("_video_noise", 0, 4200)
-        self.add_slider("_video_scanline_phase_shift", 0, 270)
-        self.add_slider("_video_scanline_phase_shift_offset", 0, 3)
+        self.add_slider("_video_scanline_phase_shift", 0, 270, pro=True)
+        self.add_slider("_video_scanline_phase_shift_offset", 0, 3, pro=True)
 
         self.add_slider("_head_switching_speed", 0, 100)
 
         self.add_checkbox("_vhs_head_switching", (1, 1))
-        self.add_checkbox("_color_bleed_before", (1, 2))
-        self.add_checkbox("_enable_ringing2", (2, 1))
-        self.add_checkbox("_composite_in_chroma_lowpass", (2, 2))
-        self.add_checkbox("_composite_out_chroma_lowpass", (3, 1))
-        self.add_checkbox("_composite_out_chroma_lowpass_lite", (3, 2))
+        self.add_checkbox("_color_bleed_before", (1, 2), pro=True)
+        self.add_checkbox("_enable_ringing2", (2, 1), pro=True)
+        self.add_checkbox("_composite_in_chroma_lowpass", (2, 2), pro=True)
+        self.add_checkbox("_composite_out_chroma_lowpass", (3, 1), pro=True)
+        self.add_checkbox("_composite_out_chroma_lowpass_lite", (3, 2), pro=True)
         self.add_checkbox("_emulating_vhs", (4, 1))
-        self.add_checkbox("_nocolor_subcarrier", (4, 2))
-        self.add_checkbox("_vhs_chroma_vert_blend", (5, 1))
-        self.add_checkbox("_vhs_svideo_out", (5, 2))
-        self.add_checkbox("_output_ntsc", (6, 1))
+        self.add_checkbox("_nocolor_subcarrier", (4, 2), pro=True)
+        self.add_checkbox("_vhs_chroma_vert_blend", (5, 1), pro=True)
+        self.add_checkbox("_vhs_svideo_out", (5, 2), pro=True)
+        self.add_checkbox("_output_ntsc", (6, 1), pro=True)
 
         self.previewHeightBox.valueChanged.connect(
             lambda: self.set_current_frame(self.current_frame)
@@ -109,6 +110,10 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.livePreviewCheckbox.stateChanged.connect(self.toggle_live_preview)
         self.refreshFrameButton.clicked.connect(self.nt_update_preview)
         self.openImageUrlButton.clicked.connect(self.open_image_by_url)
+
+        self.ProMode.clicked.connect(
+            lambda: self.set_pro_mode(self.ProMode.isChecked())
+        )
 
         self.seedSpinBox.valueChanged.connect(self.update_seed)
         self.seedSpinBox.setValue(3)
@@ -246,7 +251,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         setattr(self.nt, parameter_name, value)
         self.nt_update_preview()
 
-    def add_checkbox(self, param_name, pos):
+    def add_checkbox(self, param_name, pos, pro=False):
         checkbox = QCheckBox()
         checkbox.setText(self.strings[param_name])
         checkbox.setObjectName(param_name)
@@ -255,8 +260,27 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.nt_controls[param_name] = checkbox
         self.checkboxesLayout.addWidget(checkbox, pos[0], pos[1])
 
-    def add_slider(self, param_name, min_val, max_val, slider_value_type=int):
-        slider_layout = QHBoxLayout()
+        if pro:
+            self.pro_mode_elements.append(checkbox)
+            checkbox.hide()
+
+    @QtCore.pyqtSlot(bool)
+    def set_pro_mode(self, state):
+        for frame in self.pro_mode_elements:
+            if state:
+                frame.show()
+            else:
+                frame.hide()
+
+    def add_slider(self, param_name, min_val, max_val, slider_value_type=int, pro=False):
+        ly = QHBoxLayout()
+        slider_frame = QtWidgets.QFrame()
+        slider_frame.setLayout(ly)
+
+        if pro:
+            self.pro_mode_elements.append(slider_frame)
+            slider_frame.hide()
+
         if slider_value_type is int:
             slider = QSlider()
             # box = QSpinBox()
@@ -291,16 +315,16 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         value_label.setObjectName(param_name)
         # slider.valueChanged.connect(lambda intval: value_label.setText(str(intval)))
 
-        slider_layout.addWidget(label)
-        slider_layout.addWidget(slider)
+        ly.addWidget(label)
+        ly.addWidget(slider)
         # slider_layout.addWidget(box)
-        slider_layout.addWidget(value_label)
+        ly.addWidget(value_label)
 
         self.nt_controls[param_name] = slider
-        self.controlLayout.addLayout(slider_layout)
+        self.controlLayout.addWidget(slider_frame)
 
     def get_current_video_frame(self):
-        preview_h = self.previewHeightBox.value()
+        preview_h = self.renderHeightBox.value()
         if not self.input_video or preview_h < 10:
             return None
         frame_no = self.videoTrackSlider.value()
@@ -468,7 +492,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
 
     @QtCore.pyqtSlot(object)
     def render_preview(self, img):
-        image = QtGui.QImage(img.data.tobytes(), img.shape[1], img.shape[0], QtGui.QImage.Format_RGB888)\
+        image = QtGui.QImage(img.data.tobytes(), img.shape[1], img.shape[0], QtGui.QImage.Format_RGB888) \
             .rgbSwapped()
         if self.scale_pixmap:
             self.image_frame.setPixmap(QtGui.QPixmap.fromImage(image).scaledToHeight(480))
