@@ -3,6 +3,7 @@ import time
 import cv2
 from PyQt5 import QtCore
 import ffmpeg
+from imutils.video import FileVideoStream
 
 from app.funcs import resize_to_height, trim_to_4width
 
@@ -41,17 +42,24 @@ class Renderer(QtCore.QObject):
 
         frame_index = 0
         self.renderStateChanged.emit(True)
-        while self.render_data["input_video"]["cap"].isOpened():
+        cap = FileVideoStream(
+            path=str(self.render_data["input_video"]["path"]),
+            queue_size=322
+        ).start()
+        # cap = self.render_data["input_video"]["cap"]
+        # ret = True
+        while cap.more():
 
             if self.pause:
                 self.sendStatus.emit(f"{status_string} [P]")
                 time.sleep(0.3)
                 continue
 
+            # cap.set(1, frame_index)
             frame_index += 1
-            self.render_data["input_video"]["cap"].set(1, frame_index)
-            ret, frame = self.render_data["input_video"]["cap"].read()
-            if not ret or not self.running:
+            frame = cap.read()
+            if frame is None or not self.running:
+                self.sendStatus.emit(f'Render stopped. ret(debug):')
                 break
 
             if orig_wh != render_wh:
