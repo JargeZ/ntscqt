@@ -381,7 +381,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             "width": int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
             "height": int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
             "frames_count": int(cap.get(cv2.CAP_PROP_FRAME_COUNT)),
-            "orig_fps": int(cap.get(cv2.CAP_PROP_FPS)),
+            "orig_fps": cap.get(cv2.CAP_PROP_FPS),
             "path": path
         }
         print(f"selfinput: {self.input_video}")
