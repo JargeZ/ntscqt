@@ -26,8 +26,16 @@ class Renderer(QtCore.QObject):
 
         tmp_output = self.render_data['target_file'].parent / f'tmp_{self.render_data["target_file"].name}'
 
+        upscale_2x = self.render_data["upscale_2x"]
+
         orig_wh = (self.render_data["input_video"]["width"], self.render_data["input_video"]["height"])
         render_wh = resize_to_height(orig_wh, self.render_data["input_heigth"])
+        container_wh = render_wh
+        if upscale_2x:
+            container_wh = (
+                render_wh[0] * 2,
+                render_wh[1] * 2,
+            )
 
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         video = cv2.VideoWriter(
@@ -35,7 +43,7 @@ class Renderer(QtCore.QObject):
             fourcc,
             self.render_data["input_video"]["orig_fps"],
             # create container as amended with fix crash when frame not divided by 4
-            (render_wh[0] - render_wh[0] % 4, render_wh[1])
+            container_wh
         )
 
         logger.debug(f'Input video: {str(self.render_data["input_video"]["path"].resolve())}')
@@ -79,6 +87,9 @@ class Renderer(QtCore.QObject):
             if frame_index % 10 == 0 or self.liveView:
                 self.frameMoved.emit(frame_index)
                 self.newFrame.emit(frame)
+
+            if upscale_2x:
+                frame = cv2.resize(frame, dsize=container_wh, interpolation=cv2.INTER_NEAREST)
 
             status_string = f'Progress: {frame_index}/{self.render_data["input_video"]["frames_count"]}'
             self.sendStatus.emit(status_string)
