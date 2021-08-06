@@ -204,6 +204,13 @@
           </property>
          </widget>
         </item>
+        <item row="2" column="1">
+         <widget class="QCheckBox" name="NearestUpScale">
+          <property name="text">
+           <string>x2 Output by nearest-neighbor</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
       <item>
