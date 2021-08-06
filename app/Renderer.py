@@ -18,6 +18,7 @@ class Renderer(QtCore.QObject):
     frameMoved = QtCore.pyqtSignal(int)
     renderStateChanged = QtCore.pyqtSignal(bool)
     sendStatus = QtCore.pyqtSignal(str)
+    increment_progress = QtCore.pyqtSignal()
     render_data = {}
 
     def run(self):
@@ -63,6 +64,7 @@ class Renderer(QtCore.QObject):
                 self.sendStatus.emit(f'Render stopped. ret(debug):')
                 break
 
+            self.increment_progress.emit()
             if orig_wh != render_wh:
                 frame = cv2.resize(frame, render_wh)
 

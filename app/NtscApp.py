@@ -113,6 +113,10 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.seedSpinBox.valueChanged.connect(self.update_seed)
         self.seedSpinBox.setValue(3)
 
+        self.progressBar.setValue(0)
+        self.progressBar.setMinimum(1)
+        self.progressBar.hide()
+
     def setup_renderer(self):
         try:
             self.update_status("Terminating prev renderer")
@@ -134,12 +138,17 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.videoRenderer.frameMoved.connect(self.videoTrackSlider.setValue)
         self.videoRenderer.renderStateChanged.connect(self.set_render_state)
         self.videoRenderer.sendStatus.connect(self.update_status)
+        self.videoRenderer.increment_progress.connect(self.increment_progress)
         # подключим сигнал старта потока к методу run у объекта, который должен выполнять код в другом потоке
         self.thread.started.connect(self.videoRenderer.run)
 
     @QtCore.pyqtSlot()
     def stop_render(self):
         self.videoRenderer.stop()
+
+    @QtCore.pyqtSlot()
+    def increment_progress(self):
+        self.progressBar.setValue(self.progressBar.value() + 1)
 
     @QtCore.pyqtSlot()
     def toggle_compare_mode(self):
@@ -198,6 +207,11 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
 
         # todo: сделать реассигн параметров во время рендера
         self.seedSpinBox.setEnabled(not is_render_active)
+
+        if is_render_active:
+            self.progressBar.show()
+        else:
+            self.progressBar.hide()
 
     def sync_nt_to_sliders(self):
         for parameter_name, element in self.nt_controls.items():
@@ -394,6 +408,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.videoTrackSlider.valueChanged.connect(
             lambda: self.set_current_frame(self.get_current_video_frame())
         )
+        self.progressBar.setMaximum(self.input_video["frames_count"])
 
     def render_image(self):
         target_file = pick_save_file(self, title='Save frame as', suffix='.png')
