@@ -1,11 +1,14 @@
-# VHS GUI Tool
+# VHS GUI Tool [<img src="https://evo.audio/wp-content/uploads/2020/07/Download-Mint-Button.svg" height="25">](https://github.com/JargeZ/ntsc/releases/latest/download/ntscQT.exe)
 #### AKA `Line maker 10.0`
 [![Demo](demo.gif)](https://youtu.be/uqT3Z0kfF24)
 Demo:\
-[![Programm interface](https://i.imgur.com/BXLqOMN.png)](https://youtu.be/uqT3Z0kfF24)
-[![VHS tom cat](https://i.imgur.com/BiPpjoD.png)](https://youtu.be/Jr7Jmn81WNQ)
-## Download
+[<img alt="Program interface" src="https://i.imgur.com/BXLqOMN.png" height="175">](https://youtu.be/uqT3Z0kfF24)
+[<img src="https://i.imgur.com/BiPpjoD.png" height="175">](https://youtu.be/Jr7Jmn81WNQ)
+[<img alt="Satyr video intro" src="https://sun9-13.userapi.com/impg/8OTpTqANlgy5K5nXWTXfMomyOVi9ljtmxUb7EQ/GmzqXzWO-GM.jpg?size=1098x776&quality=96&sign=c286b8766606af183a5291765e32c21d&type=album" height="175">](https://youtu.be/TMZathtFWM8?t=377)
+
 #### For windows:
+[<img src="https://phonelumi.com/wp-content/uploads/2017/02/button-dl.svg" height="50">](https://github.com/JargeZ/ntsc/releases/latest/download/ntscQT.exe)
+
 You can [download latest version here](https://github.com/JargeZ/ntsc/releases/latest/download/ntscQT.exe) or from [releases page](https://github.com/JargeZ/ntsc/releases)
 
 ### WTF
@@ -18,6 +21,8 @@ This simple program is made on the basis of an algorithm that allows you to achi
 В программе есть возможность выключить применение эффекта во время рендера и включить только в нужный момент, но это всё равно будет дольше, чем заранее подготовить нужный кусок.
 
 `This code is *SLOW*. It's designed to be as accurate as I can make it, not fast. You may want to take any Simpsons episodes you will be editing and cut them up first in Adobe Premiere (or your favorite video editor) then run the exported "clip show" through this program instead of wasting CPU cycles on whole episodes.`
+
+`Этот код *ОЧЕНЬ МЕДЛЕННЫЙ*. Он был разработан настолько точным, насколько насколько было возможно, но он медленный. Возможно, вам будет лучше взять, напримре, какую-то серию Симпсонов, которую Вы хотите отредактировать и вырезать из неё нужный фрагмент в Adobe Premiere (или в Вашем любимом редакторе), а затем пропустить экспортированный клип через эту программу вместо того, чтобы тратить мощности процессора на целый эпизод.`
 
 # Использование (RU)
 Откройте видео и играйтесь ползунками
@@ -35,7 +40,11 @@ You can open the video and experiment with all parameters
 - **Pause Render** allows you to pause the render and change the processing parameters to achieve a variable effect in the video. Also, the sliders can be turned directly during rendering without pause.
 - **LivePreview** can be turned on during rendering, then every frame being processed will be shown in the preview window, default only every 10th frame shown
 - **:arrows_counterclockwise: button** re-render the current frame effect
+- - -
+> You can find more info there [/releases](https://github.com/JargeZ/ntsc/releases)\
+> Больше описания и скриншотов есть по ссылке [/releases](https://github.com/JargeZ/ntsc/releases)
 
+- - - 
 #
 ##### Original readme (оригинальное описание)
 #### NTSC video emulator
