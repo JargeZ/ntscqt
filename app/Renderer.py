@@ -48,8 +48,7 @@ class Renderer(QtCore.QObject):
             path=str(self.render_data["input_video"]["path"]),
             queue_size=322
         ).start()
-        # cap = self.render_data["input_video"]["cap"]
-        # ret = True
+
         while cap.more():
 
             if self.pause:
@@ -95,7 +94,7 @@ class Renderer(QtCore.QObject):
         (
             ffmpeg
                 .output(video.video, audio_orig.audio, str(self.render_data["target_file"].resolve()),
-                        shortest=None, vcodec='copy')
+                        shortest=None, vcodec='copy', acodec='copy')
                 .overwrite_output()
                 .run()
         )
