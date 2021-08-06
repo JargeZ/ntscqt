@@ -7,6 +7,7 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QSlider, QHBoxLayout, QLabel, QCheckBox, QInputDialog
 from numpy import ndarray
 
+from app.logs import logger
 from app.Renderer import Renderer
 from app.funcs import resize_to_height, pick_save_file, trim_to_4width
 from app.ntsc import random_ntsc, Ntsc
@@ -115,13 +116,13 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
     def setup_renderer(self):
         try:
             self.update_status("Terminating prev renderer")
-            print("Terminating prev renderer")
+            logger.debug("Terminating prev renderer")
             self.thread.quit()
             self.update_status("Waiting prev renderer")
-            print("Waiting prev renderer")
+            logger.debug("Waiting prev renderer")
             self.thread.wait()
         except AttributeError:
-            print("Setup first renderer")
+            logger.debug("Setup first renderer")
         # создадим поток
         self.thread = QtCore.QThread()
         # создадим объект для выполнения кода в другом потоке
@@ -182,6 +183,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
 
     @QtCore.pyqtSlot(str)
     def update_status(self, string):
+        logger.info('[GUI STATUS] ' + string)
         self.statusLabel.setText(string)
 
     @QtCore.pyqtSlot(bool)
@@ -212,7 +214,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             if related_label:
                 related_label.setText(str(value)[:7])
 
-            print(f"set {type(value)} {parameter_name} slider to {value}")
+            logger.debug(f"set {type(value)} {parameter_name} slider to {value}")
         self.nt_update_preview()
 
     def value_changed_slot(self):
@@ -226,8 +228,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         elif isinstance(element, QCheckBox):
             value = element.isChecked()
 
-        self.update_status(f"Set {parameter_name} to {value}")
-        print(f"Set {parameter_name} to {value}")
+        logger.debug(f"Set {parameter_name} to {value}")
         setattr(self.nt, parameter_name, value)
         self.nt_update_preview()
 
@@ -373,9 +374,9 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.set_current_frame(img)
 
     def open_video(self, path: Path):
-        print(f"file: {path}")
+        logger.debug(f"file: {path}")
         cap = cv2.VideoCapture(str(path))
-        print(f"cap: {cap} isOpened: {cap.isOpened()}")
+        logger.debug(f"cap: {cap} isOpened: {cap.isOpened()}")
         self.input_video = {
             "cap": cap,
             "width": int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
@@ -384,7 +385,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             "orig_fps": cap.get(cv2.CAP_PROP_FPS),
             "path": path
         }
-        print(f"selfinput: {self.input_video}")
+        logger.debug(f"selfinput: {self.input_video}")
         self.orig_wh = (int(self.input_video["width"]), int(self.input_video["height"]))
         self.set_current_frame(self.get_current_video_frame())
         self.renderHeightBox.setValue(self.input_video["height"])
