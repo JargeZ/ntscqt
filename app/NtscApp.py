@@ -97,7 +97,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.add_checkbox("_vhs_svideo_out", (5, 2), pro=True)
         self.add_checkbox("_output_ntsc", (6, 1), pro=True)
 
-        self.previewHeightBox.valueChanged.connect(
+        self.renderHeightBox.valueChanged.connect(
             lambda: self.set_current_frame(self.current_frame)
         )
         self.openFile.clicked.connect(self.open_file)
@@ -334,7 +334,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
 
     def set_current_frame(self, frame):
         current_frame_valid = isinstance(frame, ndarray)
-        preview_h = self.previewHeightBox.value()
+        preview_h = self.renderHeightBox.value()
         if not current_frame_valid or preview_h < 10:
             self.update_status("Trying to set invalid current frame")
             return None
@@ -398,16 +398,19 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.livePreviewCheckbox.hide()
         self.renderVideoButton.hide()
 
-    def open_image(self, img: numpy.ndarray):
-        height, width, channels = img.shape
-        self.orig_wh = width, height
-
-        if height > 1337:
+    def set_render_heigth(self, height):
+        if height > 600:
             self.renderHeightBox.setValue(600)
             self.update_status(
                 self.tr('The image resolution is large. For the best effect, the output height is set to 600'))
         else:
             self.renderHeightBox.setValue(height // 120 * 120)
+
+    def open_image(self, img: numpy.ndarray):
+        height, width, channels = img.shape
+        self.orig_wh = width, height
+
+        self.set_render_heigth(height)
 
         self.set_current_frame(img)
 
@@ -425,8 +428,8 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         }
         logger.debug(f"selfinput: {self.input_video}")
         self.orig_wh = (int(self.input_video["width"]), int(self.input_video["height"]))
+        self.set_render_heigth(self.input_video["height"])
         self.set_current_frame(self.get_current_video_frame())
-        self.renderHeightBox.setValue(self.input_video["height"])
         self.videoTrackSlider.setMinimum(1)
         self.videoTrackSlider.setMaximum(self.input_video["frames_count"])
         self.videoTrackSlider.valueChanged.connect(
