@@ -1,4 +1,5 @@
 from pathlib import Path
+from random import randint
 from typing import Tuple
 
 import cv2
@@ -116,7 +117,8 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         )
 
         self.seedSpinBox.valueChanged.connect(self.update_seed)
-        self.seedSpinBox.setValue(3)
+        presets = [18, 31, 38, 44]
+        self.seedSpinBox.setValue(presets[randint(0, len(presets)-1)])
 
         self.progressBar.setValue(0)
         self.progressBar.setMinimum(1)
