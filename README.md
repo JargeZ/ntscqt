@@ -5,10 +5,10 @@ Demo:\
 [<img alt="Program interface" src="https://i.imgur.com/BXLqOMN.png" height="157">](https://youtu.be/uqT3Z0kfF24)
 [<img src="https://i.imgur.com/BiPpjoD.png" height="157">](https://youtu.be/Jr7Jmn81WNQ)
 [<img alt="Satyr video intro" src="https://sun9-13.userapi.com/impg/8OTpTqANlgy5K5nXWTXfMomyOVi9ljtmxUb7EQ/GmzqXzWO-GM.jpg?size=1098x776&quality=96&sign=c286b8766606af183a5291765e32c21d&type=album" height="157">](https://youtu.be/TMZathtFWM8?t=377)
-[<img alt="YT Demo" src="https://i.imgur.com/cDRA96Q.png" height="157">](https://youtu.be/FPcTfAHiPyw)
-[<img alt="YT Demo" src="https://i.imgur.com/PmhceT6.jpg" height="157">](https://youtu.be/k5l16rJfh-8)
-[<img alt="YT Demo" src="https://i.imgur.com/Xy5Cex9.png" height="157">](https://youtu.be/vjvISSdGYv0)
-[<img alt="YT Demo" src="https://i.imgur.com/i5FxlYU.jpg" height="157">](https://youtu.be/ctMSn--04Sk)
+[<img alt="YT Demo" src="https://i.imgur.com/cDRA96Q.png" height="140">](https://youtu.be/FPcTfAHiPyw)
+[<img alt="YT Demo" src="https://i.imgur.com/PmhceT6.jpg" height="140">](https://youtu.be/k5l16rJfh-8)
+[<img alt="YT Demo" src="https://i.imgur.com/Xy5Cex9.png" height="140">](https://youtu.be/vjvISSdGYv0)
+[<img alt="YT Demo" src="https://i.imgur.com/i5FxlYU.jpg" height="140">](https://youtu.be/ctMSn--04Sk)
 
 
 #### For windows:
