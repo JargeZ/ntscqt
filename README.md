@@ -2,9 +2,10 @@
 #### AKA `Line maker 10.0`
 [![Demo](demo.gif)](https://youtu.be/uqT3Z0kfF24)
 Demo:\
-[<img alt="Program interface" src="https://i.imgur.com/BXLqOMN.png" height="175">](https://youtu.be/uqT3Z0kfF24)
-[<img src="https://i.imgur.com/BiPpjoD.png" height="175">](https://youtu.be/Jr7Jmn81WNQ)
-[<img alt="Satyr video intro" src="https://sun9-13.userapi.com/impg/8OTpTqANlgy5K5nXWTXfMomyOVi9ljtmxUb7EQ/GmzqXzWO-GM.jpg?size=1098x776&quality=96&sign=c286b8766606af183a5291765e32c21d&type=album" height="175">](https://youtu.be/TMZathtFWM8?t=377)
+[<img alt="Program interface" src="https://i.imgur.com/BXLqOMN.png" height="160">](https://youtu.be/uqT3Z0kfF24)
+[<img src="https://i.imgur.com/BiPpjoD.png" height="160">](https://youtu.be/Jr7Jmn81WNQ)
+[<img alt="Satyr video intro" src="https://sun9-13.userapi.com/impg/8OTpTqANlgy5K5nXWTXfMomyOVi9ljtmxUb7EQ/GmzqXzWO-GM.jpg?size=1098x776&quality=96&sign=c286b8766606af183a5291765e32c21d&type=album" height="160">](https://youtu.be/TMZathtFWM8?t=377)
+[<img alt="Satyr video intro" src="https://i.imgur.com/cDRA96Q.png" height="160">](https://youtu.be/FPcTfAHiPyw)
 
 #### For windows:
 [<img src="https://phonelumi.com/wp-content/uploads/2017/02/button-dl.svg" height="50">](https://github.com/JargeZ/ntsc/releases/latest/download/ntscQT.exe)
