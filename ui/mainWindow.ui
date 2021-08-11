@@ -23,6 +23,17 @@
       <item>
        <layout class="QGridLayout" name="checkboxesLayout"/>
       </item>
+      <item>
+       <layout class="QHBoxLayout" name="templatesLayout">
+        <item>
+         <widget class="QPushButton" name="exportImportConfigButton">
+          <property name="text">
+           <string>Import / Export preset</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
      </layout>
     </item>
     <item>

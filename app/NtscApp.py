@@ -8,6 +8,7 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QSlider, QHBoxLayout, QLabel, QCheckBox, QInputDialog
 from numpy import ndarray
 
+from app.config_dialog import ConfigDialog
 from app.logs import logger
 from app.Renderer import Renderer
 from app.funcs import resize_to_height, pick_save_file, trim_to_4width
@@ -111,6 +112,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.livePreviewCheckbox.stateChanged.connect(self.toggle_live_preview)
         self.refreshFrameButton.clicked.connect(self.nt_update_preview)
         self.openImageUrlButton.clicked.connect(self.open_image_by_url)
+        self.exportImportConfigButton.clicked.connect(self.export_import_config)
 
         self.ProMode.clicked.connect(
             lambda: self.set_pro_mode(self.ProMode.isChecked())
@@ -418,6 +420,25 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
 
         self.set_current_frame(img)
 
+    def nt_get_config(self):
+        values = {}
+        element: Union[QCheckBox, QSlider, DoubleSlider]
+        for parameter_name, element in self.nt_controls.items():
+            if isinstance(element, QCheckBox):
+                value = element.isChecked()
+            elif isinstance(element, (QSlider, DoubleSlider)):
+                value = element.value()
+
+            values[parameter_name] = value
+
+        return values
+
+    def nt_set_config(self, values: list[set[str, Union[int, float]]]):
+        for parameter_name, value in values.items():
+            setattr(self.nt, parameter_name, value)
+
+        self.sync_nt_to_sliders()
+
     def open_video(self, path: Path):
         logger.debug(f"file: {path}")
         cap = cv2.VideoCapture(str(path))
@@ -497,6 +518,20 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             )
 
         self.render_preview(ntsc_out_image)
+
+    def export_import_config(self):
+        config = self.nt_get_config()
+        config_json = json.dumps(config, indent=2)
+
+        dialog = ConfigDialog()
+        dialog.configJsonTextField.setPlainText(config_json)
+        dialog.configJsonTextField.selectAll()
+
+        code = dialog.exec_()
+        if code:
+            config_json = dialog.configJsonTextField.toPlainText()
+            config = json.loads(config_json)
+            self.nt_set_config(config)
 
     @QtCore.pyqtSlot(object)
     def render_preview(self, img):

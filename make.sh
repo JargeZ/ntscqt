@@ -4,6 +4,7 @@ case $1 in
 "ui")
   echo updating ui py
   pyuic5 ui/mainWindow.ui -o ui/mainWindow.py
+  pyuic5 ui/configExportDialog.ui -o ui/configExportDialog.py
   ;;
 "translate")
   echo Updating translate file for lunguist
