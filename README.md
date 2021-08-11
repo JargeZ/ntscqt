@@ -1,4 +1,4 @@
-# VHS GUI Tool [<img src="https://evo.audio/wp-content/uploads/2020/07/Download-Mint-Button.svg" height="25">](https://github.com/JargeZ/ntsc/releases/latest/download/ntscQT.exe)
+# NtscQT (VHS GUI Tool) [<img src="https://evo.audio/wp-content/uploads/2020/07/Download-Mint-Button.svg" height="25">](https://github.com/JargeZ/ntsc/releases/latest/download/ntscQT.exe)
 #### AKA `Line maker 10.0`
 [![Demo](demo.gif)](https://youtu.be/uqT3Z0kfF24)
 Demo:\
