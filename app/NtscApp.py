@@ -1,11 +1,12 @@
+import json
 from pathlib import Path
 from random import randint
-from typing import Tuple
-
+from typing import Tuple, Union
+import requests
 import cv2
 import numpy
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import QSlider, QHBoxLayout, QLabel, QCheckBox, QInputDialog
+from PyQt5.QtWidgets import QSlider, QHBoxLayout, QLabel, QCheckBox, QInputDialog, QPushButton
 from numpy import ndarray
 
 from app.config_dialog import ConfigDialog
@@ -23,6 +24,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.preview: numpy.ndarray = False
         self.scale_pixmap = False
         self.input_video = {}
+        self.templates = {}
         self.orig_wh: Tuple[int, int] = (0, 0)
         self.compareMode: bool = False
         self.isRenderActive: bool = False
@@ -120,11 +122,32 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
 
         self.seedSpinBox.valueChanged.connect(self.update_seed)
         presets = [18, 31, 38, 44]
-        self.seedSpinBox.setValue(presets[randint(0, len(presets)-1)])
+        self.seedSpinBox.setValue(presets[randint(0, len(presets) - 1)])
 
         self.progressBar.setValue(0)
         self.progressBar.setMinimum(1)
         self.progressBar.hide()
+
+        self.add_builtin_templates()
+
+    def add_builtin_templates(self):
+
+        try:
+            res = requests.get('https://raw.githubusercontent.com/JargeZ/vhs/master/builtin_templates.json')
+            if not res.ok:
+                return
+            self.templates = json.loads(res.content)
+        except Exception as e:
+            logger.exception('json not loaded')
+
+        for name, values in self.templates.items():
+            button = QPushButton()
+            button.setText(name)
+            set_values = (
+                lambda v: lambda: self.nt_set_config(v)
+            )(values)
+            button.clicked.connect(set_values)
+            self.templatesLayout.addWidget(button)
 
     def setup_renderer(self):
         try:
@@ -541,4 +564,3 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             self.image_frame.setPixmap(QtGui.QPixmap.fromImage(image).scaledToHeight(480))
         else:
             self.image_frame.setPixmap(QtGui.QPixmap.fromImage(image))
-

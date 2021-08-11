@@ -8,3 +8,4 @@ PyQt5-sip==12.8.1
 PyQt5-stubs==5.14.2.2
 scipy==1.7.0
 loguru~=0.5.3
+requests~=2.26.0
