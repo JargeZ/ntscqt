@@ -1,0 +1,32 @@
+{
+"by RayovaTeh577": {
+  "_composite_preemphasis": 0.0,
+  "_vhs_out_sharpen": 1,
+  "_vhs_edge_wave": 2,
+  "_ringing": 0.9375,
+  "_ringing_power": 1,
+  "_ringing_shift": 0.9375,
+  "_freq_noise_size": 0.88806,
+  "_freq_noise_amplitude": 1,
+  "_color_bleed_horiz": 2,
+  "_color_bleed_vert": 0,
+  "_video_chroma_noise": 12335,
+  "_video_chroma_phase_noise": 6,
+  "_video_chroma_loss": 0,
+  "_video_noise": 3907,
+  "_video_scanline_phase_shift": 43,
+  "_video_scanline_phase_shift_offset": 2,
+  "_head_switching_speed": 37,
+  "_vhs_head_switching": false,
+  "_color_bleed_before": false,
+  "_enable_ringing2": true,
+  "_composite_in_chroma_lowpass": true,
+  "_composite_out_chroma_lowpass": true,
+  "_composite_out_chroma_lowpass_lite": true,
+  "_emulating_vhs": true,
+  "_nocolor_subcarrier": false,
+  "_vhs_chroma_vert_blend": true,
+  "_vhs_svideo_out": true,
+  "_output_ntsc": true
+}
+}
