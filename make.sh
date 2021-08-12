@@ -8,7 +8,7 @@ case $1 in
   ;;
 "translate")
   echo Updating translate file for lunguist
-  pylupdate5 ui/mainWindow.py app/NtscApp.py -ts translate/ru_RU.ts
+  pylupdate5 ui/mainWindow.py app/NtscApp.py ui/configExportDialog.py -ts translate/ru_RU.ts
   ;;
 "build")
   if [ ! -f 'ffmpeg.exe' ]; then

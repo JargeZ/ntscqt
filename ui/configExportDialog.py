@@ -18,7 +18,7 @@ class Ui_TemplateConfigDialog(object):
         self.buttonBox = QtWidgets.QDialogButtonBox(TemplateConfigDialog)
         self.buttonBox.setGeometry(QtCore.QRect(30, 240, 341, 32))
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
+        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Save)
         self.buttonBox.setObjectName("buttonBox")
         self.configJsonTextField = QtWidgets.QPlainTextEdit(TemplateConfigDialog)
         self.configJsonTextField.setGeometry(QtCore.QRect(10, 10, 381, 221))
