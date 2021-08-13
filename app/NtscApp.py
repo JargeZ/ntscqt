@@ -173,7 +173,6 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.videoRenderer.increment_progress.connect(self.increment_progress)
         # подключим сигнал старта потока к методу run у объекта, который должен выполнять код в другом потоке
         self.thread.started.connect(self.videoRenderer.run)
-        self.progressBar.setValue(0)
 
     @QtCore.pyqtSlot()
     def stop_render(self):
@@ -515,6 +514,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         }
         self.setup_renderer()
         self.toggle_main_effect()
+        self.progressBar.setValue(1)
         self.videoRenderer.render_data = render_data
         self.thread.start()
 
