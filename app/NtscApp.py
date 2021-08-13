@@ -558,12 +558,20 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             self.nt_set_config(config)
 
     @QtCore.pyqtSlot(object)
-    def render_preview(self, img):
-        image = QtGui.QImage(img.data.tobytes(), img.shape[1], img.shape[0], QtGui.QImage.Format_RGB888) \
+    def render_preview(self, img: ndarray):
+        # https://stackoverflow.com/questions/41596940/qimage-skews-some-images-but-not-others
+
+        height, width, _ = img.shape
+        # calculate the total number of bytes in the frame
+        totalBytes = img.nbytes
+        # divide by the number of rows
+        bytesPerLine = int(totalBytes / height)
+
+        image = QtGui.QImage(img.tobytes(), width, height, bytesPerLine, QtGui.QImage.Format_RGB888) \
             .rgbSwapped()
+
         max_h = self.image_frame.height()
-        h, w, _ = img.shape
-        if h > max_h:
+        if height > max_h:
             self.image_frame.setPixmap(QtGui.QPixmap.fromImage(image).scaledToHeight(max_h))
         else:
             self.image_frame.setPixmap(QtGui.QPixmap.fromImage(image))
