@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 from random import randint
-from typing import Tuple, Union
+from typing import Tuple, Union, List, Dict
 import requests
 import cv2
 import numpy
@@ -173,6 +173,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.videoRenderer.increment_progress.connect(self.increment_progress)
         # подключим сигнал старта потока к методу run у объекта, который должен выполнять код в другом потоке
         self.thread.started.connect(self.videoRenderer.run)
+        self.progressBar.setValue(0)
 
     @QtCore.pyqtSlot()
     def stop_render(self):
@@ -456,7 +457,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
 
         return values
 
-    def nt_set_config(self, values: list[set[str, Union[int, float]]]):
+    def nt_set_config(self, values: List[Dict[str, Union[int, float]]]):
         for parameter_name, value in values.items():
             setattr(self.nt, parameter_name, value)
 
