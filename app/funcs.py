@@ -37,3 +37,17 @@ def trim_to_4width(img: numpy.ndarray) -> numpy.ndarray:
         height, width, channels = img.shape
         logger.debug(f"┗FIX to wh: {width}x{height} w%4={width % 4}")
     return img
+
+
+def expand_to_4width(img: numpy.ndarray) -> numpy.ndarray:
+    """
+    Workaround crash if image not divided by 4
+    """
+    height, width, channels = img.shape
+    logger.debug(f"┃ Image wh: {width}x{height} w%4={width % 4}")
+    d = width % 4
+    if d != 0:
+        img = numpy.concatenate((img, img[:, -1:(d + 1) * -1:-1]), axis=1)
+        height, width, channels = img.shape
+        logger.debug(f"┗FIX to wh: {width}x{height} w%4={width % 4}")
+    return img
