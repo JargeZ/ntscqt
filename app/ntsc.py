@@ -20,8 +20,10 @@ Int_MAX_VALUE = 2147483647
 
 ring_pattern_real_path = 'app/ringPattern.npy'
 if getattr(sys, 'frozen', False):
-    ring_pattern_real_path = f'{sys._MEIPASS}\\app\\ringPattern.npy'
-RingPattern = np.load(ring_pattern_real_path)
+    ring_pattern_real_path = f'{sys._MEIPASS}/app/ringPattern.npy'
+
+ring_pattern_path = Path(ring_pattern_real_path)
+RingPattern = np.load(str(ring_pattern_path.resolve()))
 
 
 def ringing(img2d, alpha=0.5, noiseSize=0, noiseValue=2, clip=True, seed=None):
