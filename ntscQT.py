@@ -13,9 +13,11 @@ def main():
     # if run by pyinstaller executable, frozen attr will be true
     if getattr(sys, 'frozen', False):
         # _MEIPASS contain temp pyinstaller dir
-        locale_file = str((Path(sys._MEIPASS) / 'translate' / f'{locale}.qm').resolve())
+        base_dir = Path(sys._MEIPASS)
+        locale_file = str((base_dir / 'translate' / f'{locale}.qm').resolve())
     else:
-        locale_file = str((Path(__file__).absolute().parent / 'translate' / f'{locale}.qm').resolve())
+        base_dir = Path(__file__).absolute().parent
+        locale_file = str((base_dir / 'translate' / f'{locale}.qm').resolve())
 
     print(f"Try load {locale} locale: {locale_file}")
     if translator.load(locale_file):

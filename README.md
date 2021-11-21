@@ -21,6 +21,28 @@
 
 You can [download latest version here](https://github.com/JargeZ/ntsc/releases/latest/download/ntscQT.exe) or from [releases page](https://github.com/JargeZ/ntsc/releases)
 
+#### For Mac OS X:
+1. Open terminal
+2. If not already installed, install Homebrew
+   by instructions here: [brew.sh](https://brew.sh/)
+3. Install ffmpeg
+   ```bash
+    brew install ffmpeg
+   ```
+4. Install NtscQT:
+    ```bash
+    git clone https://github.com/JargeZ/vhs -C ~/ntscqt
+    cd ~/ntscqt
+    python3 -m venv ./venv
+    source venv/bin/activate
+    pip install -r requirements.txt
+    ```
+5. After that you can test run by command `python ntscQT.py`
+6. after exit and subsequent times
+ you should run app by following command:
+   ```bash
+   cd ~/ntscqt && venv/bin/python ntscQT.py
+   ```
 ### WTF
 Эта простая программа сделана на основе алгоритма, который позволяет добиться эффекта реального старого магнитофона или VHS, а не простое размытие и шумы со статическими эффектами, как на многих видео simpsonwave и подобных. Я надеюсь, что этот инструмент поможет вам в творчестве, если вы решите стилизовать картинки или видео под старинные кадры.
 <hr>
