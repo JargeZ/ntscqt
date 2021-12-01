@@ -21,14 +21,14 @@
 
 You can [download latest version here](https://github.com/JargeZ/ntsc/releases/latest/download/ntscQT.exe) or from [releases page](https://github.com/JargeZ/ntsc/releases)
 
-#### For Mac OS X:
+#### For Mac OS X and Linux:
 Thanks for [Robot Riot Records](https://linktr.ee/robotriot) for donation which motivated to make MacOS fixes
 1. Open terminal
 2. If not already installed, install Homebrew
    by instructions here: [brew.sh](https://brew.sh/)
 3. Install ffmpeg
    ```bash
-    brew install ffmpeg
+    brew install ffmpeg #or apt if using Linux
    ```
 4. Install NtscQT:
     ```bash
