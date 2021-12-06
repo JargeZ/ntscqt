@@ -76,7 +76,8 @@ You can open the video and experiment with all parameters
 - - -
 > You can find more info there [/releases](https://github.com/JargeZ/ntsc/releases)\
 > Больше описания и скриншотов есть по ссылке [/releases](https://github.com/JargeZ/ntsc/releases)
-
+# Presets
+* [From rgm89](https://github.com/rgm89git/rgms-ntscqt-presets)
 - - - 
 #
 ##### Original readme (оригинальное описание)
