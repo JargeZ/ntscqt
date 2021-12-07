@@ -409,7 +409,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             self.set_image_mode()
             self.open_image(img)
         else:
-            self.update_status(f"Unsopported file type {file_suffix}")
+            self.update_status(f"Unsupported file type {file_suffix}")
 
     def set_video_mode(self):
         self.videoTrackSlider.blockSignals(False)
