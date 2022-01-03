@@ -1,0 +1,134 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+	color: black;
+	background: #0a0094;
+	margin: 0 auto;
+	max-width: 715px; /* 800x600 */
+    font-family: sans-serif;
+}
+
+a {
+	color: #fff;
+}
+
+#wrapper{
+	max-width: 1160px;
+}
+
+/* NAVIGATION BAR/TOP OF PAGE */
+
+#header #nav {
+    background: white;
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+#header #nav a {
+    text-decoration: none;
+    color: black;
+    padding: 7px 10px;
+}
+#header #nav a:hover {
+    background-color: #b4b4b4;
+}
+#header #nav a.active {
+    background: #0a0094;
+    color: white;
+}
+#header #nav a.download {
+    background: #940000;
+    color: white;
+}
+
+.imgbox {
+	width: 100%;
+	margin: 0 auto;
+    display: block;
+}
+
+#main {
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 15px 5px;
+    text-align: center;
+}
+#details {
+    background-color: #af0000;
+    color: white !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+}
+#details .infobox {
+    display: flex;
+    flex-direction: row;
+    padding: 15px;
+}
+#details .infobox div {
+    flex-grow: 1;
+}
+#details .infobox .icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#details .infobox .icon i {
+    font-size: 80px;
+}
+#details .infobox .text {
+    flex-grow: 26;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    justify-content: start;
+    flex-direction: column;
+}
+#details .infobox .text p {
+    width: 100%;
+}
+#details .infobox .text.right {
+    text-align: right !important;
+    align-items: end;
+    justify-content: center;
+}
+#details .infobox .text.right {
+    text-align: right;
+}
+
+#download {
+    background-color: white;
+    color: black;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    padding: 15px 5px;
+    text-align: center;
+}
+#download .dl-btn {
+	background: #940000;
+	padding: 15px;
+	text-decoration: none;
+}
+#download .dl-btn:hover {
+    background: #d80e0e;
+}
+
+#footer {
+    background-color: #af0000;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 15px 5px;
+    text-align: center;
+}
