@@ -1,9 +1,24 @@
+import os
 import sys
 from pathlib import Path
 
 from PyQt5 import QtCore, QtWidgets
-
+from PyQt5.QtCore import QLibraryInfo
+from app.logs import logger
 from app.NtscApp import NtscApp
+
+os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = QLibraryInfo.location(
+    QLibraryInfo.PluginsPath
+)
+
+
+def crash_handler(type, value, tb):
+    logger.exception("Uncaught exception: {0}".format(str(value)))
+    exit(1)
+
+
+# Install exception handler
+sys.excepthook = crash_handler
 
 
 def main():
