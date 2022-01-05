@@ -14,6 +14,7 @@ os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = QLibraryInfo.location(
 
 
 def crash_handler(type, value, tb):
+    logger.trace(value)
     logger.exception("Uncaught exception: {0}".format(str(value)))
     sys.exit(1)
 
