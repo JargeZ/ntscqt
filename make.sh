@@ -21,6 +21,7 @@ case $1 in
     echo '  remove archive'
     rm win32-x64.zip
   fi
+  convert icon.png -resize 256x256 icon.ico
   docker run --entrypoint /bin/sh --rm -v "$(pwd):/src/" cdrx/pyinstaller-windows -c "python -m pip install --upgrade pip && /entrypoint.sh"
   ;;
 
