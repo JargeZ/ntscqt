@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['ntscQT.py'],
-             pathex=['Z:\\src'],
+             pathex=['Z:\\src', 'c:\\Python37\\Lib\\site-packages\\cv2'],
              binaries=[
                 ('c:\\Python37\\Lib\\site-packages\\cv2\\opencv_videoio_ffmpeg455_64.dll', '.'),
                 ('ffmpeg.exe', '.')
@@ -36,4 +36,4 @@ exe = EXE(pyz,
           upx=False,
           upx_exclude=[],
           runtime_tmpdir=None,
-          console=False )
+          console=True )
