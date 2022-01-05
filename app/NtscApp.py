@@ -82,7 +82,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.add_slider("_color_bleed_vert", 0, 10)
         self.add_slider("_video_chroma_noise", 0, 16384)
         self.add_slider("_video_chroma_phase_noise", 0, 50)
-        self.add_slider("_video_chroma_loss", 0, 30_000)
+        self.add_slider("_video_chroma_loss", 0, 800)
         self.add_slider("_video_noise", 0, 4200)
         self.add_slider("_video_scanline_phase_shift", 0, 270, pro=True)
         self.add_slider("_video_scanline_phase_shift_offset", 0, 3, pro=True)
@@ -138,7 +138,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
                 return
             self.templates = json.loads(res.content)
         except Exception as e:
-            logger.exception('json not loaded')
+            logger.exception(f'json not loaded: {e}')
 
         for name, values in self.templates.items():
             button = QPushButton()
@@ -464,7 +464,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
 
     def open_video(self, path: Path):
         logger.debug(f"file: {path}")
-        cap = cv2.VideoCapture(str(path))
+        cap = cv2.VideoCapture(str(path.resolve()))
         logger.debug(f"cap: {cap} isOpened: {cap.isOpened()}")
         self.input_video = {
             "cap": cap,
