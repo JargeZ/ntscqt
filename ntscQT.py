@@ -4,8 +4,9 @@ from pathlib import Path
 
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import QLibraryInfo
-from app.logs import logger
-from app.NtscApp import NtscApp
+
+from app import NtscApp
+from app import logger
 
 os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = QLibraryInfo.location(
     QLibraryInfo.PluginsPath
