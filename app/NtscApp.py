@@ -472,7 +472,8 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             "height": int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
             "frames_count": int(cap.get(cv2.CAP_PROP_FRAME_COUNT)),
             "orig_fps": cap.get(cv2.CAP_PROP_FPS),
-            "path": path
+            "path": path,
+            "suffix": path.suffix.lower(),
         }
         logger.debug(f"selfinput: {self.input_video}")
         self.orig_wh = (int(self.input_video["width"]), int(self.input_video["height"]))
@@ -502,7 +503,11 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         im_buf_arr.tofile(target_file)
 
     def render_video(self):
-        target_file = pick_save_file(self, title='Render video as', suffix='.mp4')
+        if self.input_video['suffix'] == ".gif":
+            suffix = self.input_video['suffix']
+        else:
+            suffix = ".mp4"
+        target_file = pick_save_file(self, title='Render video as', suffix=suffix)
         if not target_file:
             return None
         render_data = {
