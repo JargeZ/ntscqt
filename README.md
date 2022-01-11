@@ -1,7 +1,21 @@
-# NtscQT (VHS GUI Tool) [<img src="https://evo.audio/wp-content/uploads/2020/07/Download-Mint-Button.svg" height="25">](https://github.com/JargeZ/ntsc/releases/latest/download/ntscQT.exe)
-#### AKA `Line maker 10.0`
+# [<img src="https://github.com/JargeZ/ntscqt/blob/master/docs/img/ntscqt_banner.png?raw=true">](https://0hz.ru/ntscqt/)
+#### <p align="center">AKA `Line maker 10.0`</p>
+
+<div align="center">
+
+[![Release version](https://img.shields.io/github/v/release/JargeZ/ntscqt?color=blue&label=&style=for-the-badge)](https://github.com/JargeZ/ntscqt/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/JargeZ/ntscqt/total?style=for-the-badge&color=blue)](https://github.com/JargeZ/ntscqt/releases/latest)
+[![Commits](https://img.shields.io/github/commit-activity/m/JargeZ/ntscqt?label=commits&style=for-the-badge)](https://github.com/JargeZ/ntscqt/commits)
+[![Last Commit](https://img.shields.io/github/last-commit/JargeZ/ntscqt/master?label=&style=for-the-badge)](https://github.com/JargeZ/ntscqt/commits)
+[![Website](https://img.shields.io/badge/-WEBSITE-blue?label=&style=for-the-badge)](https://0hz.ru/ntscqt/)
+
+</div>
+
 [![Demo](demo.gif)](https://youtu.be/uqT3Z0kfF24)
 ![example](https://i.imgur.com/nn92Jmp.jpg)
+
+<div align="center">
+
 ## Demo:
 [<img alt="Tutorial by Skittleology" src="https://i.imgur.com/5vJ3Pdb.png" height="157">](https://youtu.be/hV9IoedRe7I)
 [<img alt="GiyuGamer556 Comparing" src="https://i.imgur.com/gVBgqkO.png" height="157">](https://youtu.be/S6Qn-_wWuMc)
@@ -17,11 +31,18 @@
 [<img alt="YT Demo" src="https://i.imgur.com/Xy5Cex9.png" height="140">](https://youtu.be/vjvISSdGYv0)
 [<img alt="YT Demo" src="https://i.imgur.com/i5FxlYU.jpg" height="140">](https://youtu.be/ctMSn--04Sk)
 
+</div>
 
-#### For windows:
-[<img src="https://phonelumi.com/wp-content/uploads/2017/02/button-dl.svg" height="50">](https://github.com/JargeZ/ntsc/releases/latest/download/ntscQT.exe)
+<div align="center">
+
+### Download:
+[<img src="https://img.shields.io/github/downloads/JargeZ/ntscqt/latest/total?label=DOWNLOAD%20THE%20LATEST%20VERSION&style=for-the-badge" height="40">](https://github.com/JargeZ/ntsc/releases/latest/download/ntscQT.exe)
 
 You can [download latest version here](https://github.com/JargeZ/ntsc/releases/latest/download/ntscQT.exe) or from [releases page](https://github.com/JargeZ/ntsc/releases)
+
+</div>
+
+### Compiling:
 
 #### For Mac OS X and Linux:
 Thanks for [Robot Riot Records](https://linktr.ee/robotriot) for donation which motivated to make MacOS fixes
@@ -79,8 +100,9 @@ You can open the video and experiment with all parameters
 > You can find more info there [/releases](https://github.com/JargeZ/ntsc/releases)\
 > Больше описания и скриншотов есть по ссылке [/releases](https://github.com/JargeZ/ntsc/releases)
 # Presets
-* [From rgm89](https://github.com/rgm89git/rgms-ntscqt-presets)
-- - - 
+<p align="center"><a href="https://github.com/rgm89git/rgms-ntscqt-presets">RGM's ntscQT presets <i>(by RGM)</i></a></p>
+
+- - -
 #
 ##### Original readme (оригинальное описание)
 #### NTSC video emulator
