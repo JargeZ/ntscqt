@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Über NTSC — QT Edition 3000</string>
+   <string>ntscQT</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -33,7 +33,7 @@
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Noto Sans'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Check for updates and stargazes: &lt;a href=&quot;https://github.com/JargeZ/vhs&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;Github/JargeZ/vhs&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Check for updates and stargazes: &lt;a href=&quot;https://github.com/JargeZ/ntscqt&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;Github/JargeZ/ntscqt&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="openExternalLinks">
          <bool>true</bool>
@@ -52,6 +52,9 @@ p, li { white-space: pre-wrap; }
          <widget class="QPushButton" name="exportImportConfigButton">
           <property name="text">
            <string>Import / Export preset</string>
+          </property>
+          <property name="toolTip">
+           <string comment="Import and export pre-existing presets."/>
           </property>
          </widget>
         </item>
@@ -82,7 +85,7 @@ p, li { white-space: pre-wrap; }
          </size>
         </property>
         <property name="text">
-         <string>ImageFrameTextLabel</string>
+         <string>No image/video/GIF selected. ❓</string>
         </property>
         <property name="scaledContents">
          <bool>false</bool>
@@ -120,7 +123,7 @@ p, li { white-space: pre-wrap; }
          </widget>
         </item>
         <item>
-         <widget class="QScrollBar" name="videoTrackSlider">
+         <widget class="QSlider" name="videoTrackSlider">
           <property name="tabletTracking">
            <bool>false</bool>
           </property>
