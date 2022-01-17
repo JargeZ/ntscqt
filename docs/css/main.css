@@ -88,7 +88,7 @@ a {
     flex-grow: 26;
     text-align: left;
     display: flex;
-    align-items: center;
+    align-items: left;
     padding: 10px;
     justify-content: start;
     flex-direction: column;

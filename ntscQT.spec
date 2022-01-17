@@ -4,16 +4,16 @@ block_cipher = None
 
 
 a = Analysis(['ntscQT.py'],
-             pathex=['Z:\\src'],
+             pathex=['Z:\\src', 'c:\\Python37\\Lib\\site-packages\\cv2'],
              binaries=[
-                ('c:\\Python37\\Lib\\site-packages\\cv2\\opencv_videoio_ffmpeg440_64.dll', '.'),
+                ('c:\\Python37\\Lib\\site-packages\\cv2\\opencv_videoio_ffmpeg455_64.dll', '.'),
                 ('ffmpeg.exe', '.')
              ],
              datas=[
                 ('./app/ringPattern.npy', './app'),
                 ('translate/*.qm', 'translate/'),
              ],
-             hiddenimports=['scipy.special.cython_special', 'scipy.spatial.transform._rotation_groups'],
+             hiddenimports=['scipy.special.cython_special', 'scipy.spatial.transform._rotation_groups', 'app'],
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
@@ -35,5 +35,6 @@ exe = EXE(pyz,
           strip=False,
           upx=False,
           upx_exclude=[],
+          icon='Z:\\src\icon.ico',
           runtime_tmpdir=None,
           console=False )

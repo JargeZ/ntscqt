@@ -24,7 +24,12 @@ class Renderer(QtCore.QObject):
     def run(self):
         self.running = True
 
-        tmp_output = self.render_data['target_file'].parent / f'tmp_{self.render_data["target_file"].name}'
+        if self.render_data["input_video"]["suffix"] == '.gif':
+            suffix = '.mp4'
+        else:
+            suffix = self.render_data["input_video"]["suffix"]
+
+        tmp_output = self.render_data['target_file'].parent / f'tmp_{self.render_data["target_file"].stem}{suffix}'
 
         upscale_2x = self.render_data["upscale_2x"]
 
@@ -42,7 +47,7 @@ class Renderer(QtCore.QObject):
             cv2.VideoWriter_fourcc(*'H264')
         ]
         video = cv2.VideoWriter()
-        
+
         open_result = False
         while not open_result:
             open_result = video.open(
@@ -104,19 +109,30 @@ class Renderer(QtCore.QObject):
             video.write(frame)
 
         video.release()
-        audio_orig = (
-            ffmpeg
-                .input(str(self.render_data["input_video"]["path"].resolve()))
-        )
-        self.sendStatus.emit('Original audio extracted')
-        video = ffmpeg.input(str(tmp_output.resolve()))
-        (
-            ffmpeg
-                .output(video.video, audio_orig.audio, str(self.render_data["target_file"].resolve()),
-                        shortest=None, vcodec='copy', acodec='copy')
-                .overwrite_output()
-                .run()
-        )
+
+        orig_path = str(self.render_data["input_video"]["path"].resolve())
+        orig_suffix = self.render_data["input_video"]["suffix"]
+        result_path = str(self.render_data["target_file"].resolve())
+
+        # FIXME beautify file render and audio detection
+
+        orig = ffmpeg.input(orig_path)
+        temp_video_stream = ffmpeg.input(str(tmp_output.resolve()))
+        # render_streams.append(temp_video_stream.video)
+
+        ff_command = ffmpeg.output(orig.audio, temp_video_stream.video, result_path,
+                                   shortest=None, vcodec='copy', acodec='copy')
+        logger.debug(ff_command)
+        logger.debug(' '.join(ff_command.compile()))
+        try:
+            ff_command.overwrite_output().run()
+        except ffmpeg.Error as e:
+            if orig_suffix == '.gif':
+                ff_command = ffmpeg.output(temp_video_stream.video, result_path, shortest=None)
+            else:
+                ff_command = ffmpeg.output(temp_video_stream.video, result_path, shortest=None, vcodec='copy')
+            ff_command.overwrite_output().run()
+
         self.sendStatus.emit('Audio copy done')
         tmp_output.unlink()
         self.renderStateChanged.emit(False)
