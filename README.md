@@ -84,7 +84,7 @@ Thanks for [Robot Riot Records](https://linktr.ee/robotriot) for donation which 
 5. After that you can test run by command `python ntscQT.py`
 6. After exit and subsequent times, you should run app by entering the following command:
    ```bash
-   cd ~/ntscqt && venv/bin/python ntscQT.py
+   cd ntscqt && venv/bin/python ntscQT.py
    ```
 
 ### WTF
