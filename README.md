@@ -62,7 +62,7 @@ You can [download latest version here](https://github.com/JargeZ/ntsc/releases/l
 5. After that you can test run by command `python ntscQT.py`
 6. After exit and subsequent times, you should run app by entering the following command:
    ```powershell
-   cd ~/ntscqt && ./venv/Scripts/activate && python ntscQT.py
+   cd ntscqt && ./venv/Scripts/activate && python ntscQT.py
    ```
 
 #### For Mac OS X and Linux:
