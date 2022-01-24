@@ -44,16 +44,36 @@ You can [download latest version here](https://github.com/JargeZ/ntsc/releases/l
 
 ### Compiling:
 
+#### For Windows:
+1. Open your terminal of preference.
+2. If not already installed, install Chocolatey: [chocolatey.org](https://chocolatey.org/)
+3. Install ffmpeg *(necessary)*:
+   ```powershell
+   choco install ffmpeg
+   ```
+4. Install ntscQT:
+    ```powershell
+    git clone https://github.com/JargeZ/vhs
+    cd ntscqt
+    python -m venv ./venv
+    ./venv/Scripts/activate
+    pip install -r requirements.txt
+    ```
+5. After that you can test run by command `python ntscQT.py`
+6. After exit and subsequent times, you should run app by entering the following command:
+   ```powershell
+   cd ntscqt && ./venv/Scripts/activate && python ntscQT.py
+   ```
+
 #### For Mac OS X and Linux:
 Thanks for [Robot Riot Records](https://linktr.ee/robotriot) for donation which motivated to make MacOS fixes
-1. Open terminal
-2. If not already installed, install Homebrew
-   by instructions here: [brew.sh](https://brew.sh/)
-3. Install ffmpeg
+1. Open your terminal of preference.
+2. If not already installed, install Homebrew: [brew.sh](https://brew.sh/)
+3. Install ffmpeg *(necessary)*:
    ```bash
-    brew install ffmpeg #or apt if using Linux
+   brew install ffmpeg #or apt if using Linux
    ```
-4. Install NtscQT:
+4. Install ntscQT:
     ```bash
     git clone https://github.com/JargeZ/vhs -C ~/ntscqt
     cd ~/ntscqt
@@ -62,11 +82,11 @@ Thanks for [Robot Riot Records](https://linktr.ee/robotriot) for donation which 
     pip install -r requirements.txt
     ```
 5. After that you can test run by command `python ntscQT.py`
-6. after exit and subsequent times
- you should run app by following command:
+6. After exit and subsequent times, you should run app by entering the following command:
    ```bash
    cd ~/ntscqt && venv/bin/python ntscQT.py
    ```
+
 ### WTF
 Эта простая программа сделана на основе алгоритма, который позволяет добиться эффекта реального старого магнитофона или VHS, а не простое размытие и шумы со статическими эффектами, как на многих видео simpsonwave и подобных. Я надеюсь, что этот инструмент поможет вам в творчестве, если вы решите стилизовать картинки или видео под старинные кадры.
 <hr>
