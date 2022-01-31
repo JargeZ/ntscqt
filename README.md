@@ -87,7 +87,7 @@ Thanks for [Robot Riot Records](https://linktr.ee/robotriot) for donation which 
    cd ~/ntscqt && venv/bin/python ntscQT.py
    ```
 
-### WTF
+### What It Is
 Эта простая программа сделана на основе алгоритма, который позволяет добиться эффекта реального старого магнитофона или VHS, а не простое размытие и шумы со статическими эффектами, как на многих видео simpsonwave и подобных. Я надеюсь, что этот инструмент поможет вам в творчестве, если вы решите стилизовать картинки или видео под старинные кадры.
 <hr>
 This simple program is made on the basis of an algorithm that allows you to achieve the effect of a real old tape recorder or VHS, rather than simple blur and noise with static effects, as in many simpsonwave videos and the like. I hope this tool will help you in your creative work if you decide to stylize pictures or videos to look like old video.
