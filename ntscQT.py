@@ -44,7 +44,7 @@ def main():
     else:
         print("Using default translation")
 
-    app = QtWidgets.QApplication(sys.argv)  # Новый экземпляр QApplication
+    app = QtWidgets.QApplication(sys.argv)
     app.installTranslator(translator)
 
     if darkdetect.isDark():
