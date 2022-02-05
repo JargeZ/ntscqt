@@ -5,7 +5,7 @@ from pathlib import Path
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import QLibraryInfo
 from PyQt5.QtCore import QFile, QTextStream
-import breeze_resources
+import darkdetect
 
 from app import NtscApp
 from app import logger
@@ -47,11 +47,12 @@ def main():
     app = QtWidgets.QApplication(sys.argv)  # Новый экземпляр QApplication
     app.installTranslator(translator)
 
-    darkthm = QFile(":/dark/stylesheet.qss")
-    darkthm.open(QFile.ReadOnly | QFile.Text)
-    darkthm_stream = QTextStream(darkthm)
-
-    app.setStyleSheet(darkthm_stream.readAll())
+    if darkdetect.isDark():
+        import ui.breeze_resources
+        darkthm = QFile(":/dark/stylesheet.qss")
+        darkthm.open(QFile.ReadOnly | QFile.Text)
+        darkthm_stream = QTextStream(darkthm)
+        app.setStyleSheet(darkthm_stream.readAll())
 
     window = NtscApp()
     window.show()
