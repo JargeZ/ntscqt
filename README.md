@@ -53,8 +53,8 @@ You can [download latest version here](https://github.com/JargeZ/ntsc/releases/l
    ```
 4. Install ntscQT:
     ```powershell
-    git clone https://github.com/JargeZ/vhs
-    cd vhs
+    git clone https://github.com/JargeZ/vhs -C ntscqt
+    cd ntscqt
     python -m venv ./venv
     ./venv/Scripts/activate
     pip install -r requirements.txt
