@@ -105,26 +105,26 @@ This simple program is made on the basis of an algorithm that allows you to achi
 - Поле с номером **Seed** генерирует случайные параметры обработки, которые всегда будут одинаковы для одной и той же цифры
 - **Preview height** указывает размер кадра, который обрабатывается для предпросмотра. Меньше - быстрее.
 - **Render height** изначально становится такой, как у видео, которое вы загрузили. Если установить значение меньше, то при рендере входное видео будет ресайзиться и обработается быстрее
-- **Pause Render** позволяет поставить рендер на паузу и изменить параметры обработки, чтобы достичь изменяемого эффекта в видео. Также ползунки можно крутить прям во время рендера без паузы.
+- **Pause Render** позволяет поставить рендер на паузу и изменить параметры обработки, чтобы достичь изменяемого эффекта в видео. Также ползунки можно крутить прямо во время рендера без паузы.
 - **LivePreview** можно включить во время рендера, тогда в окне предпросмотра будет показываться каждый обрабатываемся кадр, тогда как изанчально только каждый 10-й
-- **Кнопка :arrows_counterclockwise:** обновляет эффект для кадра, так можно оценить параметры в динамике.
+- **Кнопка :arrows_counterclockwise:** рендерит заново текущий кадр с наложенным эффектом
 # Usage (EN)
 You can open the video and experiment with all parameters
 - **Seed** field generates random processing parameters that will always be the same for the same value
-- Preview height indicates the size of the frame that is processed for preview. Less is faster.
+- **Preview height** indicates the size of the frame that is processed for preview. Less is faster.
 - The **Render height** initially becomes the same as the video you uploaded. If you set the value less, the video will be resized and processed faster
 - **Pause Render** allows you to pause the render and change the processing parameters to achieve a variable effect in the video. Also, the sliders can be turned directly during rendering without pause.
 - **LivePreview** can be turned on during rendering, then every frame being processed will be shown in the preview window, default only every 10th frame shown
 - **:arrows_counterclockwise: button** re-render the current frame effect
 - - -
 > You can find more info there [/releases](https://github.com/JargeZ/ntsc/releases)\
-> Больше описания и скриншотов есть по ссылке [/releases](https://github.com/JargeZ/ntsc/releases)
+> Подробности есть по ссылке [/releases](https://github.com/JargeZ/ntsc/releases)
 # Presets
 <p align="center"><a href="https://github.com/rgm89git/rgms-ntscqt-presets">RGM's ntscQT presets <i>(by RGM)</i></a></p>
 
 - - -
 #
-##### Original readme (оригинальное описание)
+##### Original README (оригинальное описание)
 #### NTSC video emulator
 ![alt text](https://github.com/zhuker/ntsc/raw/master/ntsc.gif)
 
