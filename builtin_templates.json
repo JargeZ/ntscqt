@@ -1,5 +1,5 @@
 {
-"by yobelkcip": {
+"yobelkcip": {
   "_composite_preemphasis": 0.0,
   "_vhs_out_sharpen": 1,
   "_vhs_edge_wave": 2,
@@ -29,7 +29,7 @@
   "_vhs_svideo_out": true,
   "_output_ntsc": true
 },
-"by Master Nama": {
+"Master Nama": {
   "_composite_preemphasis": 0.0492,
   "_vhs_out_sharpen": 2,
   "_vhs_edge_wave": 2,
@@ -57,6 +57,36 @@
   "_nocolor_subcarrier": false,
   "_vhs_chroma_vert_blend": true,
   "_vhs_svideo_out": false,
+  "_output_ntsc": true
+},
+"RGM": {
+  "_composite_preemphasis": 0.0492,
+  "_vhs_out_sharpen": 2,
+  "_vhs_edge_wave": 2,
+  "_ringing": 0.51042,
+  "_ringing_power": 0,
+  "_ringing_shift": 0.0,
+  "_freq_noise_size": 0.7906,
+  "_freq_noise_amplitude": 0,
+  "_color_bleed_horiz": 0,
+  "_color_bleed_vert": 1,
+  "_video_chroma_noise": 949,
+  "_video_chroma_phase_noise": 6,
+  "_video_chroma_loss": 11,
+  "_video_noise": 332,
+  "_video_scanline_phase_shift": 90,
+  "_video_scanline_phase_shift_offset": 1,
+  "_head_switching_speed": 0,
+  "_vhs_head_switching": true,
+  "_color_bleed_before": true,
+  "_enable_ringing2": true,
+  "_composite_in_chroma_lowpass": true,
+  "_composite_out_chroma_lowpass": true,
+  "_composite_out_chroma_lowpass_lite": true,
+  "_emulating_vhs": true,
+  "_nocolor_subcarrier": false,
+  "_vhs_chroma_vert_blend": true,
+  "_vhs_svideo_out": true,
   "_output_ntsc": true
 }
 }

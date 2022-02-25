@@ -51,7 +51,7 @@ p, li { white-space: pre-wrap; }
         <item>
          <widget class="QPushButton" name="exportImportConfigButton">
           <property name="text">
-           <string>Import / Export preset</string>
+           <string>📝</string>
           </property>
           <property name="toolTip">
            <string comment="Import and export pre-existing presets."/>
