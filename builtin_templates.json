@@ -61,7 +61,7 @@
 },
 "RGM": {
   "_composite_preemphasis": 0.0492,
-  "_vhs_out_sharpen": 2,
+  "_vhs_out_sharpen": 1,
   "_vhs_edge_wave": 2,
   "_ringing": 0.51042,
   "_ringing_power": 0,
@@ -69,7 +69,7 @@
   "_freq_noise_size": 0.7906,
   "_freq_noise_amplitude": 0,
   "_color_bleed_horiz": 0,
-  "_color_bleed_vert": 1,
+  "_color_bleed_vert": 0,
   "_video_chroma_noise": 949,
   "_video_chroma_phase_noise": 6,
   "_video_chroma_loss": 11,
