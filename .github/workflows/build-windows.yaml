@@ -25,6 +25,16 @@ jobs:
         run: |
           docker run --entrypoint /bin/sh --rm -v $GITHUB_WORKSPACE:/src cdrx/pyinstaller-windows:latest -c "python -m pip install --upgrade pip && /entrypoint.sh"
 #          docker run -v $GITHUB_WORKSPACE:/src cdrx/pyinstaller-windows:latest 'pyinstaller -F --clean -y --dist ./ --workpath /tmp main.py'
+      - uses: suisei-cn/actions-download-file@v1
+        id: downloadfile  # Remember to give an ID if you need the output
+        name: Download the file
+        with:
+          url: "https://github.com/ShareX/FFmpeg/releases/download/v4.3.1/ffmpeg-4.3.1-win64.zip"
+          target: win32-x64.zip
+
+      - uses: montudor/action-zip@v1
+        with:
+          args: unzip -o -d . -j win32-x64.zip 'ffmpeg.exe'
 
 #      - name: release
 #        uses: actions/create-release@v1
