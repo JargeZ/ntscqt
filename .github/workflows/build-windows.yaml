@@ -35,7 +35,12 @@ jobs:
       - name: PyInstaller Windows
         run: |
           docker run --entrypoint /bin/sh --rm -v $GITHUB_WORKSPACE:/src cdrx/pyinstaller-windows:latest -c "python -m pip install --upgrade pip && /entrypoint.sh"
-#          docker run -v $GITHUB_WORKSPACE:/src cdrx/pyinstaller-windows:latest 'pyinstaller -F --clean -y --dist ./ --workpath /tmp main.py'
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: my-artifact
+          path: dist/windows/ntscQT.exe
+          retention-days: 2
 
 #      - name: release
 #        uses: actions/create-release@v1
