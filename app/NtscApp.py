@@ -133,10 +133,12 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
     def add_builtin_templates(self):
 
         try:
-            res = requests.get('https://raw.githubusercontent.com/JargeZ/vhs/master/builtin_templates.json')
-            if not res.ok:
-                return
-            self.templates = json.loads(res.content)
+            #res = requests.get('../../builtin_templates.json')
+            res = open('builtin_templates.json')
+            #if not res.ok:
+            #    return
+            #self.templates = json.loads(res.content)
+            self.templates = json.load(res)
         except Exception as e:
             logger.exception(f'json not loaded: {e}')
 
