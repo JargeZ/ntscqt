@@ -75,7 +75,7 @@ Thanks for [Robot Riot Records](https://linktr.ee/robotriot) for donation which 
    ```
 4. Install ntscQT:
     ```bash
-    git clone https://github.com/JargeZ/vhs -C ~/ntscqt
+    git clone https://github.com/JargeZ/vhs ~/ntscqt
     cd ~/ntscqt
     python3 -m venv ./venv
     source venv/bin/activate
