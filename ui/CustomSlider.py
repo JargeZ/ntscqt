@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets, QtCore
+from PyQt6 import QtWidgets, QtCore
 
 from ui.DoubleSlider import DoubleSlider
 
@@ -6,7 +6,7 @@ from ui.DoubleSlider import DoubleSlider
 class CustomSlider(QtWidgets.QWidget):
     def __init__(self, *args, **kwargs):
         super(CustomSlider, self).__init__(*args, **kwargs)
-        self.slider = DoubleSlider(QtCore.Qt.Horizontal)
+        self.slider = DoubleSlider()
         self.numbox = QtWidgets.QDoubleSpinBox()
         self.numbox.setRange(self.slider.minimum(), self.slider.maximum())
         self.slider.valueChanged.connect(self.numbox.setValue)

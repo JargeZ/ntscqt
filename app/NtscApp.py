@@ -5,8 +5,8 @@ from typing import Tuple, Union, List, Dict
 import requests
 import cv2
 import numpy
-from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import QSlider, QHBoxLayout, QLabel, QCheckBox, QInputDialog, QPushButton
+from PyQt6 import QtWidgets, QtCore, QtGui
+from PyQt6.QtWidgets import QSlider, QHBoxLayout, QLabel, QCheckBox, QInputDialog, QPushButton
 from numpy import ndarray
 
 from app.config_dialog import ConfigDialog
@@ -327,9 +327,9 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         slider.setMaximum(max_val)
         slider.setMinimum(min_val)
         slider.setMouseTracking(False)
-        if max_val < 100 and slider_value_type == int:
-            slider.setTickPosition(QSlider.TicksLeft)
-        slider.setOrientation(QtCore.Qt.Horizontal)
+        # if max_val < 100 and slider_value_type == int:
+            # slider.setTickPosition(QSlider.TicksLeft)
+        # slider.setOrientation(QtCore.Qt.Horizontal)
         slider.setObjectName(f"{param_name}")
         slider.blockSignals(False)
 
@@ -574,7 +574,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         # divide by the number of rows
         bytesPerLine = int(totalBytes / height)
 
-        image = QtGui.QImage(img.tobytes(), width, height, bytesPerLine, QtGui.QImage.Format_RGB888) \
+        image = QtGui.QImage(img.tobytes(), width, height, bytesPerLine, QtGui.QImage.Format.Format_RGB888) \
             .rgbSwapped()
 
         max_h = self.image_frame.height()

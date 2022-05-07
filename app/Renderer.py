@@ -1,7 +1,7 @@
 import time
 
 import cv2
-from PyQt5 import QtCore
+from PyQt6 import QtCore
 import ffmpeg
 from imutils.video import FileVideoStream
 
