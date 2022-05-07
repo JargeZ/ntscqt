@@ -1,12 +1,9 @@
 ffmpeg-python==0.2.0
 future==0.18.2
 imutils==0.5.4
-numpy==1.21.5
 darkdetect==0.5.1
-opencv-python-headless==4.5.5.62
-PyQt5==5.15.6
-PyQt5-sip==12.9.0
-PyQt5-stubs==5.15.2.0
-scipy==1.7.3
-loguru~=0.5.3
-requests==2.27.0
+opencv-python-headless==4.5.5.64
+PyQt5-sip==12.10.1
+PyQt5-stubs==5.15.6.0
+loguru~=0.6.0
+requests==2.27.1
