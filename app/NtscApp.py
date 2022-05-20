@@ -508,7 +508,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         if self.input_video['suffix'] == ".gif":
             suffix = self.input_video['suffix']
         else:
-            suffix = ".mp4"
+            suffix = ".mkv"
         target_file = pick_save_file(self, title='Render video as', suffix=suffix)
         if not target_file:
             return None

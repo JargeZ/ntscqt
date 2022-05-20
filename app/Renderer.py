@@ -25,7 +25,7 @@ class Renderer(QtCore.QObject):
         self.running = True
 
         if self.render_data["input_video"]["suffix"] == '.gif':
-            suffix = '.mp4'
+            suffix = '.mkv'
         else:
             suffix = self.render_data["input_video"]["suffix"]
 
