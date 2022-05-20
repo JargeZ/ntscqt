@@ -75,7 +75,7 @@ Thanks for [Robot Riot Records](https://linktr.ee/robotriot) for donation which 
    ```
 4. Install ntscQT:
     ```bash
-    git clone https://github.com/JargeZ/vhs -C ~/ntscqt
+    git clone https://github.com/JargeZ/vhs ~/ntscqt
     cd ~/ntscqt
     python3 -m venv ./venv
     source venv/bin/activate
@@ -86,6 +86,20 @@ Thanks for [Robot Riot Records](https://linktr.ee/robotriot) for donation which 
    ```bash
    cd ~/ntscqt && venv/bin/python ntscQT.py
    ```
+
+#### For Mac on M1 Apple Silicon try this:
+```bash
+brew install pyqt@5
+git clone https://github.com/JargeZ/vhs ~/ntscqt
+cd ~/ntscqt
+python3 -m venv ./venv
+cp -R /opt/homebrew/Cellar/pyqt@5/5.15.6/lib/python3.9/site-packages/* ./venv/lib/python3.9/site-packages/
+source venv/bin/activate
+pip install --pre -i https://pypi.anaconda.org/scipy-wheels-nightly/simple scipy
+pip install --ignore-installed -r requirements.m1-temp.txt
+venv/bin/python ntscQT.py
+```
+
 
 ### What It Is
 Эта простая программа сделана на основе алгоритма, который позволяет добиться эффекта реального старого магнитофона или VHS, а не простое размытие и шумы со статическими эффектами, как на многих видео simpsonwave и подобных. Я надеюсь, что этот инструмент поможет вам в творчестве, если вы решите стилизовать картинки или видео под старинные кадры.
