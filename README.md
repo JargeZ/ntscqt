@@ -44,6 +44,9 @@ You can [download latest version here](https://github.com/JargeZ/ntsc/releases/l
 
 ### Compiling:
 
+#### Requisites:
+Python *(on moment, until Python 3.9, Python 3.10+ support will be on development)*
+
 #### For Windows:
 1. Open your terminal of preference.
 2. If not already installed, install Chocolatey: [chocolatey.org](https://chocolatey.org/)
