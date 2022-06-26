@@ -22,11 +22,11 @@ class Ui_MainWindow(object):
         self.controlLayout = QtWidgets.QVBoxLayout()
         self.controlLayout.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
         self.controlLayout.setObjectName("controlLayout")
-        self.label = QtWidgets.QLabel(self.centralwidget)
-        self.label.setMaximumSize(QtCore.QSize(16777215, 29))
-        self.label.setOpenExternalLinks(True)
-        self.label.setObjectName("label")
-        self.controlLayout.addWidget(self.label)
+        #self.label = QtWidgets.QLabel(self.centralwidget)
+        #self.label.setMaximumSize(QtCore.QSize(16777215, 29))
+        #self.label.setOpenExternalLinks(True)
+        #self.label.setObjectName("label")
+        #self.controlLayout.addWidget(self.label)
         self.checkboxesLayout = QtWidgets.QGridLayout()
         self.checkboxesLayout.setObjectName("checkboxesLayout")
         self.controlLayout.addLayout(self.checkboxesLayout)
@@ -204,11 +204,11 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "ntscQT"))
         MainWindow.setWindowIcon(QtGui.QIcon("././ntscqt_icon.ico"))
-        self.label.setText(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Noto Sans\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Check for updates and stargazes: <a href=\"https://github.com/JargeZ/ntscqt\"><span style=\" text-decoration: underline; color:#0057ae;\">Github/JargeZ/ntscqt</span></a></p></body></html>"))
+#        self.label.setText(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+#"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+#"p, li { white-space: pre-wrap; }\n"
+#"</style></head><body style=\" font-family:\'Noto Sans\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
+#"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Check for updates and stargazes: <a href=\"https://github.com/JargeZ/ntscqt\"><span style=\" text-decoration: underline; color:#0057ae;\">Github/JargeZ/ntscqt</span></a></p></body></html>"))
         self.exportImportConfigButton.setText(_translate("MainWindow", "📝"))
         self.image_frame.setText(_translate("MainWindow", "No image/video/GIF selected. ❓"))
         self.refreshFrameButton.setText(_translate("MainWindow", "🔄"))
