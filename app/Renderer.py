@@ -123,7 +123,7 @@ class Renderer(QtCore.QObject):
 
         # FIXME beautify file render and audio detection
 
-        self.sendStatus.emit(f'[FFMPEG] Copying audio to {result_path}')
+        #self.sendStatus.emit(f'[FFMPEG] Copying audio to {result_path}')
 
         orig = ffmpeg.input(orig_path)
 
@@ -150,8 +150,7 @@ class Renderer(QtCore.QObject):
             aud_ff_fx = final_audio.filter("volume",self.audio_sat_beforevol).filter("alimiter",limit="0.5").filter("volume",0.8)
             aud_ff_fx = aud_ff_fx.filter("firequalizer",gain=f'if(lt(f,{self.audio_lowpass}), 0, -INF)')
 
-            aud_ff_mix = ffmpeg.filter([aud_ff_fx, aud_ff_noise], 'amix')
-            aud_ff_mix = aud_ff_mix.filter("firequalizer",gain='if(lt(f,13301), 0, -INF)')
+            aud_ff_mix = ffmpeg.filter([aud_ff_fx, aud_ff_noise], 'amix').filter("firequalizer",gain='if(lt(f,13301), 0, -INF)')
 
             aud_ff_command = aud_ff_mix.output(tmp_audio,shortest=None)
 
@@ -166,6 +165,8 @@ class Renderer(QtCore.QObject):
             final_audio = final_audio.audio
 
             self.sendStatus.emit(f'[FFMPEG] Finished audio filtering')
+        else:
+            self.sendStatus.emit(f'[FFMPEG] Copying audio to {result_path}')
 
         temp_video_stream = ffmpeg.input(str(tmp_output.resolve()))
         # render_streams.append(temp_video_stream.video)
