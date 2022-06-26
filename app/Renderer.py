@@ -154,7 +154,7 @@ class Renderer(QtCore.QObject):
 
             aud_ff_mix = ffmpeg.filter([aud_ff_fx, aud_ff_noise], 'amix').filter("firequalizer",gain='if(lt(f,13301), 0, -INF)')
 
-            aud_ff_command = aud_ff_mix.output(tmp_audio,shortest=None)
+            aud_ff_command = aud_ff_mix.output(tmp_audio,acodec='pcm_s24le',shortest=None)
 
             self.sendStatus.emit(f'[FFMPEG] Prepared audio filtering')
             logger.debug(aud_ff_command)
