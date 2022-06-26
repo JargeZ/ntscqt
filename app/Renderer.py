@@ -21,7 +21,11 @@ class Renderer(QtCore.QObject):
     sendStatus = QtCore.pyqtSignal(str)
     increment_progress = QtCore.pyqtSignal()
     render_data = {}
+
     process_audio = True
+    audio_sat_beforevol = 4.5
+    audio_lowpass = 10896
+    audio_noise_volume = 0.03
 
     def run(self):
         self.running = True
@@ -141,12 +145,13 @@ class Renderer(QtCore.QObject):
 
             aud_ff_noise = ffmpeg.input(f'aevalsrc=-2+random(0):sample_rate={aud_ff_srate}:channel_layout=mono',f="lavfi",t=aud_ff_duration)
             aud_ff_noise = ffmpeg.filter((aud_ff_noise, aud_ff_noise), 'join', inputs=2, channel_layout='stereo')
-            aud_ff_noise = aud_ff_noise.filter('volume', 0.03)
+            aud_ff_noise = aud_ff_noise.filter('volume', self.audio_noise_volume)
 
-            aud_ff_fx = final_audio.filter("volume",4.5).filter("alimiter",limit="0.5").filter("volume",0.8)
-            aud_ff_fx = aud_ff_fx.filter("firequalizer",gain='if(lt(f,10896), 0, -INF)')
+            aud_ff_fx = final_audio.filter("volume",self.audio_sat_beforevol).filter("alimiter",limit="0.5").filter("volume",0.8)
+            aud_ff_fx = aud_ff_fx.filter("firequalizer",gain=f'if(lt(f,{self.audio_lowpass}), 0, -INF)')
 
             aud_ff_mix = ffmpeg.filter([aud_ff_fx, aud_ff_noise], 'amix')
+            aud_ff_mix = aud_ff_mix.filter("firequalizer",gain='if(lt(f,13301), 0, -INF)')
 
             aud_ff_command = aud_ff_mix.output(tmp_audio,shortest=None)
 
@@ -166,9 +171,9 @@ class Renderer(QtCore.QObject):
         # render_streams.append(temp_video_stream.video)
 
         if(self.process_audio == True):
-            ff_command = ffmpeg.output(final_audio, temp_video_stream.video, result_path, shortest=None, vcodec='copy', acodec='flac')
+            ff_command = ffmpeg.output(temp_video_stream.video, final_audio, result_path, shortest=None, vcodec='copy', acodec='flac')
         else:
-            ff_command = ffmpeg.output(final_audio, temp_video_stream.video, result_path, shortest=None, vcodec='copy', acodec='copy')
+            ff_command = ffmpeg.output(temp_video_stream.video, final_audio, result_path, shortest=None, vcodec='copy', acodec='copy')
         
         logger.debug(ff_command)
         logger.debug(' '.join(ff_command.compile()))
