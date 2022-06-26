@@ -137,8 +137,9 @@ class Renderer(QtCore.QObject):
 
             aud_ff_probe = ffmpeg.probe(orig_path)
 
-            aud_ff_video_stream = next((stream for stream in aud_ff_probe['streams'] if stream['codec_type'] == 'video'), None)
-            aud_ff_duration = aud_ff_video_stream['duration']
+            #aud_ff_video_stream = next((stream for stream in aud_ff_probe['streams'] if stream['codec_type'] == 'video'), None)
+            #aud_ff_duration = aud_ff_video_stream['duration']
+            aud_ff_duration = aud_ff_probe["format"]["duration"]
 
             aud_ff_audio_stream = next((stream for stream in aud_ff_probe['streams'] if stream['codec_type'] == 'audio'), None)
             aud_ff_srate = aud_ff_audio_stream['sample_rate']
