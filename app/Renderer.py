@@ -22,7 +22,9 @@ class Renderer(QtCore.QObject):
     increment_progress = QtCore.pyqtSignal()
     render_data = {}
 
-    process_audio = True
+    lossless = False
+
+    process_audio = False
     audio_sat_beforevol = 4.5
     audio_lowpass = 10896
     audio_noise_volume = 0.03
@@ -52,13 +54,19 @@ class Renderer(QtCore.QObject):
             cv2.VideoWriter_fourcc(*'mp4v'),  # doesn't work on mac os
             cv2.VideoWriter_fourcc(*'H264')
         ]
+
+        if(self.lossless):
+            fourcc_choice = cv2.VideoWriter_fourcc(*'FFV1')
+        else:
+            fourcc_choice = fourccs.pop(0)
+
         video = cv2.VideoWriter()
 
         open_result = False
         while not open_result:
             open_result = video.open(
                 filename=str(tmp_output.resolve()),
-                fourcc=fourccs.pop(0),
+                fourcc=fourcc_choice,
                 fps=self.render_data["input_video"]["orig_fps"],
                 frameSize=container_wh,
             )
@@ -67,7 +75,7 @@ class Renderer(QtCore.QObject):
         logger.debug(f'Input video: {str(self.render_data["input_video"]["path"].resolve())}')
         logger.debug(f'Temp output: {str(tmp_output.resolve())}')
         logger.debug(f'Output video: {str(self.render_data["target_file"].resolve())}')
-        logger.debug(f'Process audio: {self.process_audio}')
+        #logger.debug(f'Process audio: {self.process_audio}')
 
         frame_index = 0
         self.renderStateChanged.emit(True)

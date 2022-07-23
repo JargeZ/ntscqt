@@ -29,6 +29,8 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.compareMode: bool = False
         self.isRenderActive: bool = False
         self.mainEffect: bool = True
+        self.LossLess: bool = False
+        self.ProcessAudio: bool = False
         self.nt_controls = {}
         self.nt: Ntsc = None
         self.pro_mode_elements = []
@@ -115,7 +117,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.refreshFrameButton.clicked.connect(self.nt_update_preview)
         self.openImageUrlButton.clicked.connect(self.open_image_by_url)
         self.exportImportConfigButton.clicked.connect(self.export_import_config)
-
+        
         self.ProMode.clicked.connect(
             lambda: self.set_pro_mode(self.ProMode.isChecked())
         )
@@ -217,6 +219,24 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         except AttributeError:
             pass
         self.nt_update_preview()
+
+    def lossless_exporting(self):
+        state = self.LossLessCheckBox.isChecked()
+        self.LossLess = state
+        try:
+            self.videoRenderer.lossless = state
+            logger.debug(f"Lossless: {str(state)}")
+        except AttributeError:
+            pass
+
+    def audio_filtering(self):
+        state = self.ProcessAudioCheckBox.isChecked()
+        self.ProcessAudio = state
+        try:
+            self.videoRenderer.process_audio = state
+            logger.debug(f"Process audio: {str(state)}")
+        except AttributeError:
+            pass
 
     @QtCore.pyqtSlot(int)
     def update_seed(self, seed):
@@ -521,6 +541,8 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         }
         self.setup_renderer()
         self.toggle_main_effect()
+        self.lossless_exporting()
+        self.audio_filtering()
         self.progressBar.setValue(1)
         self.videoRenderer.render_data = render_data
         self.thread.start()
