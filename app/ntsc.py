@@ -635,6 +635,8 @@ class Ntsc:
     def composite_layer(self, dst: numpy.ndarray, src: numpy.ndarray, field: int, fieldno: int):
         assert dst.shape == src.shape, "dst and src images must be of same shape"
         yiq = bgr2yiq(src)
+        
+        self._generate_border(yiq, 10)
 
         if self._color_bleed_before and (self._color_bleed_vert != 0 or self._color_bleed_horiz != 0):
             self.color_bleed(yiq, field)
@@ -691,9 +693,14 @@ class Ntsc:
 
         return yiq2bgr(yiq)
 
+    def _generate_border(self, image: numpy.ndarray, bordersize: int=10) -> numpy.ndarray:
+        h, w = image.shape
+        border = cv2.copyMakeBorder(image,top=0,bottom=0,left=0,right=10,borderType=cv2.BORDER_CONSTANT,value=[0,0,0])
+        return cv2.resize(border, (w, h), interpolation=cv2.INTER_LANCZOS4).astype(numpy.int32)
+    
     def _blur_chroma(self, chroma: numpy.ndarray) -> numpy.ndarray:
         h, w = chroma.shape
-        down2 = cv2.resize(chroma.astype(numpy.float32), (w // 2, h // 2), interpolation=cv2.INTER_LANCZOS4)
+        down2 = cv2.resize(chroma.astype(numpy.float32), (int(w // 1.5), int(h // 1.5)), interpolation=cv2.INTER_LANCZOS4)
         return cv2.resize(down2, (w, h), interpolation=cv2.INTER_LANCZOS4).astype(numpy.int32)
 
     def ringing(self, yiq: numpy.ndarray, field: int):
