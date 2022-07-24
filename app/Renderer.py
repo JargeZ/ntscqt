@@ -32,10 +32,7 @@ class Renderer(QtCore.QObject):
     def run(self):
         self.running = True
 
-        if self.render_data["input_video"]["suffix"] == '.gif':
-            suffix = '.mkv'
-        else:
-            suffix = self.render_data["input_video"]["suffix"]
+        suffix = '.mkv'
 
         tmp_output = self.render_data['target_file'].parent / f'tmp_{self.render_data["target_file"].stem}{suffix}'
 

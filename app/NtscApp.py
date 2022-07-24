@@ -29,7 +29,8 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.compareMode: bool = False
         self.isRenderActive: bool = False
         self.mainEffect: bool = True
-        self.LossLess: bool = False
+        self.loss_less_mode: bool = False
+        self.__video_output_suffix = ".mp4"  # or .mkv for FFV1
         self.ProcessAudio: bool = False
         self.nt_controls = {}
         self.nt: Ntsc = None
@@ -114,6 +115,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.stopRenderButton.clicked.connect(self.stop_render)
         self.compareModeButton.stateChanged.connect(self.toggle_compare_mode)
         self.toggleMainEffect.stateChanged.connect(self.toggle_main_effect)
+        self.LossLessCheckBox.stateChanged.connect(self.lossless_exporting)
         self.pauseRenderButton.clicked.connect(self.toggle_pause_render)
         self.livePreviewCheckbox.stateChanged.connect(self.toggle_live_preview)
         self.refreshFrameButton.clicked.connect(self.nt_update_preview)
@@ -222,12 +224,15 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             pass
         self.nt_update_preview()
 
+    @QtCore.pyqtSlot()
     def lossless_exporting(self):
-        state = self.LossLessCheckBox.isChecked()
-        self.LossLess = state
+        lossless_state = self.LossLessCheckBox.isChecked()
+
+        self.loss_less_mode = lossless_state
+        self.__video_output_suffix = '.mkv' if lossless_state else '.mp4'
         try:
-            self.videoRenderer.lossless = state
-            logger.debug(f"Lossless: {str(state)}")
+            self.videoRenderer.lossless = lossless_state
+            logger.debug(f"Lossless: {str(lossless_state)}")
         except AttributeError:
             pass
 
@@ -537,7 +542,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         if self.input_video['suffix'] == ".gif":
             suffix = self.input_video['suffix']
         else:
-            suffix = ".mkv"
+            suffix = self.__video_output_suffix
         target_file = pick_save_file(self, title='Render video as', suffix=suffix)
         if not target_file:
             return None
