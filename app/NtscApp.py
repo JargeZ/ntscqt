@@ -122,6 +122,9 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.refreshFrameButton.clicked.connect(self.nt_update_preview)
         self.openImageUrlButton.clicked.connect(self.open_image_by_url)
         self.exportImportConfigButton.clicked.connect(self.export_import_config)
+
+        # TEMP HIDE WHILE FFPROBE ISSUE ISNT FIX
+        self.ProcessAudioCheckBox.hide()
         
         self.ProMode.clicked.connect(
             lambda: self.set_pro_mode(self.ProMode.isChecked())
