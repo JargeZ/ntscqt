@@ -70,6 +70,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             "_vhs_chroma_vert_blend": self.tr("VHS chroma vert blend"),
             "_vhs_svideo_out": self.tr("VHS svideo out"),
             "_output_ntsc": self.tr("NTSC output"),
+            "_black_line_cut": self.tr("Cut 2% black line"),
         }
         self.add_slider("_composite_preemphasis", 0, 10, float)
         self.add_slider("_vhs_out_sharpen", 1, 5)
@@ -102,6 +103,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.add_checkbox("_vhs_chroma_vert_blend", (5, 1), pro=True)
         self.add_checkbox("_vhs_svideo_out", (5, 2), pro=True)
         self.add_checkbox("_output_ntsc", (6, 1), pro=True)
+        self.add_checkbox("_black_line_cut", (1, 2), pro=False)
 
         self.renderHeightBox.valueChanged.connect(
             lambda: self.set_current_frame(self.current_frame)
