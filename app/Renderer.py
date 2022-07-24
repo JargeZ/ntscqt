@@ -124,6 +124,7 @@ class Renderer(QtCore.QObject):
 
         orig_path = str(self.render_data["input_video"]["path"].resolve())
         orig_suffix = self.render_data["input_video"]["suffix"]
+        target_suffix = self.render_data["target_file"].suffix
         result_path = str(self.render_data["target_file"].resolve())
 
         # FIXME beautify file render and audio detection
@@ -179,7 +180,8 @@ class Renderer(QtCore.QObject):
         # render_streams.append(temp_video_stream.video)
 
         if self.process_audio:
-            ff_command = ffmpeg.output(temp_video_stream.video, final_audio, result_path, shortest=None, vcodec='copy', acodec='flac')
+            acodec = 'flac' if target_suffix == '.mkv' else 'copy'
+            ff_command = ffmpeg.output(temp_video_stream.video, final_audio, result_path, shortest=None, vcodec='copy', acodec=acodec)
         else:
             ff_command = ffmpeg.output(temp_video_stream.video, final_audio, result_path, shortest=None, vcodec='copy', acodec='copy')
         
