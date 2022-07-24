@@ -273,6 +273,13 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         for parameter_name, element in self.nt_controls.items():
             value = getattr(self.nt, parameter_name)
 
+            # This is necessary because some parameters that have a real float type, but in the interface,
+            # the slide is simplified to int. However, when setting the initial parameters that occur here,
+            # you need to set from the initial parameters that float
+            if isinstance(element, QSlider) and isinstance(value, float):
+                value = int(value)
+
+
             element.blockSignals(True)
             if isinstance(value, bool):
                 element.setChecked(value)
@@ -323,7 +330,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             else:
                 frame.hide()
 
-    def add_slider(self, param_name, min_val, max_val, slider_value_type=int, pro=False):
+    def add_slider(self, param_name, min_val, max_val, slider_value_type: Union[int,float] = int, pro=False):
         ly = QHBoxLayout()
         slider_frame = QtWidgets.QFrame()
         slider_frame.setLayout(ly)
