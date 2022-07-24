@@ -181,7 +181,7 @@ class Renderer(QtCore.QObject):
         temp_video_stream = ffmpeg.input(str(tmp_output.resolve()))
         # render_streams.append(temp_video_stream.video)
 
-        if(self.process_audio == True):
+        if self.process_audio:
             ff_command = ffmpeg.output(temp_video_stream.video, final_audio, result_path, shortest=None, vcodec='copy', acodec='flac')
         else:
             ff_command = ffmpeg.output(temp_video_stream.video, final_audio, result_path, shortest=None, vcodec='copy', acodec='copy')
@@ -200,7 +200,7 @@ class Renderer(QtCore.QObject):
         self.sendStatus.emit('[FFMPEG] Audio copy done')
 
         tmp_output.unlink()
-        if(self.process_audio == True):
+        if self.process_audio:
             if os.path.exists(tmp_audio):
                 os.remove(tmp_audio)
 
