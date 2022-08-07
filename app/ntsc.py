@@ -228,12 +228,12 @@ def cut_black_line_border(image: numpy.ndarray, bordersize: int = None) -> None:
 
     image[:, -1*line_width:] = 0  # 0 set to black
 
-
 def composite_lowpass(yiq: numpy.ndarray, field: int, fieldno: int):
     _, height, width = yiq.shape
     fY, fI, fQ = yiq
     for p in range(1, 3):
         cutoff = 1300000.0 if p == 1 else 600000.0
+        #cutoff = 2000000.0
         delay = 2 if (p == 1) else 4
         P = fI if (p == 1) else fQ
         P = P[field::2]
@@ -292,6 +292,7 @@ class Ntsc:
         self._composite_preemphasis_cut = 1000000.0
         # analog artifacts related to anything that affects the raw composite signal i.e. CATV modulation
         self._composite_preemphasis = 0.0  # values 0..8 look realistic
+        #self._composite_lowpass = 2400000.0
 
         self._vhs_out_sharpen = 1.5  # 1.0..5.0
 
@@ -321,7 +322,7 @@ class Ntsc:
         self._video_chroma_loss = 0  # 0..100_000
         self._video_noise = 2  # 0..4200
         self._subcarrier_amplitude = 50
-        self._subcarrier_amplitude_back = 50
+        self._subcarrier_amplitude_back = 150
         self._emulating_vhs = False
         self._nocolor_subcarrier = False  # if set, emulate subcarrier but do not decode back to color (debug)
         self._vhs_chroma_vert_blend = True  # if set, and VHS, blend vertically the chroma scanlines (as the VHS format does)
@@ -333,6 +334,7 @@ class Ntsc:
         self._output_vhs_tape_speed = VHSSpeed.VHS_SP
 
         self._black_line_cut = False  # Add black line glitch (credits to @rgm89git)
+        self._black_line_cut_size = 2 # Black line glitch width
 
     def rand(self) -> numpy.int32:
         return self.random.nextInt(_from=0)
@@ -643,12 +645,25 @@ class Ntsc:
         if not self._vhs_svideo_out:
             self.chroma_into_luma(yiq, field, fieldno, self._subcarrier_amplitude)
             self.chroma_from_luma(yiq, field, fieldno, self._subcarrier_amplitude)
+    
+    def black_brightness_cut(image: numpy.ndarray, value: int = 30) -> None:
+        hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+        h, s, v = cv2.split(hsv)
+
+        lim = 255 - value
+        v[v > lim] = 255
+        v[v <= lim] += value
+
+        final_hsv = cv2.merge((h, s, v))
+        image = cv2.cvtColor(final_hsv, cv2.COLOR_HSV2BGR)
 
     def composite_layer(self, dst: numpy.ndarray, src: numpy.ndarray, field: int, fieldno: int):
         assert dst.shape == src.shape, "dst and src images must be of same shape"
 
+        self.black_brightness_cut(src,value=40)
+
         if self._black_line_cut:
-            cut_black_line_border(src)
+            cut_black_line_border(src,bordersize=self._black_line_cut_size)
 
         yiq = bgr2yiq(src)
         if self._color_bleed_before and (self._color_bleed_vert != 0 or self._color_bleed_horiz != 0):
