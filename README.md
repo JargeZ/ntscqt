@@ -65,13 +65,13 @@ You can [download latest version here](https://github.com/JargeZ/ntsc/releases/l
    cd ntscqt && ./venv/Scripts/activate && python ntscQT.py
    ```
 
-#### For Mac OS X and Linux:
+#### For Mac OS X and Linux distributions:
 Thanks for [Robot Riot Records](https://linktr.ee/robotriot) for donation which motivated to make MacOS fixes
 1. Open your terminal of preference.
-2. If not already installed, install Homebrew: [brew.sh](https://brew.sh/)
+2. **For Mac OS users:** If not already installed, install Homebrew: [brew.sh](https://brew.sh/)
 3. Install ffmpeg *(necessary)*:
    ```bash
-   brew install ffmpeg #or apt if using Linux
+   brew install ffmpeg # For Linux users: use package manager of distribution you're using to download and instal FFmpeg
    ```
 4. Install ntscQT:
     ```bash
