@@ -100,6 +100,8 @@ pip install --ignore-installed -r requirements.m1-temp.txt
 venv/bin/python ntscQT.py
 ```
 
+### About installation process on Termux 
+At this moment ntscqt **is not supported on Termux even with proot-distro utility.** Maybe ntscqt is runnable on Termux but **there is no method to make it work.**
 
 ### What It Is
 Эта простая программа сделана на основе алгоритма, который позволяет добиться эффекта реального старого магнитофона или VHS, а не простое размытие и шумы со статическими эффектами, как на многих видео simpsonwave и подобных. Я надеюсь, что этот инструмент поможет вам в творчестве, если вы решите стилизовать картинки или видео под старинные кадры.
