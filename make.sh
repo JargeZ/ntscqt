@@ -15,7 +15,7 @@ case $1 in
     echo 'Downloading ffmpeg'
     echo 'windows x64'
     echo '  downloading from github.com'
-    wget 'https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.7z' -O "./win32-x64.zip"
+    wget 'https://github.com/ShareX/FFmpeg/releases/download/v4.3.1/ffmpeg-4.3.1-win64.zip' -O "./win32-x64.zip"
     echo '  extracting'
     unzip -o -d . -j win32-x64.zip 'ffmpeg.exe'
     echo '  remove archive'
