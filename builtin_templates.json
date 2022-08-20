@@ -1,6 +1,8 @@
 {
 "yobelkcip": {
   "_composite_preemphasis": 0.0,
+  "_subcarrier_amplitude": 50,
+  "_subcarrier_amplitude_back": 50,
   "_vhs_out_sharpen": 1,
   "_vhs_edge_wave": 2,
   "_ringing": 0.9375,
@@ -31,6 +33,8 @@
 },
 "Master Nama": {
   "_composite_preemphasis": 0.0492,
+  "_subcarrier_amplitude": 50,
+  "_subcarrier_amplitude_back": 50,
   "_vhs_out_sharpen": 2,
   "_vhs_edge_wave": 1,
   "_ringing": 0.05523,
@@ -61,6 +65,8 @@
 },
 "RGM": {
   "_composite_preemphasis": 0.0,
+  "_subcarrier_amplitude": 110,
+  "_subcarrier_amplitude_back": 110,
   "_vhs_out_sharpen": 1,
   "_vhs_edge_wave": 0,
   "_ringing": 0.0,
@@ -74,7 +80,7 @@
   "_video_chroma_phase_noise": 4,
   "_video_chroma_loss": 65,
   "_video_noise": 2743,
-  "_video_scanline_phase_shift": 90,
+  "_video_scanline_phase_shift": 180,
   "_video_scanline_phase_shift_offset": 0,
   "_black_line_cut_size": 6,
   "_head_switching_speed": 0,
@@ -86,9 +92,9 @@
   "_composite_out_chroma_lowpass_lite": false,
   "_emulating_vhs": true,
   "_nocolor_subcarrier": false,
-  "_vhs_chroma_vert_blend": false,
+  "_vhs_chroma_vert_blend": true,
   "_vhs_svideo_out": true,
   "_output_ntsc": true,
-  "_black_line_cut": true
+  "_black_line_cut": false
 }
 }

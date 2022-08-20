@@ -10,6 +10,8 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+import qtawesome as qta
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -42,6 +44,7 @@ class Ui_MainWindow(object):
         exportImportsizePolicy.setVerticalStretch(0)
         exportImportsizePolicy.setHeightForWidth(self.exportImportConfigButton.sizePolicy().hasHeightForWidth())
         self.exportImportConfigButton.setSizePolicy(exportImportsizePolicy)
+        self.exportImportConfigButton.setIcon(qta.icon("mdi6.notebook-plus", color="#5555ff"))
         self.templatesLayout.addWidget(self.exportImportConfigButton)
         self.controlLayout.addLayout(self.templatesLayout)
         self.horizontalLayout_3.addLayout(self.controlLayout)
@@ -150,6 +153,8 @@ class Ui_MainWindow(object):
         self.horizontalLayout_4.setObjectName("horizontalLayout_4")
         self.openFile = QtWidgets.QPushButton(self.centralwidget)
         self.openFile.setObjectName("openFile")
+        openFileIcon = qta.icon("fa.eject", color="#5555ff")
+        self.openFile.setIcon(openFileIcon)
         self.horizontalLayout_4.addWidget(self.openFile)
         self.openImageUrlButton = QtWidgets.QToolButton(self.centralwidget)
         self.openImageUrlButton.setObjectName("openImageUrlButton")
@@ -173,6 +178,8 @@ class Ui_MainWindow(object):
         self.renderVideoButton.setMinimumSize(QtCore.QSize(360, 0))
         self.renderVideoButton.setBaseSize(QtCore.QSize(0, 0))
         self.renderVideoButton.setObjectName("renderVideoButton")
+        renderVideoIcon = qta.icon("mdi.record", color="#5555ff")
+        self.renderVideoButton.setIcon(renderVideoIcon)
         self.horizontalLayout.addWidget(self.renderVideoButton)
         self.saveImageButton = QtWidgets.QPushButton(self.centralwidget)
         self.saveImageButton.setObjectName("saveImageButton")
@@ -215,7 +222,7 @@ class Ui_MainWindow(object):
 #"p, li { white-space: pre-wrap; }\n"
 #"</style></head><body style=\" font-family:\'Noto Sans\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
 #"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Check for updates and stargazes: <a href=\"https://github.com/JargeZ/ntscqt\"><span style=\" text-decoration: underline; color:#0057ae;\">Github/JargeZ/ntscqt</span></a></p></body></html>"))
-        self.exportImportConfigButton.setText(_translate("MainWindow", "📝"))
+        self.exportImportConfigButton.setText(_translate("MainWindow", ""))
         self.image_frame.setText(_translate("MainWindow", "No image/video/GIF selected. ❓"))
         self.refreshFrameButton.setText(_translate("MainWindow", "🔄"))
         self.livePreviewCheckbox.setText(_translate("MainWindow", "LivePreview"))

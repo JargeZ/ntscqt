@@ -10,3 +10,4 @@ PyQt5-stubs>=5.15.2.0
 scipy>=1.7.3
 loguru~=0.5.3
 requests>=2.27.0
+qtawesome

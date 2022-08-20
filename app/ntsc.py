@@ -218,6 +218,17 @@ class LowpassFilter:
         f = self.lowpass_array(samples)
         return samples - f
 
+def black_brightness_cut(image: numpy.ndarray, value: int = 30):
+    hsv = cv2.cvtColor(np.float32(image), cv2.COLOR_BGR2HSV)
+    h, s, v = cv2.split(hsv)
+
+    v = cv2.add(v,value)
+    v[v > 255] = 255
+    v[v < 0] = 0
+
+    final_hsv = cv2.merge((h, s, v))
+    image = cv2.cvtColor(final_hsv, cv2.COLOR_HSV2BGR).astype(np.float32)
+    return image
 
 def cut_black_line_border(image: numpy.ndarray, bordersize: int = None) -> None:
     h, w, _ = image.shape
@@ -322,7 +333,7 @@ class Ntsc:
         self._video_chroma_loss = 0  # 0..100_000
         self._video_noise = 2  # 0..4200
         self._subcarrier_amplitude = 50
-        self._subcarrier_amplitude_back = 150
+        self._subcarrier_amplitude_back = 50
         self._emulating_vhs = False
         self._nocolor_subcarrier = False  # if set, emulate subcarrier but do not decode back to color (debug)
         self._vhs_chroma_vert_blend = True  # if set, and VHS, blend vertically the chroma scanlines (as the VHS format does)
@@ -645,27 +656,17 @@ class Ntsc:
         if not self._vhs_svideo_out:
             self.chroma_into_luma(yiq, field, fieldno, self._subcarrier_amplitude)
             self.chroma_from_luma(yiq, field, fieldno, self._subcarrier_amplitude)
-    
-    def black_brightness_cut(image: numpy.ndarray, value: int = 30) -> None:
-        hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-        h, s, v = cv2.split(hsv)
 
-        lim = 255 - value
-        v[v > lim] = 255
-        v[v <= lim] += value
-
-        final_hsv = cv2.merge((h, s, v))
-        image = cv2.cvtColor(final_hsv, cv2.COLOR_HSV2BGR)
-
-    def composite_layer(self, dst: numpy.ndarray, src: numpy.ndarray, field: int, fieldno: int):
+    def composite_layer(self, dst: numpy.ndarray, src: numpy.ndarray, field: int = 0, fieldno: int = 1):
         assert dst.shape == src.shape, "dst and src images must be of same shape"
 
-        self.black_brightness_cut(src,value=40)
+        #src = black_brightness_cut(src)
 
         if self._black_line_cut:
             cut_black_line_border(src,bordersize=self._black_line_cut_size)
 
         yiq = bgr2yiq(src)
+
         if self._color_bleed_before and (self._color_bleed_vert != 0 or self._color_bleed_horiz != 0):
             self.color_bleed(yiq, field)
 
@@ -686,11 +687,14 @@ class Ntsc:
         if self._vhs_head_switching:
             self.vhs_head_switching(yiq, field)
 
+        if self._video_chroma_noise != 0:
+            self.video_chroma_noise(yiq, field, self._video_chroma_noise)
+        
         if not self._nocolor_subcarrier:
             self.chroma_from_luma(yiq, field, fieldno, self._subcarrier_amplitude_back)
 
-        if self._video_chroma_noise != 0:
-            self.video_chroma_noise(yiq, field, self._video_chroma_noise)
+        #if self._video_chroma_noise != 0:
+        #    self.video_chroma_noise(yiq, field, self._video_chroma_noise)
 
         if self._video_chroma_phase_noise != 0:
             self.video_chroma_phase_noise(yiq, field, self._video_chroma_phase_noise)
