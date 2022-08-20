@@ -116,7 +116,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.compareModeButton.stateChanged.connect(self.toggle_compare_mode)
         self.toggleMainEffect.stateChanged.connect(self.toggle_main_effect)
         self.LossLessCheckBox.stateChanged.connect(self.lossless_exporting)
-        self.ProcessAudioCheckBox.stateChanged.connect(self.audio_filtering)
+        # self.ProcessAudioCheckBox.stateChanged.connect(self.audio_filtering)
         self.pauseRenderButton.clicked.connect(self.toggle_pause_render)
         self.livePreviewCheckbox.stateChanged.connect(self.toggle_live_preview)
         self.refreshFrameButton.clicked.connect(self.nt_update_preview)
@@ -124,8 +124,9 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.exportImportConfigButton.clicked.connect(self.export_import_config)
 
         # TEMP HIDE WHILE FFPROBE ISSUE ISNT FIX
-        self.ProcessAudioCheckBox.hide()
-        
+        # self.ProcessAudioCheckBox.hide()
+        # Waiting for another branch
+
         self.ProMode.clicked.connect(
             lambda: self.set_pro_mode(self.ProMode.isChecked())
         )
