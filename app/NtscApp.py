@@ -43,8 +43,6 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.setupUi(self)  # Это нужно для инициализации нашего дизайна
         self.strings = {
             "_composite_preemphasis": self.tr("Composite preemphasis"),
-            "_subcarrier_amplitude": self.tr("Subcarrier amplitude"),
-            "_subcarrier_amplitude_back": self.tr("Subcarrier back amplitude"),
             "_vhs_out_sharpen": self.tr("VHS out sharpen"),
             "_vhs_edge_wave": self.tr("Edge wave"),
             "_output_vhs_tape_speed": self.tr("VHS tape speed"),
@@ -78,8 +76,6 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             #"_composite_lowpass": self.tr("Composite lowpass")
         }
         self.add_slider("_composite_preemphasis", 0, 10, float)
-        self.add_slider("_subcarrier_amplitude", 10, 500, pro=True)
-        self.add_slider("_subcarrier_amplitude_back", 10, 500, pro=True)
         #self.add_slider("_composite_lowpass",0,3000000.0,float)
         self.add_slider("_vhs_out_sharpen", 1, 5)
         self.add_slider("_vhs_edge_wave", 0, 10)
@@ -133,7 +129,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.exportImportConfigButton.clicked.connect(self.export_import_config)
 
         # TEMP HIDE WHILE FFPROBE ISSUE ISNT FIX
-        #self.ProcessAudioCheckBox.hide()
+        self.ProcessAudioCheckBox.hide()
         
         self.ProMode.clicked.connect(
             lambda: self.set_pro_mode(self.ProMode.isChecked())
@@ -575,7 +571,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.thread.start()
 
     def nt_process(self, frame) -> ndarray:
-        _ = self.nt.composite_layer(frame, frame, field=0, fieldno=1)
+        _ = self.nt.composite_layer(frame, frame, field=2, fieldno=2)
         ntsc_out_image = cv2.convertScaleAbs(_)
         ntsc_out_image[1:-1:2] = ntsc_out_image[0:-2:2] / 2 + ntsc_out_image[2::2] / 2
         return ntsc_out_image

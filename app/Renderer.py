@@ -103,7 +103,7 @@ class Renderer(QtCore.QObject):
                 frame = expand_to_4width(frame)
 
             if self.mainEffect:
-                frame = self.render_data["nt"].composite_layer(frame, frame, field=0, fieldno=1)
+                frame = self.render_data["nt"].composite_layer(frame, frame, field=2, fieldno=2)
                 frame = cv2.convertScaleAbs(frame)
                 frame[1:-1:2] = frame[0:-2:2] / 2 + frame[2::2] / 2
 
