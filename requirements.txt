@@ -1,7 +1,7 @@
 ffmpeg-python>=0.2.0
 future>=0.18.2
 imutils>=0.5.4
-numpy>=1.21.5
+numpy>=1.22
 darkdetect>=0.5.1
 opencv-python-headless>=4.5.5.62
 PyQt5>=5.15.6
