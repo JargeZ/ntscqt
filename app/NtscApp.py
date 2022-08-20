@@ -144,12 +144,11 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
     def add_builtin_templates(self):
 
         try:
-            #res = requests.get('../../builtin_templates.json')
-            res = open('builtin_templates.json')
-            #if not res.ok:
-            #    return
-            #self.templates = json.loads(res.content)
-            self.templates = json.load(res)
+            # TODO: if online not available, then load from file (it need file to be included in build spec)
+            res = requests.get('https://raw.githubusercontent.com/JargeZ/vhs/master/builtin_templates.json')
+            if not res.ok:
+                return
+            self.templates = json.loads(res.content)
         except Exception as e:
             logger.exception(f'json not loaded: {e}')
 
@@ -291,7 +290,6 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             if isinstance(element, QSlider) and isinstance(value, float):
                 value = int(value)
 
-
             element.blockSignals(True)
             if isinstance(value, bool):
                 element.setChecked(value)
@@ -342,7 +340,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             else:
                 frame.hide()
 
-    def add_slider(self, param_name, min_val, max_val, slider_value_type: Union[int,float] = int, pro=False):
+    def add_slider(self, param_name, min_val, max_val, slider_value_type: Union[int, float] = int, pro=False):
         ly = QHBoxLayout()
         slider_frame = QtWidgets.QFrame()
         slider_frame.setLayout(ly)
