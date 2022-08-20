@@ -60,11 +60,11 @@
   "_output_ntsc": true
 },
 "RGM": {
-  "_composite_preemphasis": 0.0,
+  "_composite_preemphasis": 0.9433999999999999,
   "_vhs_out_sharpen": 1,
   "_vhs_edge_wave": 0,
-  "_ringing": 0.0,
-  "_ringing_power": 0,
+  "_ringing": 0.40541,
+  "_ringing_power": 1,
   "_ringing_shift": 0.0,
   "_freq_noise_size": 0.0,
   "_freq_noise_amplitude": 2,
@@ -76,7 +76,6 @@
   "_video_noise": 2743,
   "_video_scanline_phase_shift": 90,
   "_video_scanline_phase_shift_offset": 0,
-  "_black_line_cut_size": 6,
   "_head_switching_speed": 0,
   "_vhs_head_switching": true,
   "_color_bleed_before": true,
@@ -86,9 +85,8 @@
   "_composite_out_chroma_lowpass_lite": false,
   "_emulating_vhs": true,
   "_nocolor_subcarrier": false,
-  "_vhs_chroma_vert_blend": false,
+  "_vhs_chroma_vert_blend": true,
   "_vhs_svideo_out": true,
-  "_output_ntsc": true,
-  "_black_line_cut": true
+  "_output_ntsc": true
 }
 }

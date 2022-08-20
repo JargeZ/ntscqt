@@ -38,7 +38,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         # Это здесь нужно для доступа к переменным, методам
         # и т.д. в файле design.py
         super().__init__()
-        self.supported_video_type = ['.mp4', '.mkv', '.avi', '.webm', '.mpg', '.gif', '.mov']
+        self.supported_video_type = ['.mp4', '.mkv', '.avi', '.webm', '.mpg', '.gif']
         self.supported_image_type = ['.png', '.jpg', '.jpeg', '.webp']
         self.setupUi(self)  # Это нужно для инициализации нашего дизайна
         self.strings = {
@@ -71,12 +71,9 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             "_vhs_chroma_vert_blend": self.tr("VHS chroma vert blend"),
             "_vhs_svideo_out": self.tr("VHS svideo out"),
             "_output_ntsc": self.tr("NTSC output"),
-            "_black_line_cut": self.tr("Cut black line"),
-            "_black_line_cut_size": self.tr("Black line width"),
-            #"_composite_lowpass": self.tr("Composite lowpass")
+            "_black_line_cut": self.tr("Cut 2% black line"),
         }
         self.add_slider("_composite_preemphasis", 0, 10, float)
-        #self.add_slider("_composite_lowpass",0,3000000.0,float)
         self.add_slider("_vhs_out_sharpen", 1, 5)
         self.add_slider("_vhs_edge_wave", 0, 10)
         # self.add_slider("_output_vhs_tape_speed", 0, 10)
@@ -93,8 +90,6 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.add_slider("_video_noise", 0, 4200)
         self.add_slider("_video_scanline_phase_shift", 0, 270, pro=True)
         self.add_slider("_video_scanline_phase_shift_offset", 0, 3, pro=True)
-
-        self.add_slider("_black_line_cut_size",1,15,pro=False)
 
         self.add_slider("_head_switching_speed", 0, 100)
 
@@ -416,7 +411,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.current_frame = frame
         try:
             crop_wh = resize_to_height(self.orig_wh, preview_h)
-            self.preview = cv2.resize(frame, crop_wh, interpolation=cv2.INTER_LANCZOS4)
+            self.preview = cv2.resize(frame, crop_wh)
         except ZeroDivisionError:
             self.update_status("ZeroDivisionError :DDDDDD")
             pass
@@ -537,7 +532,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             return None
         render_h = self.renderHeightBox.value()
         crop_wh = resize_to_height(self.orig_wh, render_h)
-        image = cv2.resize(self.current_frame, crop_wh, interpolation=cv2.INTER_LANCZOS4)
+        image = cv2.resize(self.current_frame, crop_wh)
         if image.shape[1] % 4 != 0:
             image = trim_to_4width(image)
         image = self.nt_process(image)
