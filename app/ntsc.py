@@ -218,6 +218,17 @@ class LowpassFilter:
         f = self.lowpass_array(samples)
         return samples - f
 
+def black_brightness_cut(image: numpy.ndarray, value: int = 30):
+    hsv = cv2.cvtColor(np.float32(image), cv2.COLOR_BGR2HSV)
+    h, s, v = cv2.split(hsv)
+
+    v = cv2.add(v,value)
+    v[v > 255] = 255
+    v[v < 0] = 0
+
+    final_hsv = cv2.merge((h, s, v))
+    image = cv2.cvtColor(final_hsv, cv2.COLOR_HSV2BGR).astype(np.float32)
+    return image
 
 def cut_black_line_border(image: numpy.ndarray, bordersize: int = None) -> None:
     h, w, _ = image.shape
@@ -646,6 +657,8 @@ class Ntsc:
 
     def composite_layer(self, dst: numpy.ndarray, src: numpy.ndarray, field: int, fieldno: int):
         assert dst.shape == src.shape, "dst and src images must be of same shape"
+
+        src = black_brightness_cut(src)
 
         if self._black_line_cut:
             cut_black_line_border(src)
