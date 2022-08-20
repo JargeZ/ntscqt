@@ -29,6 +29,9 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.compareMode: bool = False
         self.isRenderActive: bool = False
         self.mainEffect: bool = True
+        self.loss_less_mode: bool = False
+        self.__video_output_suffix = ".mp4"  # or .mkv for FFV1
+        self.ProcessAudio: bool = False
         self.nt_controls = {}
         self.nt: Ntsc = None
         self.pro_mode_elements = []
@@ -68,6 +71,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             "_vhs_chroma_vert_blend": self.tr("VHS chroma vert blend"),
             "_vhs_svideo_out": self.tr("VHS svideo out"),
             "_output_ntsc": self.tr("NTSC output"),
+            "_black_line_cut": self.tr("Cut 2% black line"),
         }
         self.add_slider("_composite_preemphasis", 0, 10, float)
         self.add_slider("_vhs_out_sharpen", 1, 5)
@@ -100,6 +104,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.add_checkbox("_vhs_chroma_vert_blend", (5, 1), pro=True)
         self.add_checkbox("_vhs_svideo_out", (5, 2), pro=True)
         self.add_checkbox("_output_ntsc", (6, 1), pro=True)
+        self.add_checkbox("_black_line_cut", (1, 2), pro=False)
 
         self.renderHeightBox.valueChanged.connect(
             lambda: self.set_current_frame(self.current_frame)
@@ -110,11 +115,17 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.stopRenderButton.clicked.connect(self.stop_render)
         self.compareModeButton.stateChanged.connect(self.toggle_compare_mode)
         self.toggleMainEffect.stateChanged.connect(self.toggle_main_effect)
+        self.LossLessCheckBox.stateChanged.connect(self.lossless_exporting)
+        # self.ProcessAudioCheckBox.stateChanged.connect(self.audio_filtering)
         self.pauseRenderButton.clicked.connect(self.toggle_pause_render)
         self.livePreviewCheckbox.stateChanged.connect(self.toggle_live_preview)
         self.refreshFrameButton.clicked.connect(self.nt_update_preview)
         self.openImageUrlButton.clicked.connect(self.open_image_by_url)
         self.exportImportConfigButton.clicked.connect(self.export_import_config)
+
+        # TEMP HIDE WHILE FFPROBE ISSUE ISNT FIX
+        # self.ProcessAudioCheckBox.hide()
+        # Waiting for another branch
 
         self.ProMode.clicked.connect(
             lambda: self.set_pro_mode(self.ProMode.isChecked())
@@ -218,6 +229,27 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             pass
         self.nt_update_preview()
 
+    @QtCore.pyqtSlot()
+    def lossless_exporting(self):
+        lossless_state = self.LossLessCheckBox.isChecked()
+
+        self.loss_less_mode = lossless_state
+        self.__video_output_suffix = '.mkv' if lossless_state else '.mp4'
+        try:
+            self.videoRenderer.lossless = lossless_state
+            logger.debug(f"Lossless: {str(lossless_state)}")
+        except AttributeError:
+            pass
+
+    def audio_filtering(self):
+        state = self.ProcessAudioCheckBox.isChecked()
+        self.ProcessAudio = state
+        try:
+            self.videoRenderer.process_audio = state
+            logger.debug(f"Process audio: {str(state)}")
+        except AttributeError:
+            pass
+
     @QtCore.pyqtSlot(int)
     def update_seed(self, seed):
         self.nt = random_ntsc(seed)
@@ -252,6 +284,13 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
     def sync_nt_to_sliders(self):
         for parameter_name, element in self.nt_controls.items():
             value = getattr(self.nt, parameter_name)
+
+            # This is necessary because some parameters that have a real float type, but in the interface,
+            # the slide is simplified to int. However, when setting the initial parameters that occur here,
+            # you need to set from the initial parameters that float
+            if isinstance(element, QSlider) and isinstance(value, float):
+                value = int(value)
+
 
             element.blockSignals(True)
             if isinstance(value, bool):
@@ -303,7 +342,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             else:
                 frame.hide()
 
-    def add_slider(self, param_name, min_val, max_val, slider_value_type=int, pro=False):
+    def add_slider(self, param_name, min_val, max_val, slider_value_type: Union[int,float] = int, pro=False):
         ly = QHBoxLayout()
         slider_frame = QtWidgets.QFrame()
         slider_frame.setLayout(ly)
@@ -508,7 +547,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         if self.input_video['suffix'] == ".gif":
             suffix = self.input_video['suffix']
         else:
-            suffix = ".mp4"
+            suffix = self.__video_output_suffix
         target_file = pick_save_file(self, title='Render video as', suffix=suffix)
         if not target_file:
             return None
@@ -521,6 +560,8 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         }
         self.setup_renderer()
         self.toggle_main_effect()
+        self.lossless_exporting()
+        self.audio_filtering()
         self.progressBar.setValue(1)
         self.videoRenderer.render_data = render_data
         self.thread.start()

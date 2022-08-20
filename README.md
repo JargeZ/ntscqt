@@ -44,6 +44,9 @@ You can [download latest version here](https://github.com/JargeZ/ntsc/releases/l
 
 ### Compiling:
 
+#### Requisites:
+Python *(on moment, until Python 3.9, Python 3.10+ support will be on development)*
+
 #### For Windows:
 1. Open your terminal of preference.
 2. If not already installed, install Chocolatey: [chocolatey.org](https://chocolatey.org/)
@@ -65,17 +68,17 @@ You can [download latest version here](https://github.com/JargeZ/ntsc/releases/l
    cd ntscqt && ./venv/Scripts/activate && python ntscQT.py
    ```
 
-#### For Mac OS X and Linux:
+#### For Mac OS X and Linux distributions:
 Thanks for [Robot Riot Records](https://linktr.ee/robotriot) for donation which motivated to make MacOS fixes
 1. Open your terminal of preference.
-2. If not already installed, install Homebrew: [brew.sh](https://brew.sh/)
+2. **For Mac OS users:** If not already installed, install Homebrew: [brew.sh](https://brew.sh/)
 3. Install ffmpeg *(necessary)*:
    ```bash
-   brew install ffmpeg #or apt if using Linux
+   brew install ffmpeg # For Linux users: use package manager of distribution you're using to download and instal FFmpeg
    ```
 4. Install ntscQT:
     ```bash
-    git clone https://github.com/JargeZ/vhs -C ~/ntscqt
+    git clone https://github.com/JargeZ/vhs ~/ntscqt
     cd ~/ntscqt
     python3 -m venv ./venv
     source venv/bin/activate
@@ -86,6 +89,22 @@ Thanks for [Robot Riot Records](https://linktr.ee/robotriot) for donation which 
    ```bash
    cd ~/ntscqt && venv/bin/python ntscQT.py
    ```
+
+#### For Mac on M1 Apple Silicon try this:
+```bash
+brew install pyqt@5
+git clone https://github.com/JargeZ/vhs ~/ntscqt
+cd ~/ntscqt
+python3 -m venv ./venv
+cp -R /opt/homebrew/Cellar/pyqt@5/5.15.6/lib/python3.9/site-packages/* ./venv/lib/python3.9/site-packages/
+source venv/bin/activate
+pip install --pre -i https://pypi.anaconda.org/scipy-wheels-nightly/simple scipy
+pip install --ignore-installed -r requirements.m1-temp.txt
+venv/bin/python ntscQT.py
+```
+
+### About installation process on Termux 
+At this moment ntscqt **is not supported on Termux even with proot-distro utility.** Maybe ntscqt is runnable on Termux but **there is no method to make it work.**
 
 ### What It Is
 Эта простая программа сделана на основе алгоритма, который позволяет добиться эффекта реального старого магнитофона или VHS, а не простое размытие и шумы со статическими эффектами, как на многих видео simpsonwave и подобных. Я надеюсь, что этот инструмент поможет вам в творчестве, если вы решите стилизовать картинки или видео под старинные кадры.

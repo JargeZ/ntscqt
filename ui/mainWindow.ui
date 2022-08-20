@@ -14,6 +14,9 @@
    <string>ntscQT</string>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <layout class="QHBoxLayout" name="horizontalLayout_3">
     <item>
      <layout class="QVBoxLayout" name="controlLayout">
@@ -50,11 +53,11 @@ p, li { white-space: pre-wrap; }
        <layout class="QHBoxLayout" name="templatesLayout">
         <item>
          <widget class="QPushButton" name="exportImportConfigButton">
-          <property name="text">
-           <string>📝</string>
-          </property>
           <property name="toolTip">
            <string comment="Import and export pre-existing presets."/>
+          </property>
+          <property name="text">
+           <string>📝</string>
           </property>
          </widget>
         </item>
@@ -167,30 +170,37 @@ p, li { white-space: pre-wrap; }
       </item>
       <item>
        <layout class="QGridLayout" name="gridLayout_2">
-        <item row="1" column="3">
-         <widget class="QLabel" name="seedLabel">
-          <property name="maximumSize">
-           <size>
-            <width>85</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="font">
-           <font>
-            <pointsize>15</pointsize>
-            <weight>75</weight>
-            <bold>true</bold>
-            <underline>false</underline>
-           </font>
-          </property>
-          <property name="autoFillBackground">
-           <bool>false</bool>
-          </property>
+        <item row="1" column="1">
+         <widget class="QLabel" name="label_2">
           <property name="text">
-           <string>Seed</string>
+           <string>Render height</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QSpinBox" name="renderHeightBox">
+          <property name="maximum">
+           <number>3000</number>
+          </property>
+          <property name="singleStep">
+           <number>120</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QCheckBox" name="NearestUpScale">
+          <property name="text">
+           <string>x2 Output by nearest-neighbor</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="4">
+         <widget class="QCheckBox" name="compareModeButton">
+          <property name="text">
+           <string>Compare mode</string>
           </property>
          </widget>
         </item>
@@ -220,37 +230,37 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="1" column="2">
-         <widget class="QSpinBox" name="renderHeightBox">
-          <property name="maximum">
-           <number>3000</number>
+        <item row="1" column="3">
+         <widget class="QLabel" name="seedLabel">
+          <property name="maximumSize">
+           <size>
+            <width>85</width>
+            <height>16777215</height>
+           </size>
           </property>
-          <property name="singleStep">
-           <number>120</number>
+          <property name="font">
+           <font>
+            <pointsize>15</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+            <underline>false</underline>
+           </font>
           </property>
-         </widget>
-        </item>
-        <item row="2" column="4">
-         <widget class="QCheckBox" name="compareModeButton">
+          <property name="autoFillBackground">
+           <bool>false</bool>
+          </property>
           <property name="text">
-           <string>Compare mode</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>Render height</string>
+           <string>Seed</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
          </widget>
         </item>
-        <item row="2" column="1">
-         <widget class="QCheckBox" name="NearestUpScale">
+        <item row="2" column="5">
+         <widget class="QCheckBox" name="LossLessCheckBox">
           <property name="text">
-           <string>x2 Output by nearest-neighbor</string>
+           <string>Lossless .mkv export</string>
           </property>
          </widget>
         </item>

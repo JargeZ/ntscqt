@@ -219,6 +219,16 @@ class LowpassFilter:
         return samples - f
 
 
+def cut_black_line_border(image: numpy.ndarray, bordersize: int = None) -> None:
+    h, w, _ = image.shape
+    if bordersize is None:
+        line_width = int(w * 0.017)  # 1.7%
+    else:
+        line_width = bordersize  # TODO: value to settings
+
+    image[:, -1*line_width:] = 0  # 0 set to black
+
+
 def composite_lowpass(yiq: numpy.ndarray, field: int, fieldno: int):
     _, height, width = yiq.shape
     fY, fI, fQ = yiq
@@ -321,6 +331,8 @@ class Ntsc:
         self._video_scanline_phase_shift = 180
         self._video_scanline_phase_shift_offset = 0  # 0..4
         self._output_vhs_tape_speed = VHSSpeed.VHS_SP
+
+        self._black_line_cut = False  # Add black line glitch (credits to @rgm89git)
 
     def rand(self) -> numpy.int32:
         return self.random.nextInt(_from=0)
@@ -634,8 +646,11 @@ class Ntsc:
 
     def composite_layer(self, dst: numpy.ndarray, src: numpy.ndarray, field: int, fieldno: int):
         assert dst.shape == src.shape, "dst and src images must be of same shape"
-        yiq = bgr2yiq(src)
 
+        if self._black_line_cut:
+            cut_black_line_border(src)
+
+        yiq = bgr2yiq(src)
         if self._color_bleed_before and (self._color_bleed_vert != 0 or self._color_bleed_horiz != 0):
             self.color_bleed(yiq, field)
 

@@ -29,6 +29,8 @@ def main():
     translator = QtCore.QTranslator()
     locale = QtCore.QLocale.system().name()
 
+    print("ntscQT by JargeZ")
+
     # if run by pyinstaller executable, frozen attr will be true
     if getattr(sys, 'frozen', False):
         # _MEIPASS contain temp pyinstaller dir
