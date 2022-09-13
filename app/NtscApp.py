@@ -240,14 +240,14 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         except AttributeError:
             pass
 
-    def audio_filtering(self):
-        state = self.ProcessAudioCheckBox.isChecked()
-        self.ProcessAudio = state
-        try:
-            self.videoRenderer.process_audio = state
-            logger.debug(f"Process audio: {str(state)}")
-        except AttributeError:
-            pass
+    #def audio_filtering(self):
+    #    state = self.ProcessAudioCheckBox.isChecked()
+    #    self.ProcessAudio = state
+    #    try:
+    #        self.videoRenderer.process_audio = state
+    #        logger.debug(f"Process audio: {str(state)}")
+    #    except AttributeError:
+    #        pass
 
     @QtCore.pyqtSlot(int)
     def update_seed(self, seed):
