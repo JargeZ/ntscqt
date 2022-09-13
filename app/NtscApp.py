@@ -565,7 +565,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.thread.start()
 
     def nt_process(self, frame) -> ndarray:
-        _ = self.nt.composite_layer(frame, frame, field=2, fieldno=2)
+        _ = self.nt.composite_layer(frame, frame, field=0, fieldno=1)
         ntsc_out_image = cv2.convertScaleAbs(_)
         ntsc_out_image[1:-1:2] = ntsc_out_image[0:-2:2] / 2 + ntsc_out_image[2::2] / 2
         return ntsc_out_image
