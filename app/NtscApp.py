@@ -559,7 +559,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.setup_renderer()
         self.toggle_main_effect()
         self.lossless_exporting()
-        self.audio_filtering()
+        #self.audio_filtering()
         self.progressBar.setValue(1)
         self.videoRenderer.render_data = render_data
         self.thread.start()
