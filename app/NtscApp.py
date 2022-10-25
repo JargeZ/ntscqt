@@ -432,8 +432,9 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             self.update_status("ZeroDivisionError :DDDDDD")
             pass
 
-        if self.preview.shape[1] % 4 != 0:
+        if self.preview1.shape[1] % 4 != 0:
             self.preview1 = trim_to_4width(self.preview1)
+        if self.preview2.shape[1] % 4 != 0:
             self.preview2 = trim_to_4width(self.preview2)
 
         self.nt_update_preview()
