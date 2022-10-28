@@ -584,10 +584,8 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.thread.start()
 
     def nt_process(self, frame1: ndarray, frame2: ndarray) -> ndarray:
-        moire_pos = 0
-
-        f1 = self.nt.composite_layer(frame1, frame1, field=0, fieldno=2, moirepos=moire_pos)
-        f2 = self.nt.composite_layer(frame2, frame2, field=2, fieldno=2, moirepos=moire_pos)
+        f1 = self.nt.composite_layer(frame1, frame1, field=0, fieldno=2)
+        f2 = self.nt.composite_layer(frame2, frame2, field=2, fieldno=2)
         f1_out = cv2.convertScaleAbs(f1)
         f2_out = cv2.convertScaleAbs(f2)
 
