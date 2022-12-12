@@ -83,8 +83,13 @@ class Renderer(QtCore.QObject):
         #    queue_size=322
         #)
         cap = self.render_data["input_video"]["cap"]
+        
+        if(self.input_video["frames_count"] % 2 == 1):
+            new_frame_count = self.render_data["input_video"]["frames_count"]-3
+        else:
+            new_frame_count = self.render_data["input_video"]["frames_count"]-2
 
-        while (frame_index <= self.render_data["input_video"]["frames_count"]-2):
+        while (frame_index <= new_frame_count):
 
             if self.pause:
                 self.sendStatus.emit(f"{status_string} [P]")
