@@ -551,7 +551,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         }
 
         if(self.input_video["frames_count"] % 2 == 1):
-            new_frame_count = self.input_video["frames_count"]-1
+            new_frame_count = self.input_video["frames_count"]-3
         else:
             new_frame_count = self.input_video["frames_count"]
 
