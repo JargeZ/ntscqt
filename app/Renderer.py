@@ -84,22 +84,17 @@ class Renderer(QtCore.QObject):
         #)
         cap = self.render_data["input_video"]["cap"]
 
-        print(int(self.render_data["input_video"]["frames_count"] / 2))
-
-        while (frame_index <= self.render_data["input_video"]["frames_count"]):
+        while (frame_index <= self.render_data["input_video"]["frames_count"]-2):
 
             if self.pause:
                 self.sendStatus.emit(f"{status_string} [P]")
                 time.sleep(0.3)
                 continue
 
-            #frame_index += 1
-            #frame = cap.read()
-
             cap.set(1, frame_index)
             ret1, frame1 = cap.read()
 
-            if(frame_index == self.render_data["input_video"]["frames_count"]):
+            if((frame_index == self.render_data["input_video"]["frames_count"]-2) or (frame_index+1 == self.render_data["input_video"]["frames_count"]-2)):
                 frame2 = frame1
             else:
                 cap.set(1, frame_index+1)
@@ -144,13 +139,14 @@ class Renderer(QtCore.QObject):
             if upscale_2x:
                 frame = cv2.resize(frame, dsize=container_wh, interpolation=cv2.INTER_NEAREST)
 
-            status_string = f'[CV2] Render progress: {og_frame_index}/{round(self.render_data["input_video"]["frames_count"] / 2)}'
+            status_string = f'[CV2] Render progress: {og_frame_index}/{self.render_data["input_video"]["frames_count"] // 2}'
             self.sendStatus.emit(status_string)
             video.write(frame)
 
             frame_index += 2
             og_frame_index += 1
-            if((frame_index > self.render_data["input_video"]["frames_count"]) or (frame_index+2 > self.render_data["input_video"]["frames_count"])):
+
+            if((frame_index > self.render_data["input_video"]["frames_count"]) or (frame_index+1 > self.render_data["input_video"]["frames_count"])):
                 frame_index = self.render_data["input_video"]["frames_count"]
 
         video.release()
