@@ -83,7 +83,11 @@ class DefaultRenderer(AbstractRenderer):
         render_wh = self.config.get("render_wh")
 
         if orig_wh != render_wh:
-            frame = cv2.resize(frame, render_wh)
+            try:
+                frame = cv2.resize(frame, render_wh)
+            except Exception as e:
+                logger.exception(e)
+                raise e
 
         #  crash workaround
         if render_wh[0] % 4 != 0:
@@ -104,7 +108,11 @@ class DefaultRenderer(AbstractRenderer):
 
         frame1 = self.prepare_frame(frame)
         if self.config.get('next_frame_context'):
-            frame2 = self.prepare_frame(self.buffer[self.current_frame_index+1])
+            fr = self.buffer[self.current_frame_index + 1]
+            if fr is not None:
+                frame2 = self.prepare_frame(fr)
+            else:
+                frame2 = None
         else:
             frame2 = None
 
@@ -114,6 +122,8 @@ class DefaultRenderer(AbstractRenderer):
                 frame1=frame1,
                 frame2=frame2,
             )
+        else:
+            frame = frame1
 
         frame = frame[:, 0:render_wh[0]]
 
