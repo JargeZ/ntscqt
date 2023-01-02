@@ -644,11 +644,9 @@ class Ntsc:
             self.chroma_into_luma(yiq, field, fieldno, self._subcarrier_amplitude)
             self.chroma_from_luma(yiq, field, fieldno, self._subcarrier_amplitude)
 
-    def composite_layer(self, dst: numpy.ndarray, src: numpy.ndarray, field: int, fieldno: int, moirepos: int):
+    def composite_layer(self, dst: numpy.ndarray, src: numpy.ndarray, field: int, fieldno: int):
         assert dst.shape == src.shape, "dst and src images must be of same shape"
 
-        self._video_scanline_phase_shift_offset = moirepos
-        
         if self._black_line_cut:
             cut_black_line_border(src)
 
