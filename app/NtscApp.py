@@ -401,7 +401,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         ret1, frame1 = cap.read()
 
         if(interlaced):
-            if((frame_no == self.input_video["frames_count"]-2) or (frame_no+1 == self.input_video["frames_count"]-2)):
+            if(frame_no == self.input_video["frames_count"]):
                 frame2 = frame1
             else:
                 cap.set(1, frame_no+1)
@@ -417,7 +417,6 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         if not self.input_video or preview_h < 10:
             return None
         frame_no = self.videoTrackSlider.value()
-
         #self.input_video["cap"].set(1, frame_no)
         #ret1, frame1 = self.input_video["cap"].read()
 
@@ -553,24 +552,18 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             "path": path,
             "suffix": path.suffix.lower(),
         }
-
-        if(self.input_video["frames_count"] % 2 == 1):
-            new_frame_count = self.input_video["frames_count"]-1
-        else:
-            new_frame_count = self.input_video["frames_count"]
-
         logger.debug(f"selfinput: {self.input_video}")
         self.orig_wh = (int(self.input_video["width"]), int(self.input_video["height"]))
         self.set_render_height(self.input_video["height"])
         self.set_current_frame(self.get_current_video_frame()[0],self.get_current_video_frame()[1])
         self.videoTrackSlider.setMinimum(1)
-        self.videoTrackSlider.setMaximum(new_frame_count)
+        self.videoTrackSlider.setMaximum(self.input_video["frames_count"])
         self.videoTrackSlider.setSingleStep(2)
         print(str(self.videoTrackSlider.singleStep()))
         self.videoTrackSlider.valueChanged.connect(
             lambda: self.set_current_frame(self.get_current_video_frame()[0],self.get_current_video_frame()[1])
         )
-        self.progressBar.setMaximum(self.input_video["frames_count"] // 2)
+        self.progressBar.setMaximum(round(self.input_video["frames_count"] / 2))
 
     def render_image(self):
         target_file = pick_save_file(self, title='Save frame as', suffix='.png')
