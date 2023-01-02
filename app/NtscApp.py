@@ -252,7 +252,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
 
     def audio_filtering(self):
         # state = self.ProcessAudioCheckBox.isChecked()
-        state = False
+        state = False # Workaround
         self.ProcessAudio = state
         try:
             self.videoRenderer.audio_process = state
