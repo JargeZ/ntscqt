@@ -22,6 +22,8 @@ class Config(TypedDict):
     upscale_2x: bool
     lossless: bool
 
+    next_frame_context: bool
+
     audio_process: bool
     audio_sat_beforevol: float
     audio_lowpass: int
@@ -100,10 +102,17 @@ class DefaultRenderer(AbstractRenderer):
 
         self.increment_progress.emit()
 
+        frame1 = self.prepare_frame(frame)
+        if self.config.get('next_frame_context'):
+            frame2 = self.prepare_frame(self.buffer[self.current_frame_index+1])
+        else:
+            frame2 = None
+
         if self.mainEffect:
             frame = self.apply_main_effect(
                 nt=self.render_data.get("nt"),
-                frame1=self.prepare_frame(frame),
+                frame1=frame1,
+                frame2=frame2,
             )
 
         frame = frame[:, 0:render_wh[0]]
@@ -140,6 +149,7 @@ class DefaultRenderer(AbstractRenderer):
             orig_wh=orig_wh,
 
             lossless=False,
+            next_frame_context=True,
 
             audio_process=False,
             audio_sat_beforevol=4.5,
