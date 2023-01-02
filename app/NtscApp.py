@@ -44,6 +44,8 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.setupUi(self)  # Это нужно для инициализации нашего дизайна
         self.strings = {
             "_composite_preemphasis": self.tr("Composite preemphasis"),
+            "_subcarrier_amplitude": self.tr("Subcarrier amplitude"),
+            "_subcarrier_amplitude_back": self.tr("Subcarrier turnback amplitude"),
             "_vhs_out_sharpen": self.tr("VHS out sharpen"),
             "_vhs_edge_wave": self.tr("Edge wave"),
             "_output_vhs_tape_speed": self.tr("VHS tape speed"),
@@ -75,6 +77,8 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             "_black_line_cut": self.tr("Cut 2% black line"),
         }
         self.add_slider("_composite_preemphasis", 0, 10, float)
+        self.add_slider("_subcarrier_amplitude", 0, 16384, pro=True)
+        self.add_slider("_subcarrier_amplitude_back", 0, 16384, pro=True)
         self.add_slider("_vhs_out_sharpen", 1, 5)
         self.add_slider("_vhs_edge_wave", 0, 10)
         # self.add_slider("_output_vhs_tape_speed", 0, 10)
