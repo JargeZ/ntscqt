@@ -21,7 +21,6 @@ from ui.DoubleSlider import DoubleSlider
 class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
     def __init__(self):
         self.current_frame: numpy.ndarray = False
-        self.next_frame: numpy.ndarray = False
         self.preview: numpy.ndarray = False
         self.scale_pixmap = False
         self.input_video = {}
@@ -44,8 +43,6 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.setupUi(self)  # Это нужно для инициализации нашего дизайна
         self.strings = {
             "_composite_preemphasis": self.tr("Composite preemphasis"),
-            "_subcarrier_amplitude": self.tr("Subcarrier amplitude"),
-            "_subcarrier_amplitude_back": self.tr("Subcarrier turnback amplitude"),
             "_vhs_out_sharpen": self.tr("VHS out sharpen"),
             "_vhs_edge_wave": self.tr("Edge wave"),
             "_output_vhs_tape_speed": self.tr("VHS tape speed"),
@@ -77,8 +74,6 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             "_black_line_cut": self.tr("Cut 2% black line"),
         }
         self.add_slider("_composite_preemphasis", 0, 10, float)
-        self.add_slider("_subcarrier_amplitude", 0, 16384, pro=True)
-        self.add_slider("_subcarrier_amplitude_back", 0, 16384, pro=True)
         self.add_slider("_vhs_out_sharpen", 1, 5)
         self.add_slider("_vhs_edge_wave", 0, 10)
         # self.add_slider("_output_vhs_tape_speed", 0, 10)
@@ -94,7 +89,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.add_slider("_video_chroma_loss", 0, 800)
         self.add_slider("_video_noise", 0, 4200)
         self.add_slider("_video_scanline_phase_shift", 0, 270, pro=True)
-        #self.add_slider("_video_scanline_phase_shift_offset", 0, 3, pro=True)
+        self.add_slider("_video_scanline_phase_shift_offset", 0, 3, pro=True)
 
         self.add_slider("_head_switching_speed", 0, 100)
 
@@ -112,7 +107,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.add_checkbox("_black_line_cut", (1, 2), pro=False)
 
         self.renderHeightBox.valueChanged.connect(
-            lambda: self.set_current_frame(self.current_frame,self.next_frame)
+            lambda: self.set_current_frame(self.current_frame)
         )
         self.openFile.clicked.connect(self.open_file)
         self.renderVideoButton.clicked.connect(self.render_video)
@@ -402,39 +397,26 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             return None
         frame_no = self.videoTrackSlider.value()
         self.input_video["cap"].set(1, frame_no)
-        ret, frame1 = self.input_video["cap"].read()
+        ret, frame = self.input_video["cap"].read()
+        return frame
 
-        if(frame_no == self.input_video["frames_count"]):
-            frame2 = frame1
-        else:
-            self.input_video["cap"].set(1, frame_no+1)
-            frame2 = self.input_video["cap"].read()
-            self.input_video["cap"].set(1, frame_no)
-        
-        return frame1, frame2
-
-    def set_current_frame(self, frame1, frame2):
-        current_frame_valid = isinstance(frame1, ndarray)
-        
+    def set_current_frame(self, frame):
+        current_frame_valid = isinstance(frame, ndarray)
         preview_h = self.renderHeightBox.value()
         if not current_frame_valid or preview_h < 10:
             self.update_status("Trying to set invalid current frame")
             return None
 
-        self.current_frame = frame1
-        self.next_frame = frame2
-
+        self.current_frame = frame
         try:
             crop_wh = resize_to_height(self.orig_wh, preview_h)
-            self.preview1 = cv2.resize(frame1, crop_wh)
-            self.preview2 = cv2.resize(frame2, crop_wh)
+            self.preview = cv2.resize(frame, crop_wh)
         except ZeroDivisionError:
             self.update_status("ZeroDivisionError :DDDDDD")
             pass
 
         if self.preview.shape[1] % 4 != 0:
-            self.preview1 = trim_to_4width(self.preview1)
-            self.preview2 = trim_to_4width(self.preview2)
+            self.preview = trim_to_4width(self.preview)
 
         self.nt_update_preview()
 
@@ -484,7 +466,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.livePreviewCheckbox.hide()
         self.renderVideoButton.hide()
 
-    def set_render_height(self, height):
+    def set_render_heigth(self, height):
         if height > 600:
             self.renderHeightBox.setValue(600)
             self.update_status(
@@ -496,9 +478,9 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         height, width, channels = img.shape
         self.orig_wh = width, height
 
-        self.set_render_height(height)
+        self.set_render_heigth(height)
 
-        self.set_current_frame(img,img)
+        self.set_current_frame(img)
 
     def nt_get_config(self):
         values = {}
@@ -534,12 +516,12 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         }
         logger.debug(f"selfinput: {self.input_video}")
         self.orig_wh = (int(self.input_video["width"]), int(self.input_video["height"]))
-        self.set_render_height(self.input_video["height"])
-        self.set_current_frame(self.get_current_video_frame()[0],self.get_current_video_frame()[1])
+        self.set_render_heigth(self.input_video["height"])
+        self.set_current_frame(self.get_current_video_frame())
         self.videoTrackSlider.setMinimum(1)
         self.videoTrackSlider.setMaximum(self.input_video["frames_count"])
         self.videoTrackSlider.valueChanged.connect(
-            lambda: self.set_current_frame(self.get_current_video_frame()[0],self.get_current_video_frame()[1])
+            lambda: self.set_current_frame(self.get_current_video_frame())
         )
         self.progressBar.setMaximum(self.input_video["frames_count"])
 
@@ -552,7 +534,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         image = cv2.resize(self.current_frame, crop_wh)
         if image.shape[1] % 4 != 0:
             image = trim_to_4width(image)
-        image = self.nt_process(image,image)
+        image = self.nt_process(image)
         is_success, im_buf_arr = cv2.imencode(".png", image)
         if not is_success:
             self.update_status("Error while saving (!is_success)")
@@ -582,17 +564,10 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.videoRenderer.render_data = render_data
         self.thread.start()
 
-    def nt_process(self, frame1: ndarray, frame2: ndarray) -> ndarray:
-        moire_pos = 0
-
-        f1 = self.nt.composite_layer(frame1, frame1, field=0, fieldno=2, moirepos=moire_pos)
-        f2 = self.nt.composite_layer(frame2, frame2, field=2, fieldno=2, moirepos=moire_pos)
-        f1_out = cv2.convertScaleAbs(f1)
-        f2_out = cv2.convertScaleAbs(f2)
-
-        ntsc_out_image = f1_out
-        #ntsc_out_image[1:-1:2] = ntsc_out_image[0:-2:2] / 2 + ntsc_out_image[2::2] / 2
-        ntsc_out_image[1::2,:] = f2_out[::2,:]
+    def nt_process(self, frame) -> ndarray:
+        _ = self.nt.composite_layer(frame, frame, field=0, fieldno=1)
+        ntsc_out_image = cv2.convertScaleAbs(_)
+        ntsc_out_image[1:-1:2] = ntsc_out_image[0:-2:2] / 2 + ntsc_out_image[2::2] / 2
         return ntsc_out_image
 
     def nt_update_preview(self):
@@ -602,14 +577,14 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             return None
 
         if not self.mainEffect:
-            self.render_preview(self.preview1)
+            self.render_preview(self.preview)
             return None
 
-        ntsc_out_image = self.nt_process(self.preview1,self.preview2)
+        ntsc_out_image = self.nt_process(self.preview)
 
         if self.compareMode:
             ntsc_out_image = numpy.concatenate(
-                (self.preview1[:self.preview.shape[0] // 2], ntsc_out_image[ntsc_out_image.shape[0] // 2:])
+                (self.preview[:self.preview.shape[0] // 2], ntsc_out_image[ntsc_out_image.shape[0] // 2:])
             )
 
         self.render_preview(ntsc_out_image)
