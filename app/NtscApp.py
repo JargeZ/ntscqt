@@ -301,12 +301,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             if isinstance(element, QSlider) and isinstance(value, float):
                 value = int(value)
 
-            element.blockSignals(True)
-            if isinstance(value, bool):
-                element.setChecked(value)
-            elif isinstance(value, (int, float)):
-                element.setValue(value)
-            element.blockSignals(False)
+            set_ui_element(element, value)
 
             related_label = element.parent().findChild(QLabel, parameter_name)
             if related_label:
