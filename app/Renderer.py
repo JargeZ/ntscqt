@@ -1,12 +1,14 @@
 import abc
 import time
 import os
+from collections import defaultdict
 from typing import Tuple, TypedDict
 
 import cv2
 from PyQt5 import QtCore
 import ffmpeg
 from imutils.video import FileVideoStream
+from numpy import ndarray
 
 from app.logs import logger
 from app.funcs import resize_to_height, trim_to_4width, expand_to_4width
@@ -47,6 +49,7 @@ class DefaultRenderer(AbstractRenderer):
     render_data = {}
     current_frame_index = 0
     cap = None
+    buffer: dict[int, ndarray] = defaultdict(lambda: None)
 
     @staticmethod
     def apply_main_effect(nt: Ntsc, frame1, frame2=None):
@@ -58,17 +61,25 @@ class DefaultRenderer(AbstractRenderer):
         frame[1:-1:2] = frame[0:-2:2] / 2 + frame[2::2] / 2
         return frame
 
-    def produce_frame(self):
-        frame = self.cap.read()
-        if frame is None or not self.running:
-            self.sendStatus.emit(f'Render stopped. ret(debug):')
-            return False
+    def update_buffer(self):
+        buf = self.buffer
+        current_index = self.current_frame_index
 
+        if buf[current_index] is None:
+            current_frame = self.cap.read()
+        else:
+            current_frame = buf[current_index]
+        next_frame = self.cap.read()
+
+        if current_index > 0:
+            del buf[current_index-1]
+        buf[current_index] = current_frame
+        buf[current_index+1] = next_frame
+
+    def prepare_frame(self, frame):
         orig_wh = self.config.get("orig_wh")
         render_wh = self.config.get("render_wh")
-        upscale_2x = self.config.get("upscale_2x")
 
-        self.increment_progress.emit()
         if orig_wh != render_wh:
             frame = cv2.resize(frame, render_wh)
 
@@ -76,10 +87,23 @@ class DefaultRenderer(AbstractRenderer):
         if render_wh[0] % 4 != 0:
             frame = expand_to_4width(frame)
 
+        return frame
+
+    def produce_frame(self):
+        frame = self.buffer[self.current_frame_index]
+        if frame is None or not self.running:
+            self.sendStatus.emit(f'Render stopped. ret(debug):')
+            return False
+
+        render_wh = self.config.get("render_wh")
+        upscale_2x = self.config.get("upscale_2x")
+
+        self.increment_progress.emit()
+
         if self.mainEffect:
             frame = self.apply_main_effect(
                 nt=self.render_data.get("nt"),
-                frame1=frame,
+                frame1=self.prepare_frame(frame),
             )
 
         frame = frame[:, 0:render_wh[0]]
@@ -159,7 +183,7 @@ class DefaultRenderer(AbstractRenderer):
         logger.debug(f'Output video: {str(self.render_data["target_file"].resolve())}')
         #logger.debug(f'Process audio: {self.process_audio}')
 
-        self.current_frame_index = 0
+        self.current_frame_index = -1
         self.renderStateChanged.emit(True)
         self.cap = FileVideoStream(
             path=str(self.render_data["input_video"]["path"]),
@@ -173,6 +197,7 @@ class DefaultRenderer(AbstractRenderer):
                 continue
 
             self.current_frame_index += 1
+            self.update_buffer()
             frame = self.produce_frame()
 
             status_string = '[CV2] Render progress: {current_frame_index}/{total}'.format(
