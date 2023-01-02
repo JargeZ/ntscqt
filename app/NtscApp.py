@@ -13,14 +13,17 @@ from app.InterlacedRenderer import InterlacedRenderer
 from app.config_dialog import ConfigDialog
 from app.logs import logger
 from app.Renderer import DefaultRenderer
-from app.funcs import resize_to_height, pick_save_file, trim_to_4width
+from app.funcs import resize_to_height, pick_save_file, set_ui_element, trim_to_4width
 from app.ntsc import random_ntsc, Ntsc
 from ui import mainWindow
 from ui.DoubleSlider import DoubleSlider
 
 
+
+
 class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
     def __init__(self):
+        self.RendererClass = DefaultRenderer
         self.videoRenderer: DefaultRenderer = None
         self.current_frame: numpy.ndarray = False
         self.next_frame: numpy.ndarray = False
@@ -74,6 +77,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             "_vhs_svideo_out": self.tr("VHS svideo out"),
             "_output_ntsc": self.tr("NTSC output"),
             "_black_line_cut": self.tr("Cut 2% black line"),
+            "interlaced": self.tr("Interlaced"),
         }
         self.add_slider("_composite_preemphasis", 0, 10, float)
         self.add_slider("_vhs_out_sharpen", 1, 5)
@@ -107,9 +111,10 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.add_checkbox("_vhs_svideo_out", (5, 2), pro=True)
         self.add_checkbox("_output_ntsc", (6, 1), pro=True)
         self.add_checkbox("_black_line_cut", (1, 2), pro=False)
+        self.add_checkbox("interlaced", (1, 2), pro=False)
 
         self.renderHeightBox.valueChanged.connect(
-            lambda: self.set_current_frames(*self.get_current_video_frames())
+            lambda: self.set_current_frames(self.current_frame, self.next_frame)
         )
         self.openFile.clicked.connect(self.open_file)
         self.renderVideoButton.clicked.connect(self.render_video)
@@ -163,12 +168,17 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             button.clicked.connect(set_values)
             self.templatesLayout.addWidget(button)
 
-    def get_render_class(self):
-        is_interlaced = False  # Get state from UI choice
+    def update_render_class(self):
+        is_interlaced = self.nt_controls["interlaced"].isChecked()
         if is_interlaced:
-            return InterlacedRenderer
+            logger.debug("Use InterlacedRenderer")
+            Cls = InterlacedRenderer
         else:
-            return DefaultRenderer
+            logger.debug("Use DefaultRenderer")
+            Cls = DefaultRenderer
+
+        self.RendererClass = Cls
+        self.nt_update_preview()
 
     def setup_renderer(self):
         try:
@@ -183,8 +193,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         # создадим поток
         self.thread = QtCore.QThread()
         # создадим объект для выполнения кода в другом потоке
-        RendererClass = self.get_render_class()
-        self.videoRenderer = RendererClass()
+        self.videoRenderer = self.RendererClass()
         # перенесём объект в другой поток
         self.videoRenderer.moveToThread(self.thread)
         # после чего подключим все сигналы и слоты
@@ -293,7 +302,10 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
 
     def sync_nt_to_sliders(self):
         for parameter_name, element in self.nt_controls.items():
-            value = getattr(self.nt, parameter_name)
+            if parameter_name.startswith("_"):
+                value = getattr(self.nt, parameter_name)
+            else:
+                continue
 
             # This is necessary because some parameters that have a real float type, but in the interface,
             # the slide is simplified to int. However, when setting the initial parameters that occur here,
@@ -320,6 +332,9 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
                 related_label.setText(str(value)[:7])
         elif isinstance(element, QCheckBox):
             value = element.isChecked()
+
+        if parameter_name == "interlaced":
+            self.update_render_class()
 
         logger.debug(f"Set {parameter_name} to {value}")
         setattr(self.nt, parameter_name, value)
@@ -400,6 +415,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
     def get_current_video_frames(self):
         preview_h = self.renderHeightBox.value()
         if not self.input_video or preview_h < 10:
+            logger.debug(f"{self.input_video=} {preview_h=}")
             return None, None
         frame_no = self.videoTrackSlider.value()
         self.input_video["cap"].set(1, frame_no)
@@ -493,16 +509,21 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             self.update_status(
                 self.tr('The image resolution is large. For the best effect, the output height is set to 600'))
         else:
-            self.renderHeightBox.setValue(height // 120 * 120)
+            h = height // 120 * 120
+            if h < 10:
+                self.renderHeightBox.setValue(120)
+            else:
+                self.renderHeightBox.setValue(h)
+
 
     def open_image(self, img: numpy.ndarray):
-        self.setup_renderer()
+        self.update_render_class()
         height, width, channels = img.shape
         self.orig_wh = width, height
 
         self.set_render_heigth(height)
 
-        self.set_current_frames(img)
+        self.set_current_frames(img, None)
 
     def nt_get_config(self):
         values = {}
@@ -519,12 +540,16 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
 
     def nt_set_config(self, values: List[Dict[str, Union[int, float]]]):
         for parameter_name, value in values.items():
-            setattr(self.nt, parameter_name, value)
+            if parameter_name.startswith("_"):
+                setattr(self.nt, parameter_name, value)
+            else:
+                element = self.nt_controls[parameter_name]
+                set_ui_element(element, value)
 
         self.sync_nt_to_sliders()
 
     def open_video(self, path: Path):
-        self.setup_renderer()
+        self.update_render_class()
         logger.debug(f"file: {path}")
         cap = cv2.VideoCapture(str(path.resolve()))
         logger.debug(f"cap: {cap} isOpened: {cap.isOpened()}")
@@ -603,7 +628,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             self.render_preview(self.current_frame)
             return None
 
-        ntsc_out_image = self.videoRenderer.apply_main_effect(self.nt, self.current_frame, self.next_frame)
+        ntsc_out_image = self.RendererClass.apply_main_effect(self.nt, self.current_frame, self.next_frame)
 
         if self.compareMode:
             ntsc_out_image = numpy.concatenate(
