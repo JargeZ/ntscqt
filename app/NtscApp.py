@@ -94,7 +94,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.add_slider("_video_chroma_loss", 0, 800)
         self.add_slider("_video_noise", 0, 4200)
         self.add_slider("_video_scanline_phase_shift", 0, 270, pro=True)
-        self.add_slider("_video_scanline_phase_shift_offset", 0, 3, pro=True)
+        #self.add_slider("_video_scanline_phase_shift_offset", 0, 3, pro=True)
 
         self.add_slider("_head_switching_speed", 0, 100)
 
