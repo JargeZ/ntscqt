@@ -9,7 +9,6 @@ from imutils.video import FileVideoStream
 from app.logs import logger
 from app.funcs import resize_to_height, trim_to_4width, expand_to_4width
 
-import numpy
 
 class Renderer(QtCore.QObject):
     running = False
@@ -65,7 +64,7 @@ class Renderer(QtCore.QObject):
             open_result = video.open(
                 filename=str(tmp_output.resolve()),
                 fourcc=fourcc_choice,
-                fps=(self.render_data["input_video"]["orig_fps"] / 2),
+                fps=self.render_data["input_video"]["orig_fps"],
                 frameSize=container_wh,
             )
             logger.debug(f'Output video open result: {open_result}')
@@ -76,64 +75,37 @@ class Renderer(QtCore.QObject):
         #logger.debug(f'Process audio: {self.process_audio}')
 
         frame_index = 0
-        og_frame_index = 0
         self.renderStateChanged.emit(True)
-        #cap = FileVideoStream(
-        #    path=str(self.render_data["input_video"]["path"]),
-        #    queue_size=322
-        #)
-        cap = self.render_data["input_video"]["cap"]
+        cap = FileVideoStream(
+            path=str(self.render_data["input_video"]["path"]),
+            queue_size=322
+        ).start()
 
-        print(int(self.render_data["input_video"]["frames_count"] / 2))
-
-        while (frame_index <= self.render_data["input_video"]["frames_count"]):
+        while cap.more():
 
             if self.pause:
                 self.sendStatus.emit(f"{status_string} [P]")
                 time.sleep(0.3)
                 continue
 
-            #frame_index += 1
-            #frame = cap.read()
-
-            cap.set(1, frame_index)
-            ret1, frame1 = cap.read()
-
-            if(frame_index == self.render_data["input_video"]["frames_count"]):
-                frame2 = frame1
-            else:
-                cap.set(1, frame_index+1)
-                ret2, frame2 = cap.read()
-                cap.set(1, frame_index)
-
-            if frame1 is None or not self.running:
+            frame_index += 1
+            frame = cap.read()
+            if frame is None or not self.running:
                 self.sendStatus.emit(f'Render stopped. ret(debug):')
                 break
 
             self.increment_progress.emit()
             if orig_wh != render_wh:
-                frame1 = cv2.resize(frame1, render_wh)
-                frame2 = cv2.resize(frame2, render_wh)
+                frame = cv2.resize(frame, render_wh)
 
             #  crash workaround
             if render_wh[0] % 4 != 0:
-                frame1 = expand_to_4width(frame1)
-                frame2 = expand_to_4width(frame2)
+                frame = expand_to_4width(frame)
 
             if self.mainEffect:
-                #frame = self.render_data["nt"].composite_layer(frame, frame, field=0, fieldno=1)
-                #frame = cv2.convertScaleAbs(frame)
-                #frame[1:-1:2] = frame[0:-2:2] / 2 + frame[2::2] / 2
-
-                f1 = self.render_data["nt"].composite_layer(frame1, frame1, field=0, fieldno=2)
-                f2_in = cv2.warpAffine(frame2, numpy.float32([[1, 0, 0], [0, 1, 1]]), (frame2.shape[1], frame2.shape[0]+2))
-                f2 = self.render_data["nt"].composite_layer(f2_in, f2_in, field=2, fieldno=2)
-                f1_out = cv2.convertScaleAbs(f1)
-                f2_out = cv2.convertScaleAbs(f2)
-
-                frame = f1_out
-                #ntsc_out_image[1:-1:2] = ntsc_out_image[0:-2:2] / 2 + ntsc_out_image[2::2] / 2
-                frame[1::2,:] = f2_out[2::2,:]
+                frame = self.render_data["nt"].composite_layer(frame, frame, field=0, fieldno=1)
+                frame = cv2.convertScaleAbs(frame)
+                frame[1:-1:2] = frame[0:-2:2] / 2 + frame[2::2] / 2
 
             frame = frame[:, 0:render_wh[0]]
 
@@ -144,14 +116,9 @@ class Renderer(QtCore.QObject):
             if upscale_2x:
                 frame = cv2.resize(frame, dsize=container_wh, interpolation=cv2.INTER_NEAREST)
 
-            status_string = f'[CV2] Render progress: {og_frame_index}/{round(self.render_data["input_video"]["frames_count"] / 2)}'
+            status_string = f'[CV2] Render progress: {frame_index}/{self.render_data["input_video"]["frames_count"]}'
             self.sendStatus.emit(status_string)
             video.write(frame)
-
-            frame_index += 2
-            og_frame_index += 1
-            if((frame_index > self.render_data["input_video"]["frames_count"]) or (frame_index+2 > self.render_data["input_video"]["frames_count"])):
-                frame_index = self.render_data["input_video"]["frames_count"]
 
         video.release()
 
