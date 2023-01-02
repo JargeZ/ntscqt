@@ -51,3 +51,12 @@ def expand_to_4width(img: numpy.ndarray) -> numpy.ndarray:
         height, width, channels = img.shape
         logger.debug(f"┗FIX to wh: {width}x{height} w%4={width % 4}")
     return img
+
+
+def set_ui_element(element, value):
+    element.blockSignals(True)
+    if isinstance(value, bool):
+        element.setChecked(value)
+    elif isinstance(value, (int, float)):
+        element.setValue(value)
+    element.blockSignals(False)
