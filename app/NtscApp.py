@@ -426,14 +426,15 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         return frame
 
     def set_current_frames(self, frame1: ndarray, frame2=None):
-        if frame2 is None:
-            frame2 = frame1.copy()
 
         current_frame_valid = isinstance(frame1, ndarray)
         preview_h = self.renderHeightBox.value()
         if not current_frame_valid or preview_h < 10:
             self.update_status("Trying to set invalid current frame")
             return None
+
+        if frame2 is None:
+            frame2 = frame1.copy()
 
         self.current_frame = self.resize_to_preview_frame(frame1)
         self.next_frame = self.resize_to_preview_frame(frame2)
