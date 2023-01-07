@@ -11,11 +11,11 @@ from app import NtscApp
 from app import logger
 
 import traceback
+from halo import Halo
 
 os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = QLibraryInfo.location(
     QLibraryInfo.PluginsPath
 )
-
 
 def crash_handler(etype, value, tb):
     logger.trace(value)
@@ -23,16 +23,21 @@ def crash_handler(etype, value, tb):
     logger.exception("Uncaught exception: {0}".format(str(value)))
     sys.exit(1)
 
+def cls():
+    os.system('cls' if os.name=='nt' else 'clear')
 
 # Install exception handler
 sys.excepthook = crash_handler
-
 
 def main():
     translator = QtCore.QTranslator()
     locale = QtCore.QLocale.system().name()
 
+    cls()
     print("ntscQT by JargeZ")
+
+    spinner = Halo(text='',color='white')
+    spinner.start()
 
     # if run by pyinstaller executable, frozen attr will be true
     if getattr(sys, 'frozen', False):
@@ -43,11 +48,11 @@ def main():
         base_dir = Path(__file__).absolute().parent
         locale_file = str((base_dir / 'translate' / f'{locale}.qm').resolve())
 
-    print(f"Try load {locale} locale: {locale_file}")
-    if translator.load(locale_file):
-        print(f'Localization loaded: {locale}')  # name, dir
-    else:
-        print("Using default translation")
+    #print(f"Try load {locale} locale: {locale_file}")
+    #if translator.load(locale_file):
+    #    print(f'Localization loaded: {locale}')  # name, dir
+    #else:
+    #    print("Using default translation")
 
     app = QtWidgets.QApplication(sys.argv)
     app.installTranslator(translator)
@@ -58,6 +63,8 @@ def main():
         darkthm.open(QFile.ReadOnly | QFile.Text)
         darkthm_stream = QTextStream(darkthm)
         app.setStyleSheet(darkthm_stream.readAll())
+
+    spinner.stop()
 
     window = NtscApp()
     window.show()
