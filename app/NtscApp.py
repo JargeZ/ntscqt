@@ -241,7 +241,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.nt_update_preview()
 
     @QtCore.pyqtSlot()
-    def lossless_exporting(self):
+    def lossless_exporting(self):xggfgsfgssdsds
         lossless_state = self.LossLessCheckBox.isChecked()
 
         self.loss_less_mode = lossless_state
@@ -600,13 +600,13 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.setup_renderer()
         self.toggle_main_effect()
         self.lossless_exporting()
-        self.audio_filtering()
+        #self.audio_filtering()
         self.progressBar.setValue(1)
         self.videoRenderer.render_data = render_data
         self.thread.start()
 
     def nt_process(self, frame) -> ndarray:
-        _ = self.nt.composite_layer(frame, frame, field=2, fieldno=2)
+        _ = self.nt.composite_layer(frame, frame, field=0, fieldno=1)
         ntsc_out_image = cv2.convertScaleAbs(_)
         ntsc_out_image[1:-1:2] = ntsc_out_image[0:-2:2] / 2 + ntsc_out_image[2::2] / 2
         return ntsc_out_image
