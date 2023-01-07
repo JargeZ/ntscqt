@@ -241,7 +241,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.nt_update_preview()
 
     @QtCore.pyqtSlot()
-    def lossless_exporting(self):xggfgsfgssdsds
+    def lossless_exporting(self):
         lossless_state = self.LossLessCheckBox.isChecked()
 
         self.loss_less_mode = lossless_state
