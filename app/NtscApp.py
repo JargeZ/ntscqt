@@ -9,10 +9,11 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QSlider, QHBoxLayout, QLabel, QCheckBox, QInputDialog, QPushButton
 from numpy import ndarray
 
+from app.InterlacedRenderer import InterlacedRenderer
 from app.config_dialog import ConfigDialog
 from app.logs import logger
-from app.Renderer import Renderer
-from app.funcs import resize_to_height, pick_save_file, trim_to_4width
+from app.Renderer import DefaultRenderer
+from app.funcs import resize_to_height, pick_save_file, trim_to_4width, set_ui_element
 from app.ntsc import random_ntsc, Ntsc
 from ui import mainWindow
 from ui.DoubleSlider import DoubleSlider
@@ -20,8 +21,9 @@ from ui.DoubleSlider import DoubleSlider
 
 class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
     def __init__(self):
+        self.videoRenderer: DefaultRenderer = None
         self.current_frame: numpy.ndarray = False
-        self.preview: numpy.ndarray = False
+        self.next_frame: numpy.ndarray = False
         self.scale_pixmap = False
         self.input_video = {}
         self.templates = {}
@@ -30,6 +32,8 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.isRenderActive: bool = False
         self.mainEffect: bool = True
         self.loss_less_mode: bool = False
+        self.interlaced: bool = True
+        self.framecount: int = 0
         self.__video_output_suffix = ".mp4"  # or .mkv for FFV1
         self.ProcessAudio: bool = False
         self.nt_controls = {}
@@ -107,7 +111,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.add_checkbox("_black_line_cut", (1, 2), pro=False)
 
         self.renderHeightBox.valueChanged.connect(
-            lambda: self.set_current_frame(self.current_frame)
+            lambda: self.set_current_frames(*self.get_current_video_frames())
         )
         self.openFile.clicked.connect(self.open_file)
         self.renderVideoButton.clicked.connect(self.render_video)
@@ -161,6 +165,13 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             button.clicked.connect(set_values)
             self.templatesLayout.addWidget(button)
 
+    def get_render_class(self):
+        #is_interlaced = True  # Get state from UI choice
+        if self.interlaced:
+            return InterlacedRenderer
+        else:
+            return DefaultRenderer
+    
     def setup_renderer(self):
         try:
             self.update_status("Terminating prev renderer")
@@ -174,7 +185,8 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         # создадим поток
         self.thread = QtCore.QThread()
         # создадим объект для выполнения кода в другом потоке
-        self.videoRenderer = Renderer()
+        RendererClass = self.get_render_class()
+        self.videoRenderer = RendererClass()
         # перенесём объект в другой поток
         self.videoRenderer.moveToThread(self.thread)
         # после чего подключим все сигналы и слоты
@@ -229,7 +241,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.nt_update_preview()
 
     @QtCore.pyqtSlot()
-    def lossless_exporting(self):
+    def lossless_exporting(self):xggfgsfgssdsds
         lossless_state = self.LossLessCheckBox.isChecked()
 
         self.loss_less_mode = lossless_state
@@ -240,14 +252,15 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         except AttributeError:
             pass
 
-    #def audio_filtering(self):
-    #    state = self.ProcessAudioCheckBox.isChecked()
-    #    self.ProcessAudio = state
-    #    try:
-    #        self.videoRenderer.process_audio = state
-    #        logger.debug(f"Process audio: {str(state)}")
-    #    except AttributeError:
-    #        pass
+    def audio_filtering(self):
+        # state = self.ProcessAudioCheckBox.isChecked()
+        state = False # Workaround
+        self.ProcessAudio = state
+        try:
+            self.videoRenderer.audio_process = state
+            logger.debug(f"Process audio: {str(state)}")
+        except AttributeError:
+            pass
 
     @QtCore.pyqtSlot(int)
     def update_seed(self, seed):
@@ -290,12 +303,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             if isinstance(element, QSlider) and isinstance(value, float):
                 value = int(value)
 
-            element.blockSignals(True)
-            if isinstance(value, bool):
-                element.setChecked(value)
-            elif isinstance(value, (int, float)):
-                element.setValue(value)
-            element.blockSignals(False)
+            set_ui_element(element, value)
 
             related_label = element.parent().findChild(QLabel, parameter_name)
             if related_label:
@@ -391,32 +399,55 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.nt_controls[param_name] = slider
         self.slidersLayout.addWidget(slider_frame)
 
-    def get_current_video_frame(self):
+    def get_current_video_frames(self):
         preview_h = self.renderHeightBox.value()
         if not self.input_video or preview_h < 10:
-            return None
-        frame_no = self.videoTrackSlider.value()
-        self.input_video["cap"].set(1, frame_no)
-        ret, frame = self.input_video["cap"].read()
+            return None, None
+        current_index = self.videoTrackSlider.value()
+
+        checkcap = self.input_video["cap"]
+        checkcap.set(1, current_index)
+
+        ret, frame1 = checkcap.read()
+
+        # Read next frame
+        checkcap.set(1, current_index+1)
+        ret, frame2 = checkcap.read()
+        # Check if next frame exists
+        if not ret:
+            frame2 = frame1
+        
+        # Reset checkcap
+        checkcap.set(1, current_index)
+
+        return frame1, frame2
+
+    def resize_to_preview_frame(self, frame):
+        preview_h = self.renderHeightBox.value()
+        try:
+            crop_wh = resize_to_height(self.orig_wh, preview_h)
+            frame = cv2.resize(frame, crop_wh)
+        except ZeroDivisionError:
+            self.update_status("ZeroDivisionError :DDDDDD")
+
+        if frame.shape[1] % 4 != 0:
+            frame = trim_to_4width(frame)
+
         return frame
 
-    def set_current_frame(self, frame):
-        current_frame_valid = isinstance(frame, ndarray)
+    def set_current_frames(self, frame1: ndarray, frame2=None):
+
+        current_frame_valid = isinstance(frame1, ndarray)
         preview_h = self.renderHeightBox.value()
         if not current_frame_valid or preview_h < 10:
             self.update_status("Trying to set invalid current frame")
             return None
 
-        self.current_frame = frame
-        try:
-            crop_wh = resize_to_height(self.orig_wh, preview_h)
-            self.preview = cv2.resize(frame, crop_wh)
-        except ZeroDivisionError:
-            self.update_status("ZeroDivisionError :DDDDDD")
-            pass
+        if frame2 is None:
+            frame2 = frame1.copy()
 
-        if self.preview.shape[1] % 4 != 0:
-            self.preview = trim_to_4width(self.preview)
+        self.current_frame = self.resize_to_preview_frame(frame1)
+        self.next_frame = self.resize_to_preview_frame(frame2)
 
         self.nt_update_preview()
 
@@ -475,12 +506,13 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             self.renderHeightBox.setValue(height // 120 * 120)
 
     def open_image(self, img: numpy.ndarray):
+        self.setup_renderer()
         height, width, channels = img.shape
         self.orig_wh = width, height
 
         self.set_render_heigth(height)
 
-        self.set_current_frame(img)
+        self.set_current_frames(img)
 
     def nt_get_config(self):
         values = {}
@@ -502,6 +534,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.sync_nt_to_sliders()
 
     def open_video(self, path: Path):
+        self.setup_renderer()
         logger.debug(f"file: {path}")
         cap = cv2.VideoCapture(str(path.resolve()))
         logger.debug(f"cap: {cap} isOpened: {cap.isOpened()}")
@@ -514,16 +547,24 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             "path": path,
             "suffix": path.suffix.lower(),
         }
+        
+        if(self.interlaced):
+            self.videoTrackSlider.setSingleStep(2)
+            self.framecount = self.input_video["frames_count"] // 2
+        else:
+            self.videoTrackSlider.setSingleStep(1)
+            self.framecount = self.input_video["frames_count"]
+
         logger.debug(f"selfinput: {self.input_video}")
         self.orig_wh = (int(self.input_video["width"]), int(self.input_video["height"]))
         self.set_render_heigth(self.input_video["height"])
-        self.set_current_frame(self.get_current_video_frame())
+        self.set_current_frames(*self.get_current_video_frames())
         self.videoTrackSlider.setMinimum(1)
         self.videoTrackSlider.setMaximum(self.input_video["frames_count"])
         self.videoTrackSlider.valueChanged.connect(
-            lambda: self.set_current_frame(self.get_current_video_frame())
+            lambda: self.set_current_frames(*self.get_current_video_frames())
         )
-        self.progressBar.setMaximum(self.input_video["frames_count"])
+        self.progressBar.setMaximum(self.framecount)
 
     def render_image(self):
         target_file = pick_save_file(self, title='Save frame as', suffix='.png')
@@ -534,7 +575,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         image = cv2.resize(self.current_frame, crop_wh)
         if image.shape[1] % 4 != 0:
             image = trim_to_4width(image)
-        image = self.nt_process(image)
+        image = self.videoRenderer.apply_main_effect(self.nt, frame1=image)
         is_success, im_buf_arr = cv2.imencode(".png", image)
         if not is_success:
             self.update_status("Error while saving (!is_success)")
@@ -577,14 +618,14 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             return None
 
         if not self.mainEffect:
-            self.render_preview(self.preview)
+            self.render_preview(self.current_frame)
             return None
 
-        ntsc_out_image = self.nt_process(self.preview)
+        ntsc_out_image = self.videoRenderer.apply_main_effect(self.nt, self.current_frame, self.next_frame)
 
         if self.compareMode:
             ntsc_out_image = numpy.concatenate(
-                (self.preview[:self.preview.shape[0] // 2], ntsc_out_image[ntsc_out_image.shape[0] // 2:])
+                (self.current_frame[:self.current_frame.shape[0] // 2], ntsc_out_image[ntsc_out_image.shape[0] // 2:])
             )
 
         self.render_preview(ntsc_out_image)
