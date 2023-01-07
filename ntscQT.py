@@ -36,7 +36,7 @@ def main():
     cls()
     print("ntscQT by JargeZ")
 
-    spinner = Halo(text='',color='white')
+    spinner = Halo(text='Loading...',color='white')
     spinner.start()
 
     # if run by pyinstaller executable, frozen attr will be true
@@ -65,6 +65,7 @@ def main():
         app.setStyleSheet(darkthm_stream.readAll())
 
     spinner.stop()
+    print("Loaded.")
 
     window = NtscApp()
     window.show()
