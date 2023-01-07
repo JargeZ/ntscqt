@@ -32,6 +32,8 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.isRenderActive: bool = False
         self.mainEffect: bool = True
         self.loss_less_mode: bool = False
+        self.interlaced: bool = True
+        self.framecount: int = 0
         self.__video_output_suffix = ".mp4"  # or .mkv for FFV1
         self.ProcessAudio: bool = False
         self.nt_controls = {}
@@ -164,12 +166,12 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             self.templatesLayout.addWidget(button)
 
     def get_render_class(self):
-        is_interlaced = False  # Get state from UI choice
-        if is_interlaced:
+        #is_interlaced = True  # Get state from UI choice
+        if self.interlaced:
             return InterlacedRenderer
         else:
             return DefaultRenderer
-
+    
     def setup_renderer(self):
         try:
             self.update_status("Terminating prev renderer")
@@ -401,14 +403,22 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         preview_h = self.renderHeightBox.value()
         if not self.input_video or preview_h < 10:
             return None, None
-        frame_no = self.videoTrackSlider.value()
-        self.input_video["cap"].set(1, frame_no)
-        ret, frame1 = self.input_video["cap"].read()
+        current_index = self.videoTrackSlider.value()
+
+        checkcap = self.input_video["cap"]
+        checkcap.set(1, current_index)
+
+        ret, frame1 = checkcap.read()
 
         # Read next frame
-        ret, frame2 = self.input_video["cap"].read()
+        checkcap.set(1, current_index+1)
+        ret, frame2 = checkcap.read()
+        # Check if next frame exists
         if not ret:
             frame2 = frame1
+        
+        # Reset checkcap
+        checkcap.set(1, current_index)
 
         return frame1, frame2
 
@@ -537,6 +547,14 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             "path": path,
             "suffix": path.suffix.lower(),
         }
+        
+        if(self.interlaced):
+            self.videoTrackSlider.setSingleStep(2)
+            self.framecount = self.input_video["frames_count"] // 2
+        else:
+            self.videoTrackSlider.setSingleStep(1)
+            self.framecount = self.input_video["frames_count"]
+
         logger.debug(f"selfinput: {self.input_video}")
         self.orig_wh = (int(self.input_video["width"]), int(self.input_video["height"]))
         self.set_render_heigth(self.input_video["height"])
@@ -546,7 +564,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.videoTrackSlider.valueChanged.connect(
             lambda: self.set_current_frames(*self.get_current_video_frames())
         )
-        self.progressBar.setMaximum(self.input_video["frames_count"])
+        self.progressBar.setMaximum(self.framecount)
 
     def render_image(self):
         target_file = pick_save_file(self, title='Save frame as', suffix='.png')

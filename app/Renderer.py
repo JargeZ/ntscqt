@@ -8,6 +8,7 @@ import cv2
 from PyQt5 import QtCore
 import ffmpeg
 from imutils.video import FileVideoStream
+import numpy
 from numpy import ndarray
 
 from app.logs import logger
@@ -50,17 +51,26 @@ class DefaultRenderer(AbstractRenderer):
     increment_progress = QtCore.pyqtSignal()
     render_data = {}
     current_frame_index = 0
+    show_frame_index = 0
     cap = None
+    interlaced = False
     buffer: dict[int, ndarray] = defaultdict(lambda: None)
 
     @staticmethod
     def apply_main_effect(nt: Ntsc, frame1, frame2=None):
+        #raise NotImplementedError()
         if frame2 is None:
             frame2 = frame1
 
-        frame = nt.composite_layer(frame1, frame2, field=0, fieldno=1)
-        frame = cv2.convertScaleAbs(frame)
-        frame[1:-1:2] = frame[0:-2:2] / 2 + frame[2::2] / 2
+        frame1 = nt.composite_layer(frame1, frame1, field=0, fieldno=2)
+        frame1 = cv2.convertScaleAbs(frame1)
+
+        # Using warpAffine temporary while finding another fix
+        frame2 = cv2.warpAffine(frame2, numpy.float32([[1, 0, 0], [0, 1, 1]]), (frame2.shape[1], frame2.shape[0]+2))
+        frame2 = nt.composite_layer(frame2, frame2, field=2, fieldno=2)
+        frame2 = cv2.convertScaleAbs(frame2)
+        frame = frame1
+        frame[1::2,:] = frame2[2::2,:]
         return frame
 
     def update_buffer(self):
@@ -151,7 +161,7 @@ class DefaultRenderer(AbstractRenderer):
                 render_wh[0] * 2,
                 render_wh[1] * 2,
             )
-
+        
         self.config = Config(
             upscale_2x=upscale_2x,
             container_wh=container_wh,
@@ -181,11 +191,20 @@ class DefaultRenderer(AbstractRenderer):
             cv2.VideoWriter_fourcc(*'H264')
         ]
 
-        if self.config.get("lossless"):
-            fourcc_choice = cv2.VideoWriter_fourcc(*'FFV1')
+        # if self.config.get("lossless"):
+        #     fourcc_choice = cv2.VideoWriter_fourcc(*'FFV1')
+        # else:
+        #     fourcc_choice = fourccs.pop(0)
+        # Process temp file in lossless for better compression when encoding
+        fourcc_choice = cv2.VideoWriter_fourcc(*'FFV1')
+        
+        if (self.interlaced):
+            framerate = self.render_data["input_video"]["orig_fps"] / 2
+            framecount = self.render_data["input_video"]["frames_count"] // 2
         else:
-            fourcc_choice = fourccs.pop(0)
-
+            framerate = self.render_data["input_video"]["orig_fps"]
+            framecount = self.render_data["input_video"]["frames_count"]
+        
         video = cv2.VideoWriter()
 
         open_result = False
@@ -193,7 +212,7 @@ class DefaultRenderer(AbstractRenderer):
             open_result = video.open(
                 filename=str(tmp_output.resolve()),
                 fourcc=fourcc_choice,
-                fps=self.render_data["input_video"]["orig_fps"],
+                fps=framerate,
                 frameSize=self.config.get("container_wh"),
             )
             logger.debug(f'Output video open result: {open_result}')
@@ -203,7 +222,9 @@ class DefaultRenderer(AbstractRenderer):
         logger.debug(f'Output video: {str(self.render_data["target_file"].resolve())}')
         #logger.debug(f'Process audio: {self.process_audio}')
 
-        self.current_frame_index = -1
+        self.current_frame_index = 0
+        self.show_frame_index = 0
+
         self.renderStateChanged.emit(True)
         self.cap = FileVideoStream(
             path=str(self.render_data["input_video"]["path"]),
@@ -215,18 +236,23 @@ class DefaultRenderer(AbstractRenderer):
                 self.sendStatus.emit(f"{status_string} [P]")
                 time.sleep(0.3)
                 continue
-
-            self.current_frame_index += 1
+            
             self.update_buffer()
             frame = self.produce_frame()
 
             status_string = '[CV2] Render progress: {current_frame_index}/{total}'.format(
-                current_frame_index=self.current_frame_index,
-                total=self.render_data["input_video"]["frames_count"],
+                current_frame_index=self.show_frame_index,
+                total=framecount,
             )
             if frame is False:
                 logger.info(f"Video end or render error {status_string}")
                 break
+            
+            if self.interlaced:
+                self.current_frame_index += 2
+            else:
+                self.current_frame_index += 1
+            self.show_frame_index += 1
 
             self.sendStatus.emit(status_string)
             video.write(frame)
@@ -292,9 +318,16 @@ class DefaultRenderer(AbstractRenderer):
 
         if self.audio_process:
             acodec = 'flac' if target_suffix == '.mkv' else 'copy'
-            ff_command = ffmpeg.output(temp_video_stream.video, final_audio, result_path, shortest=None, vcodec='copy', acodec=acodec)
+            if (self.config.get("lossless")):
+                ff_command = ffmpeg.output(temp_video_stream.video, final_audio, result_path, shortest=None, vcodec='copy', acodec=acodec)
+            else:
+                ff_command = ffmpeg.output(temp_video_stream.video, final_audio, result_path, shortest=None, vcodec='libx264', preset='slow', crf=16, **{'vf': 'setfield=tff'}, **{'flags': '+ildct+ilme'}, acodec=acodec)
         else:
-            ff_command = ffmpeg.output(temp_video_stream.video, final_audio, result_path, shortest=None, vcodec='copy', acodec='copy')
+            acodec = 'copy' if target_suffix == '.mkv' else 'aac'
+            if (self.config.get("lossless")):
+                ff_command = ffmpeg.output(temp_video_stream.video, final_audio, result_path, shortest=None, vcodec='copy', acodec=acodec, **{'b:a': '320k'})
+            else:
+                ff_command = ffmpeg.output(temp_video_stream.video, final_audio, result_path, shortest=None, vcodec='libx264', preset='slow', crf=16, **{'vf': 'setfield=tff'}, **{'flags': '+ildct+ilme'}, acodec=acodec, **{'b:a': '320k'})
 
         logger.debug(ff_command)
         logger.debug(' '.join(ff_command.compile()))

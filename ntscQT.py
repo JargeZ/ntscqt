@@ -10,13 +10,16 @@ import darkdetect
 from app import NtscApp
 from app import logger
 
+import traceback
+
 os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = QLibraryInfo.location(
     QLibraryInfo.PluginsPath
 )
 
 
-def crash_handler(type, value, tb):
+def crash_handler(etype, value, tb):
     logger.trace(value)
+    traceback.print_exception(etype, value, tb)
     logger.exception("Uncaught exception: {0}".format(str(value)))
     sys.exit(1)
 
