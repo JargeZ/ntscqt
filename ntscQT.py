@@ -48,11 +48,11 @@ def main():
         base_dir = Path(__file__).absolute().parent
         locale_file = str((base_dir / 'translate' / f'{locale}.qm').resolve())
 
-    #print(f"Try load {locale} locale: {locale_file}")
-    #if translator.load(locale_file):
-    #    print(f'Localization loaded: {locale}')  # name, dir
-    #else:
-    #    print("Using default translation")
+    print(f"Try load {locale} locale: {locale_file}")
+    if translator.load(locale_file):
+        print(f'Localization loaded: {locale}')  # name, dir
+    else:
+        print("Using default translation")
 
     app = QtWidgets.QApplication(sys.argv)
     app.installTranslator(translator)
