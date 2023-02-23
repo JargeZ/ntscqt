@@ -11,8 +11,14 @@ class InterlacedRenderer(DefaultRenderer):
 
         frame1 = nt.composite_layer(frame1, frame1, field=0, fieldno=0)
         frame1 = cv2.convertScaleAbs(frame1)
-        frame2 = nt.composite_layer(frame2, frame2, field=2, fieldno=1)
+        #frame2 = nt.composite_layer(frame2, frame2, field=2, fieldno=1)
+        #frame2 = cv2.convertScaleAbs(frame2)
+        
+        frame2 = cv2.copyMakeBorder(frame2,1,0,0,0,cv2.BORDER_CONSTANT)
+        frame2 = nt.composite_layer(frame2, frame2, field=2, fieldno=2)
         frame2 = cv2.convertScaleAbs(frame2)
+        frame = frame1
+        frame[1::2,:] = frame2[2::2,:]
 
         # import numpy as np
         # debug1 = np.concatenate((frame1.copy(), frame2), axis=1)
@@ -33,5 +39,5 @@ class InterlacedRenderer(DefaultRenderer):
         #  [A, A, A]  [b, b, b]  [A, A, A]
         #  for now im not sure in field and fieldno behaviour
 
-        frame1[1:-1:2] = frame1[0:-2:2] / 2 + frame2[2::2] / 2
-        return frame1
+        # frame1[1:-1:2] = frame1[0:-2:2] / 2 + frame2[2::2] / 2
+        return frame
