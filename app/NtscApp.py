@@ -13,7 +13,7 @@ from app.InterlacedRenderer import InterlacedRenderer
 from app.config_dialog import ConfigDialog
 from app.logs import logger
 from app.Renderer import DefaultRenderer
-from app.funcs import resize_to_height, pick_save_file, trim_to_4width
+from app.funcs import resize_to_height, pick_save_file, trim_to_4width, set_ui_element
 from app.ntsc import random_ntsc, Ntsc
 from ui import mainWindow
 from ui.DoubleSlider import DoubleSlider
