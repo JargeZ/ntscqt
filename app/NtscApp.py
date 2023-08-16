@@ -594,7 +594,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             "target_file": target_file,
             "nt": self.nt,
             "input_video": self.input_video,
-            "input_heigth": self.renderHeightBox.value(),
+            "input_height": self.renderHeightBox.value(),
             "upscale_2x": self.NearestUpScale.isChecked(),
         }
         self.setup_renderer()

@@ -143,7 +143,7 @@ class DefaultRenderer(AbstractRenderer):
             self.render_data["input_video"]["width"],
             self.render_data["input_video"]["height"]
         )
-        render_wh = resize_to_height(orig_wh, self.render_data["input_heigth"])
+        render_wh = resize_to_height(orig_wh, self.render_data["input_height"])
         container_wh = render_wh
 
         upscale_2x = self.render_data["upscale_2x"]
