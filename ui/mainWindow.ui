@@ -177,6 +177,9 @@ p, li { white-space: pre-wrap; }
        <layout class="QGridLayout" name="gridLayout_2">
         <item row="2" column="5">
          <widget class="QCheckBox" name="compareModeButton">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Split-screen between the original image and one with effects applied.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="text">
            <string>Compare mode</string>
           </property>
@@ -201,6 +204,9 @@ p, li { white-space: pre-wrap; }
         </item>
         <item row="2" column="6">
          <widget class="QCheckBox" name="LossLessCheckBox">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Export using the lossless FFV1 codec.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="text">
            <string>Lossless .mkv export</string>
           </property>
@@ -230,6 +236,9 @@ p, li { white-space: pre-wrap; }
           </item>
           <item>
            <widget class="QSpinBox" name="renderHeightBox">
+            <property name="whatsThis">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Defaults to the height of the input video. Decreasing this will decrease the output resolution, meaning the video will be processed faster.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
             <property name="maximum">
              <number>3000</number>
             </property>
@@ -263,7 +272,11 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="noiseSeedSpinBox"/>
+           <widget class="QSpinBox" name="noiseSeedSpinBox">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Change the random seed used for video noise.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -305,6 +318,9 @@ p, li { white-space: pre-wrap; }
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Randomize the parameters from the given seed.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="text">
              <string>Preset from seed</string>
@@ -479,7 +495,7 @@ p, li { white-space: pre-wrap; }
            </size>
           </property>
           <property name="toolTip">
-           <string comment="When rendering, every frame is displayed. Otherwise, only every 10th" extracomment="фаыва"/>
+           <string comment="When rendering, every frame is displayed. Otherwise, only every 10th" extracomment="фаыва">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When enabled, display every frame during the rendering process. When disabled, only every 10th frame is shown.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="text">
            <string>Live preview</string>
