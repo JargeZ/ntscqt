@@ -171,22 +171,6 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item>
-         <widget class="QCheckBox" name="livePreviewCheckbox">
-          <property name="maximumSize">
-           <size>
-            <width>136</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string comment="When rendering, every frame is displayed. Otherwise, only every 10th" extracomment="фаыва"/>
-          </property>
-          <property name="text">
-           <string>LivePreview</string>
-          </property>
-         </widget>
-        </item>
        </layout>
       </item>
       <item>
@@ -477,6 +461,28 @@ p, li { white-space: pre-wrap; }
           </property>
           <property name="text">
            <string>Stop Render</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="livePreviewCheckbox">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>136</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string comment="When rendering, every frame is displayed. Otherwise, only every 10th" extracomment="фаыва"/>
+          </property>
+          <property name="text">
+           <string>Live preview</string>
           </property>
          </widget>
         </item>
