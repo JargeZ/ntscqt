@@ -6,7 +6,7 @@ import requests
 import cv2
 import numpy
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import QSlider, QHBoxLayout, QLabel, QCheckBox, QInputDialog, QPushButton
+from PyQt5.QtWidgets import QSlider, QHBoxLayout, QLabel, QCheckBox, QInputDialog, QPushButton, QSpinBox, QDoubleSpinBox
 from numpy import ndarray
 
 from app.InterlacedRenderer import InterlacedRenderer
@@ -20,6 +20,7 @@ from ui.DoubleSlider import DoubleSlider
 
 
 class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
+    render_thread: QtCore.QThread
     def __init__(self):
         self.videoRenderer: DefaultRenderer = None
         self.current_frame: numpy.ndarray = False
@@ -31,10 +32,10 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.compareMode: bool = False
         self.isRenderActive: bool = False
         self.mainEffect: bool = True
-        self.loss_less_mode: bool = False
+        self.lossless_mode: bool = False
         self.__video_output_suffix = ".mp4"  # or .mkv for FFV1
         self.ProcessAudio: bool = False
-        self.nt_controls = {}
+        self.nt_controls = []
         self.nt: Ntsc = None
         self.pro_mode_elements = []
         # Это здесь нужно для доступа к переменным, методам
@@ -133,9 +134,13 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             lambda: self.set_pro_mode(self.ProMode.isChecked())
         )
 
-        self.seedSpinBox.valueChanged.connect(self.update_seed)
+        self.presetFromSeedButton.clicked.connect(self.update_preset_seed)
         presets = [18, 31, 38, 44]
-        self.seedSpinBox.setValue(presets[randint(0, len(presets) - 1)])
+        self.presetSeedSpinBox.setValue(presets[randint(0, len(presets) - 1)])
+        self.update_preset_seed()
+
+
+        self.noiseSeedSpinBox.valueChanged.connect(self.update_noise_seed)
 
         self.progressBar.setValue(0)
         self.progressBar.setMinimum(1)
@@ -174,19 +179,19 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         try:
             self.update_status("Terminating prev renderer")
             logger.debug("Terminating prev renderer")
-            self.thread.quit()
+            self.render_thread.quit()
             self.update_status("Waiting prev renderer")
             logger.debug("Waiting prev renderer")
-            self.thread.wait()
+            self.render_thread.wait()
         except AttributeError:
             logger.debug("Setup first renderer")
         # создадим поток
-        self.thread = QtCore.QThread()
+        self.render_thread = QtCore.QThread()
         # создадим объект для выполнения кода в другом потоке
         RendererClass = self.get_render_class()
         self.videoRenderer = RendererClass()
         # перенесём объект в другой поток
-        self.videoRenderer.moveToThread(self.thread)
+        self.videoRenderer.moveToThread(self.render_thread)
         # после чего подключим все сигналы и слоты
         self.videoRenderer.newFrame.connect(self.render_preview)
         self.videoRenderer.frameMoved.connect(self.videoTrackSlider.setValue)
@@ -194,7 +199,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.videoRenderer.sendStatus.connect(self.update_status)
         self.videoRenderer.increment_progress.connect(self.increment_progress)
         # подключим сигнал старта потока к методу run у объекта, который должен выполнять код в другом потоке
-        self.thread.started.connect(self.videoRenderer.run)
+        self.render_thread.started.connect(self.videoRenderer.run)
 
     @QtCore.pyqtSlot()
     def stop_render(self):
@@ -242,10 +247,9 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
     def lossless_exporting(self):
         lossless_state = self.LossLessCheckBox.isChecked()
 
-        self.loss_less_mode = lossless_state
-        self.__video_output_suffix = '.mkv' if lossless_state else '.mp4'
+        self.lossless_mode = lossless_state
         try:
-            self.videoRenderer.lossless = lossless_state
+            self.videoRenderer.config['lossless'] = lossless_state
             logger.debug(f"Lossless: {str(lossless_state)}")
         except AttributeError:
             pass
@@ -255,16 +259,21 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         state = False # Workaround
         self.ProcessAudio = state
         try:
-            self.videoRenderer.audio_process = state
+            self.videoRenderer.config['audio_process'] = state
             logger.debug(f"Process audio: {str(state)}")
         except AttributeError:
             pass
 
-    @QtCore.pyqtSlot(int)
-    def update_seed(self, seed):
-        self.nt = random_ntsc(seed)
+    @QtCore.pyqtSlot()
+    def update_preset_seed(self):
+        self.nt = random_ntsc(self.presetSeedSpinBox.value())
         self.nt._enable_ringing2 = True
         self.sync_nt_to_sliders()
+
+    @QtCore.pyqtSlot(int)
+    def update_noise_seed(self):
+        self.nt._noise_seed = self.noiseSeedSpinBox.value()
+        self.nt_update_preview()
 
     @QtCore.pyqtSlot(str)
     def update_status(self, string):
@@ -282,7 +291,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.stopRenderButton.setEnabled(is_render_active)
 
         # todo: сделать реассигн параметров во время рендера
-        self.seedSpinBox.setEnabled(not is_render_active)
+        self.presetSeedSpinBox.setEnabled(not is_render_active)
 
         if is_render_active:
             self.progressBar.show()
@@ -292,34 +301,31 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.NearestUpScale.setEnabled(not is_render_active)
 
     def sync_nt_to_sliders(self):
-        for parameter_name, element in self.nt_controls.items():
+        for parameter_name, element in self.nt_controls:
             value = getattr(self.nt, parameter_name)
 
             # This is necessary because some parameters that have a real float type, but in the interface,
             # the slide is simplified to int. However, when setting the initial parameters that occur here,
             # you need to set from the initial parameters that float
-            if isinstance(element, QSlider) and isinstance(value, float):
+            if isinstance(element, (QSlider, QSpinBox)) and isinstance(value, float):
                 value = int(value)
 
             set_ui_element(element, value)
 
-            related_label = element.parent().findChild(QLabel, parameter_name)
-            if related_label:
-                related_label.setText(str(value)[:7])
-
             logger.debug(f"set {type(value)} {parameter_name} slider to {value}")
         self.nt_update_preview()
 
+    @QtCore.pyqtSlot()
     def value_changed_slot(self):
         element = self.sender()
+        print(self.sender())
         parameter_name = element.objectName()
         if isinstance(element, (QSlider, DoubleSlider)):
             value = element.value()
-            related_label = element.parent().findChild(QLabel, parameter_name)
-            if related_label:
-                related_label.setText(str(value)[:7])
         elif isinstance(element, QCheckBox):
             value = element.isChecked()
+        else:
+            value = None
 
         logger.debug(f"Set {parameter_name} to {value}")
         setattr(self.nt, parameter_name, value)
@@ -331,7 +337,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         checkbox.setObjectName(param_name)
         checkbox.stateChanged.connect(self.value_changed_slot)
         # checkbox.mouseReleaseEvent(lambda: self.controls_set())
-        self.nt_controls[param_name] = checkbox
+        self.nt_controls.append((param_name, checkbox))
         self.checkboxesLayout.addWidget(checkbox, pos[0], pos[1])
 
         if pro:
@@ -347,55 +353,67 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
                 frame.hide()
 
     def add_slider(self, param_name, min_val, max_val, slider_value_type: Union[int, float] = int, pro=False):
+        row_height = 36
         ly = QHBoxLayout()
+        ly.setContentsMargins(0, 0, 0, 0)
         slider_frame = QtWidgets.QFrame()
         slider_frame.setLayout(ly)
-
-        if pro:
-            self.pro_mode_elements.append(slider_frame)
-            slider_frame.hide()
+        slider_frame.setFixedHeight(row_height)
+        label = QLabel()
 
         if slider_value_type is int:
             slider = QSlider()
-            # box = QSpinBox()
-            slider.valueChanged.connect(self.value_changed_slot)
+            box = QSpinBox()
         elif slider_value_type is float:
-            # box = QDoubleSpinBox()
-            # box.setSingleStep(0.1)
+            box = QDoubleSpinBox()
+            box.setSingleStep(0.1)
             slider = DoubleSlider()
-            slider.mouseRelease.connect(self.value_changed_slot)
+        else:
+            raise ValueError
 
         slider.blockSignals(True)
+        box.blockSignals(True)
+
+        box.setMinimum(min_val)
+        box.setMaximum(max_val)
+        box.setFixedWidth(64)
+        slider.valueChanged.connect(box.setValue)
+        box.valueChanged.connect(slider.setValue)
+        slider.valueChanged.connect(self.value_changed_slot)
+
+        if pro:
+            self.pro_mode_elements.append(label)
+            self.pro_mode_elements.append(slider_frame)
+            label.hide()
+            slider_frame.hide()
+
         slider.setEnabled(True)
         slider.setMaximum(max_val)
         slider.setMinimum(min_val)
         slider.setMouseTracking(False)
         if max_val < 100 and slider_value_type == int:
             slider.setTickPosition(QSlider.TicksLeft)
+            slider.setTickInterval(1)
         slider.setOrientation(QtCore.Qt.Horizontal)
         slider.setObjectName(f"{param_name}")
-        slider.blockSignals(False)
 
-        label = QLabel()
+        slider.blockSignals(False)
+        box.blockSignals(False)
+
         # label.setText(description or name)
         label.setText(self.strings[param_name])
+        #label.setAlignment(QtCore.QAlign)
+        label.setFixedHeight(row_height)
 
-        # todo: сделать рандомайзер вместо бокса
-        # box.setMinimum(min_val)
-        # box.setMaximum(max_val)
-        # box.valueChanged.connect(slider.setValue)
-        # slider.valueChanged.connect(box.setValue)
-        value_label = QLabel()
-        value_label.setObjectName(param_name)
-        # slider.valueChanged.connect(lambda intval: value_label.setText(str(intval)))
-
-        ly.addWidget(label)
+        #ly.addWidget(label)
         ly.addWidget(slider)
         # slider_layout.addWidget(box)
-        ly.addWidget(value_label)
+        ly.addWidget(box)
 
-        self.nt_controls[param_name] = slider
-        self.slidersLayout.addWidget(slider_frame)
+        self.nt_controls.append((param_name, slider))
+        self.nt_controls.append((param_name, box))
+        self.slidersLayout.addRow(label, slider_frame)
+        #self.slidersLayout.setLabelAlignment(QtCore.Qt.AlignRight)
 
     def get_current_video_frames(self):
         preview_h = self.renderHeightBox.value()
@@ -557,7 +575,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         image = cv2.resize(self.current_frame, crop_wh)
         if image.shape[1] % 4 != 0:
             image = trim_to_4width(image)
-        image = self.videoRenderer.apply_main_effect(self.nt, frame1=image)
+        image = self.videoRenderer.apply_main_effect(self.nt, image, image, self.videoTrackSlider.value())
         is_success, im_buf_arr = cv2.imencode(".png", image)
         if not is_success:
             self.update_status("Error while saving (!is_success)")
@@ -568,7 +586,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         if self.input_video['suffix'] == ".gif":
             suffix = self.input_video['suffix']
         else:
-            suffix = self.__video_output_suffix
+            suffix = '.mkv' if self.lossless_mode else '.mp4'
         target_file = pick_save_file(self, title='Render video as', suffix=suffix)
         if not target_file:
             return None
@@ -585,13 +603,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.audio_filtering()
         self.progressBar.setValue(1)
         self.videoRenderer.render_data = render_data
-        self.thread.start()
-
-    def nt_process(self, frame) -> ndarray:
-        _ = self.nt.composite_layer(frame, frame, field=2, fieldno=2)
-        ntsc_out_image = cv2.convertScaleAbs(_)
-        ntsc_out_image[1:-1:2] = ntsc_out_image[0:-2:2] / 2 + ntsc_out_image[2::2] / 2
-        return ntsc_out_image
+        self.render_thread.start()
 
     def nt_update_preview(self):
         current_frame_valid = isinstance(self.current_frame, ndarray)
@@ -603,7 +615,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             self.render_preview(self.current_frame)
             return None
 
-        ntsc_out_image = self.videoRenderer.apply_main_effect(self.nt, self.current_frame, self.next_frame)
+        ntsc_out_image = self.videoRenderer.apply_main_effect(self.nt, self.current_frame, self.next_frame, self.videoTrackSlider.value())
 
         if self.compareMode:
             ntsc_out_image = numpy.concatenate(

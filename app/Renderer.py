@@ -34,7 +34,7 @@ class AbstractRenderer(QtCore.QObject):
 
     @staticmethod
     @abc.abstractmethod
-    def apply_main_effect(nt: Ntsc, frame1, frame2=None):
+    def apply_main_effect(nt: Ntsc, frame1, frame2, frameno: int):
         raise NotImplementedError()
 
 
@@ -54,11 +54,11 @@ class DefaultRenderer(AbstractRenderer):
     buffer: dict[int, ndarray] = defaultdict(lambda: None)
 
     @staticmethod
-    def apply_main_effect(nt: Ntsc, frame1, frame2=None):
+    def apply_main_effect(nt: Ntsc, frame1, frame2, frameno: int):
         if frame2 is None:
             frame2 = frame1
 
-        frame = nt.composite_layer(frame1, frame2, field=0, fieldno=1)
+        frame = nt.composite_layer(frame1, frame2, field=0, fieldno=1, frameno=frameno)
         frame = cv2.convertScaleAbs(frame)
         frame[1:-1:2] = frame[0:-2:2] / 2 + frame[2::2] / 2
         return frame
@@ -121,6 +121,7 @@ class DefaultRenderer(AbstractRenderer):
                 nt=self.render_data.get("nt"),
                 frame1=frame1,
                 frame2=frame2,
+                frameno=self.current_frame_index
             )
         else:
             frame = frame1
@@ -201,7 +202,7 @@ class DefaultRenderer(AbstractRenderer):
         logger.debug(f'Input video: {str(self.render_data["input_video"]["path"].resolve())}')
         logger.debug(f'Temp output: {str(tmp_output.resolve())}')
         logger.debug(f'Output video: {str(self.render_data["target_file"].resolve())}')
-        #logger.debug(f'Process audio: {self.process_audio}')
+        logger.debug(f'Process audio: {str(self.config.get("audio_process"))}')
 
         self.current_frame_index = -1
         self.renderStateChanged.emit(True)
@@ -246,7 +247,7 @@ class DefaultRenderer(AbstractRenderer):
 
         final_audio = orig.audio
 
-        if(self.audio_process == True):
+        if(self.config.get('audio_process')):
             self.sendStatus.emit(f'[FFMPEG] Preparing audio filtering')
 
             #tmp_audio = self.render_data['target_file'].parent / f'tmp_audio_{self.render_data["target_file"].stem}.wav'
@@ -264,10 +265,10 @@ class DefaultRenderer(AbstractRenderer):
 
             aud_ff_noise = ffmpeg.input(f'aevalsrc=-2+random(0):sample_rate={aud_ff_srate}:channel_layout=mono',f="lavfi",t=aud_ff_duration)
             aud_ff_noise = ffmpeg.filter((aud_ff_noise, aud_ff_noise), 'join', inputs=2, channel_layout='stereo')
-            aud_ff_noise = aud_ff_noise.filter('volume', self.audio_noise_volume)
+            aud_ff_noise = aud_ff_noise.filter('volume', self.config.get('audio_noise_volume'))
 
-            aud_ff_fx = final_audio.filter("volume",self.audio_sat_beforevol).filter("alimiter",limit="0.5").filter("volume",0.8)
-            aud_ff_fx = aud_ff_fx.filter("firequalizer",gain=f'if(lt(f,{self.audio_lowpass}), 0, -INF)')
+            aud_ff_fx = final_audio.filter("volume",self.config.get('audio_sat_beforevol')).filter("alimiter",limit="0.5").filter("volume",0.8)
+            aud_ff_fx = aud_ff_fx.filter("firequalizer",gain=f'if(lt(f,{self.config.get("audio_lowpass")}), 0, -INF)')
 
             aud_ff_mix = ffmpeg.filter([aud_ff_fx, aud_ff_noise], 'amix').filter("firequalizer",gain='if(lt(f,13301), 0, -INF)')
 
@@ -290,7 +291,7 @@ class DefaultRenderer(AbstractRenderer):
         temp_video_stream = ffmpeg.input(str(tmp_output.resolve()))
         # render_streams.append(temp_video_stream.video)
 
-        if self.audio_process:
+        if self.config.get('audio_process'):
             acodec = 'flac' if target_suffix == '.mkv' else 'copy'
             ff_command = ffmpeg.output(temp_video_stream.video, final_audio, result_path, shortest=None, vcodec='copy', acodec=acodec)
         else:
@@ -310,7 +311,7 @@ class DefaultRenderer(AbstractRenderer):
         self.sendStatus.emit('[FFMPEG] Audio copy done')
 
         tmp_output.unlink()
-        if self.audio_process:
+        if self.config.get('audio_process'):
             if os.path.exists(tmp_audio):
                 os.remove(tmp_audio)
 

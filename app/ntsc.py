@@ -86,10 +86,13 @@ def ringing2(img2d, power=4, shift=0, clip=True):
 def fmod(x: float, y: float) -> float:
     return x % y
 
-
+# TODO: update to use new numpy Generator
 class NumpyRandom:
     def __init__(self, seed=None):
         self.rnd = numpy.random.RandomState(seed)
+
+    def seed(self, seed: int):
+        self.rnd.seed(seed)
 
     def nextInt(self, _from: int = Int_MIN_VALUE, until: int = Int_MAX_VALUE) -> int:
         return self.rnd.randint(_from, until)
@@ -199,9 +202,13 @@ class Ntsc:
     # https://en.wikipedia.org/wiki/NTSC
     NTSC_RATE = 315000000.00 / 88 * 4  # 315/88 Mhz rate * 4
 
-    def __init__(self, precise=False, random=None):
+    def __init__(self, precise: bool, random: NumpyRandom):
         self.precise = precise
         self.random = random
+
+        # Seed to use when generating random noise
+        self._noise_seed = 0
+
         self._composite_preemphasis_cut = 1000000.0
         # analog artifacts related to anything that affects the raw composite signal i.e. CATV modulation
         self._composite_preemphasis = 0.0  # values 0..8 look realistic
@@ -546,8 +553,13 @@ class Ntsc:
             self.chroma_into_luma(yiq, field, fieldno, self._subcarrier_amplitude)
             self.chroma_from_luma(yiq, field, fieldno, self._subcarrier_amplitude)
 
-    def composite_layer(self, dst: numpy.ndarray, src: numpy.ndarray, field: int, fieldno: int):
+    def composite_layer(self, dst: numpy.ndarray, src: numpy.ndarray, field: int, fieldno: int, frameno: int):
         assert dst.shape == src.shape, "dst and src images must be of same shape"
+
+        # Set random seed based on the noise seed and frame number
+        self.random.seed(frameno)
+        frame_dependent = self.random.nextInt()
+        self.random.seed((frame_dependent ^ self._noise_seed) & 0x7fffffff)
 
         if self._black_line_cut:
             cut_black_line_border(src)
@@ -630,7 +642,7 @@ class Ntsc:
 
 def random_ntsc(seed=None) -> Ntsc:
     rnd = random.Random(seed)
-    ntsc = Ntsc(random=NumpyRandom(seed))
+    ntsc = Ntsc(precise=False, random=NumpyRandom(seed))
     ntsc._composite_preemphasis = rnd.triangular(0, 8, 0)
     ntsc._vhs_out_sharpen = rnd.triangular(1, 5, 1.5)
     ntsc._composite_in_chroma_lowpass = rnd.random() < 0.8  # lean towards default value
