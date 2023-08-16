@@ -3,14 +3,11 @@ import random
 import sys
 from enum import Enum
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 import numpy
-import scipy
-from scipy.signal import lfilter
+from scipy.signal import lfilter, lfiltic
 from scipy.ndimage.interpolation import shift
-
-import numpy as np
 import cv2
 
 M_PI = math.pi
@@ -23,7 +20,7 @@ if getattr(sys, 'frozen', False):
     ring_pattern_real_path = f'{sys._MEIPASS}/app/ringPattern.npy'
 
 ring_pattern_path = Path(ring_pattern_real_path)
-RingPattern = np.load(str(ring_pattern_path.resolve()))
+RingPattern = numpy.load(str(ring_pattern_path.resolve()))
 
 
 def ringing(img2d, alpha=0.5, noiseSize=0, noiseValue=2, clip=True, seed=None):
@@ -35,28 +32,28 @@ def ringing(img2d, alpha=0.5, noiseSize=0, noiseValue=2, clip=True, seed=None):
     :param noiseValue: float, noise amplitude  (0-5) optimal values  is 0.5-2
     :return: 2d image
     """
-    dft = cv2.dft(np.float32(img2d), flags=cv2.DFT_COMPLEX_OUTPUT)
-    dft_shift = np.fft.fftshift(dft)
+    dft = cv2.dft(numpy.float32(img2d), flags=cv2.DFT_COMPLEX_OUTPUT)
+    dft_shift = numpy.fft.fftshift(dft)
 
     rows, cols = img2d.shape
     crow, ccol = int(rows / 2), int(cols / 2)
-    mask = np.zeros((rows, cols, 2), np.uint8)
+    mask = numpy.zeros((rows, cols, 2), numpy.uint8)
 
     maskH = min(crow, int(1 + alpha * crow))
     mask[:, ccol - maskH:ccol + maskH] = 1
 
     if noiseSize > 0:
-        noise = np.ones((mask.shape[0], mask.shape[1], mask.shape[2])) * noiseValue - noiseValue / 2.
+        noise = numpy.ones((mask.shape[0], mask.shape[1], mask.shape[2])) * noiseValue - noiseValue / 2.
         start = int(ccol - ((1 - noiseSize) * ccol))
         stop = int(ccol + ((1 - noiseSize) * ccol))
         noise[:, start:stop, :] = 0
-        rnd = np.random.RandomState(seed)
-        mask = mask.astype(np.float) + rnd.rand(mask.shape[0], mask.shape[1], mask.shape[2]) * noise - noise / 2.
+        rnd = numpy.random.RandomState(seed)
+        mask = mask.astype(float) + rnd.rand(mask.shape[0], mask.shape[1], mask.shape[2]) * noise - noise / 2.
 
-    img_back = cv2.idft(np.fft.ifftshift(dft_shift * mask), flags=cv2.DFT_SCALE)
+    img_back = cv2.idft(numpy.fft.ifftshift(dft_shift * mask), flags=cv2.DFT_SCALE)
     if clip:
         _min, _max = img2d.min(), img2d.max()
-        return np.clip(img_back[:, :, 0], _min, _max)
+        return numpy.clip(img_back[:, :, 0], _min, _max)
     else:
         return img_back[:, :, 0]
 
@@ -68,20 +65,20 @@ def ringing2(img2d, power=4, shift=0, clip=True):
     :param power: int, ringing parrern poser (optimal 2 - 6)
     :return: 2d image
     """
-    dft = cv2.dft(np.float32(img2d), flags=cv2.DFT_COMPLEX_OUTPUT)
-    dft_shift = np.fft.fftshift(dft)
+    dft = cv2.dft(numpy.float32(img2d), flags=cv2.DFT_COMPLEX_OUTPUT)
+    dft_shift = numpy.fft.fftshift(dft)
 
     rows, cols = img2d.shape
 
     scalecols = int(cols * (1 + shift))
-    mask = cv2.resize(RingPattern[np.newaxis, :], (scalecols, 1), interpolation=cv2.INTER_LINEAR)[0]
+    mask = cv2.resize(RingPattern[numpy.newaxis, :], (scalecols, 1), interpolation=cv2.INTER_LINEAR)[0]
 
     mask = mask[(scalecols // 2) - (cols // 2):(scalecols // 2) + (cols // 2)]
     mask = mask ** power
-    img_back = cv2.idft(np.fft.ifftshift(dft_shift * mask[None, :, None]), flags=cv2.DFT_SCALE)
+    img_back = cv2.idft(numpy.fft.ifftshift(dft_shift * mask[None, :, None]), flags=cv2.DFT_SCALE)
     if clip:
         _min, _max = img2d.min(), img2d.max()
-        return np.clip(img_back[:, :, 0], _min, _max)
+        return numpy.clip(img_back[:, :, 0], _min, _max)
     else:
         return img_back[:, :, 0]
 
@@ -101,56 +98,6 @@ class NumpyRandom:
         return self.rnd.randint(_from, until, size, dtype=numpy.int32)
 
 
-class XorWowRandom:
-    def __init__(self, seed1: int, seed2: int):
-        self.x: int = numpy.int32(seed1)
-        self.y: int = numpy.int32(seed2)
-        self.z: int = numpy.int32(0)
-        self.w: int = numpy.int32(0)
-        self.v: int = -numpy.int32(seed1) - 1
-        self.addend: int = numpy.int32((numpy.int32(seed1) << 10) ^ (numpy.uint32(seed2) >> 4))
-        [self._nextInt() for _ in range(0, 64)]
-
-    def _nextInt(self) -> int:
-        t = self.x
-        t = numpy.int32(t ^ (numpy.uint32(t) >> 2))
-        self.x = numpy.int32(self.y)
-        self.y = numpy.int32(self.z)
-        self.z = numpy.int32(self.w)
-        v0 = numpy.int32(self.v)
-        self.w = numpy.int32(v0)
-        t = (t ^ (t << 1)) ^ v0 ^ (v0 << 4)
-        self.v = numpy.int32(t)
-        self.addend += 362437
-        return t + numpy.int32(self.addend)
-
-    def nextInt(self, _from: int = Int_MIN_VALUE, until: int = Int_MAX_VALUE) -> numpy.int32:
-        n = until - _from
-        if n > 0 or n == Int_MIN_VALUE:
-            if (n & -n) == n:
-                assert False, "not implemented"
-            else:
-                v: int = 0
-                while True:
-                    bits = numpy.uint32(self._nextInt()) >> 1
-                    v = bits % n
-                    if bits - v + (n - 1) >= 0:
-                        break
-                return numpy.int32(_from + v)
-        else:
-            r = range(_from, until)
-            while True:
-                rnd = self._nextInt()
-                if rnd in r:
-                    return numpy.int32(rnd)
-
-    def nextIntArray(self, size: int, _from: int = Int_MIN_VALUE, until: int = Int_MAX_VALUE) -> numpy.ndarray:
-        zeros = numpy.zeros(size, dtype=numpy.int32)
-        for i in range(0, size):
-            zeros[i] = self.nextInt(_from=_from, until=until)
-        return zeros
-
-
 # interleaved uint8 HWC BGR to -> planar int32 CHW YIQ
 def bgr2yiq(bgrimg: numpy.ndarray) -> numpy.ndarray:
     planar = numpy.transpose(bgrimg, (2, 0, 1))
@@ -164,7 +111,7 @@ def bgr2yiq(bgrimg: numpy.ndarray) -> numpy.ndarray:
 
 
 # one field of planar int32 CHW YIQ -> one field of interleaved uint8 HWC BGR to
-def yiq2bgr(yiq: numpy.ndarray, dst_bgr: numpy.ndarray = None, field: int = 0) -> numpy.ndarray:
+def yiq2bgr(yiq: numpy.ndarray, dst_bgr: Union[numpy.ndarray, None] = None, field: int = 0) -> numpy.ndarray:
     c, h, w = yiq.shape
     dst_bgr = dst_bgr if dst_bgr is not None else numpy.zeros((h, w, c))
     Y, I, Q = yiq
@@ -188,37 +135,6 @@ def yiq2bgr(yiq: numpy.ndarray, dst_bgr: numpy.ndarray = None, field: int = 0) -
     return dst_bgr
 
 
-class LowpassFilter:
-    def __init__(self, rate: float, hz: float, value: float = 0.0):
-        self.timeInterval: float = 1.0 / rate
-        self.tau: float = 1 / (hz * 2.0 * M_PI)
-        self.alpha: float = self.timeInterval / (self.tau + self.timeInterval)
-        self.prev: float = value
-
-    def lowpass(self, sample: float) -> float:
-        stage1 = sample * self.alpha
-        stage2 = self.prev - self.prev * self.alpha
-        self.prev = stage1 + stage2
-        return self.prev
-
-    def highpass(self, sample: float) -> float:
-        stage1 = sample * self.alpha
-        stage2 = self.prev - self.prev * self.alpha
-        self.prev = stage1 + stage2
-        return sample - self.prev
-
-    def lowpass_array(self, samples: numpy.ndarray) -> numpy.ndarray:
-        if self.prev == 0.0:
-            return lfilter([self.alpha], [1, -(1.0 - self.alpha)], samples)
-        else:
-            ic = scipy.signal.lfiltic([self.alpha], [1, -(1.0 - self.alpha)], [self.prev])
-            return lfilter([self.alpha], [1, -(1.0 - self.alpha)], samples, zi=ic)[0]
-
-    def highpass_array(self, samples: numpy.ndarray) -> numpy.ndarray:
-        f = self.lowpass_array(samples)
-        return samples - f
-
-
 def cut_black_line_border(image: numpy.ndarray, bordersize: int = None) -> None:
     h, w, _ = image.shape
     if bordersize is None:
@@ -237,11 +153,10 @@ def composite_lowpass(yiq: numpy.ndarray, field: int, fieldno: int):
         delay = 2 if (p == 1) else 4
         P = fI if (p == 1) else fQ
         P = P[field::2]
-        lp = lowpassFilters(cutoff, reset=0.0)
         for i, f in enumerate(P):
-            f = lp[0].lowpass_array(f)
-            f = lp[1].lowpass_array(f)
-            f = lp[2].lowpass_array(f)
+            f = lowpassFilter(f, cutoff, reset=0.0)
+            f = lowpassFilter(f, cutoff, reset=0.0)
+            f = lowpassFilter(f, cutoff, reset=0.0)
             P[i, 0:width - delay] = f.astype(numpy.int32)[delay:]
 
 
@@ -253,21 +168,19 @@ def composite_lowpass_tv(yiq: numpy.ndarray, field: int, fieldno: int):
         delay = 1
         P = fI if (p == 1) else fQ
         P = P[field::2]
-        lp = lowpassFilters(2600000.0, reset=0.0)
         for i, f in enumerate(P):
-            f = lp[0].lowpass_array(f)
-            f = lp[1].lowpass_array(f)
-            f = lp[2].lowpass_array(f)
+            f = lowpassFilter(f, 2600000.0, reset=0.0)
+            f = lowpassFilter(f, 2600000.0, reset=0.0)
+            f = lowpassFilter(f, 2600000.0, reset=0.0)
             P[i, 0:width - delay] = f.astype(numpy.int32)[delay:]
 
 
 def composite_preemphasis(yiq: numpy.ndarray, field: int, composite_preemphasis: float,
                           composite_preemphasis_cut: float):
     fY, fI, fQ = yiq
-    pre = LowpassFilter(Ntsc.NTSC_RATE, composite_preemphasis_cut, 16.0)
     fields = fY[field::2]
     for i, samples in enumerate(fields):
-        filtered = samples + pre.highpass_array(samples) * composite_preemphasis
+        filtered = samples + highpassFilter(samples, composite_preemphasis_cut, 16.0) * composite_preemphasis
         fields[i] = filtered.astype(numpy.int32)
 
 
@@ -288,7 +201,7 @@ class Ntsc:
 
     def __init__(self, precise=False, random=None):
         self.precise = precise
-        self.random = random if random is not None else XorWowRandom(31374242, 0)
+        self.random = random
         self._composite_preemphasis_cut = 1000000.0
         # analog artifacts related to anything that affects the raw composite signal i.e. CATV modulation
         self._composite_preemphasis = 0.0  # values 0..8 look realistic
@@ -347,10 +260,8 @@ class Ntsc:
         fields = fY[field::2]
         fh, fw = fields.shape
         if not self.precise:  # this one works FAST
-            lp = LowpassFilter(1, 1, 0)
-            lp.alpha = 0.5
             rnds = self.rand_array(fw * fh) % noise_mod - video_noise
-            noises = shift(lp.lowpass_array(rnds).astype(numpy.int32), 1)
+            noises = shift(lfilter([0.5], [1, -0.5], rnds).astype(numpy.int32), 1)
             fields += noises.reshape(fields.shape)
         else:  # this one works EXACTLY like original code
             noise = 0
@@ -363,7 +274,6 @@ class Ntsc:
 
     # https://bavc.github.io/avaa/artifacts/chrominance_noise.html
     def video_chroma_noise(self, yiq: numpy.ndarray, field: int, video_chroma_noise: int):
-        _, height, width = yiq.shape
         fY, fI, fQ = yiq
 
         noise_mod = video_chroma_noise * 2 + 1
@@ -371,13 +281,11 @@ class Ntsc:
         V = fQ[field::2]
         fh, fw = U.shape
         if not self.precise:
-            lp = LowpassFilter(1, 1, 0)
-            lp.alpha = 0.5
             rndsU = self.rand_array(fw * fh) % noise_mod - video_chroma_noise
-            noisesU = shift(lp.lowpass_array(rndsU).astype(numpy.int32), 1)
+            noisesU = shift(lfilter([0.5], [1, -0.5], rndsU).astype(numpy.int32), 1)
 
             rndsV = self.rand_array(fw * fh) % noise_mod - video_chroma_noise
-            noisesV = shift(lp.lowpass_array(rndsV).astype(numpy.int32), 1)
+            noisesV = shift(lfilter([0.5], [1, -0.5], rndsV).astype(numpy.int32), 1)
 
             U += noisesU.reshape(U.shape)
             V += noisesV.reshape(V.shape)
@@ -529,29 +437,26 @@ class Ntsc:
         _, height, width = yiq.shape
         fY, fI, fQ = yiq
         for Y in fY[field::2]:
-            pre = LowpassFilter(Ntsc.NTSC_RATE, luma_cut, 16.0)
-            lp = lowpassFilters(cutoff=luma_cut, reset=16.0)
-            f0 = lp[0].lowpass_array(Y)
-            f1 = lp[1].lowpass_array(f0)
-            f2 = lp[2].lowpass_array(f1)
-            f3 = f2 + pre.highpass_array(f2) * 1.6
+            f0 = lowpassFilter(Y, cutoff=luma_cut, reset=16.0)
+            f1 = lowpassFilter(f0, cutoff=luma_cut, reset=16.0)
+            f2 = lowpassFilter(f1, cutoff=luma_cut, reset=16.0)
+            f3 = f2 + highpassFilter(f2, luma_cut, 16.0) * 1.6
             Y[:] = f3
 
     def vhs_chroma_lowpass(self, yiq: numpy.ndarray, field: int, chroma_cut: float, chroma_delay: int):
         _, height, width = yiq.shape
         fY, fI, fQ = yiq
         for U in fI[field::2]:
-            lpU = lowpassFilters(cutoff=chroma_cut, reset=0.0)
-            f0 = lpU[0].lowpass_array(U)
-            f1 = lpU[1].lowpass_array(f0)
-            f2 = lpU[2].lowpass_array(f1)
+            f0 = lowpassFilter(U, cutoff=chroma_cut, reset=0.0)
+            f1 = lowpassFilter(f0, cutoff=chroma_cut, reset=0.0)
+            f2 = lowpassFilter(f1, cutoff=chroma_cut, reset=0.0)
+
             U[:width - chroma_delay] = f2[chroma_delay:]
 
         for V in fQ[field::2]:
-            lpV = lowpassFilters(cutoff=chroma_cut, reset=0.0)
-            f0 = lpV[0].lowpass_array(V)
-            f1 = lpV[1].lowpass_array(f0)
-            f2 = lpV[2].lowpass_array(f1)
+            f0 = lowpassFilter(V, cutoff=chroma_cut, reset=0.0)
+            f1 = lowpassFilter(f0, cutoff=chroma_cut, reset=0.0)
+            f2 = lowpassFilter(f1, cutoff=chroma_cut, reset=0.0)
             V[:width - chroma_delay] = f2[chroma_delay:]
 
     # VHS decks also vertically smear the chroma subcarrier using a delay line
@@ -573,11 +478,10 @@ class Ntsc:
         _, height, width = yiq.shape
         fY, fI, fQ = yiq
         for Y in fY[field::2]:
-            lp = lowpassFilters(cutoff=luma_cut * 4, reset=0.0)
             s = Y
-            ts = lp[0].lowpass_array(Y)
-            ts = lp[1].lowpass_array(ts)
-            ts = lp[2].lowpass_array(ts)
+            ts = lowpassFilter(Y, cutoff=luma_cut * 4, reset=0.0)
+            ts = lowpassFilter(ts, cutoff=luma_cut * 4, reset=0.0)
+            ts = lowpassFilter(ts, cutoff=luma_cut * 4, reset=0.0)
             Y[:] = (s + (s - ts) * self._vhs_out_sharpen * 2.0)
 
     # http://www.michaeldvd.com.au/Articles/VideoArtefacts/VideoArtefactsColourBleeding.html
@@ -598,9 +502,7 @@ class Ntsc:
         _, height, width = yiq.shape
         fY, fI, fQ = yiq
         rnds = self.random.nextIntArray(height // 2, 0, self._vhs_edge_wave)
-        lp = LowpassFilter(Ntsc.NTSC_RATE, self._output_vhs_tape_speed.luma_cut,
-                           0)  # no real purpose to initialize it with ntsc values
-        rnds = lp.lowpass_array(rnds).astype(numpy.int32)
+        rnds = lowpassFilter(rnds, self._output_vhs_tape_speed.luma_cut, 0.0).astype(numpy.int32)
 
         for y, Y in enumerate(fY[field::2]):
             if rnds[y] != 0:
@@ -758,5 +660,17 @@ def random_ntsc(seed=None) -> Ntsc:
     return ntsc
 
 
-def lowpassFilters(cutoff: float, reset: float, rate: float = Ntsc.NTSC_RATE) -> List[LowpassFilter]:
-    return [LowpassFilter(rate, cutoff, reset) for x in range(0, 3)]
+def lowpassFilter(samples: numpy.ndarray, cutoff: float, reset: float, rate: float = Ntsc.NTSC_RATE) -> numpy.ndarray:
+    timeInterval = 1.0 / rate
+    tau = 1 / (cutoff * 2.0 * M_PI)
+    alpha = timeInterval / (tau + timeInterval)
+
+    if reset == 0.0:
+        return lfilter([alpha], [1, -(1.0 - alpha)], samples)
+    else:
+        ic = lfiltic([alpha], [1, -(1.0 - alpha)], [reset])
+        return lfilter([alpha], [1, -(1.0 - alpha)], samples, zi=ic)[0]
+
+def highpassFilter(samples: numpy.ndarray, cutoff: float, reset: float, rate: float = Ntsc.NTSC_RATE) -> numpy.ndarray:
+    f = lowpassFilter(samples, cutoff, reset, rate)
+    return samples - f
