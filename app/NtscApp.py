@@ -307,12 +307,12 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             # This is necessary because some parameters that have a real float type, but in the interface,
             # the slide is simplified to int. However, when setting the initial parameters that occur here,
             # you need to set from the initial parameters that float
-            if isinstance(element, (QSlider, QSpinBox)) and isinstance(value, float):
+            if isinstance(element, (QSlider, QSpinBox)) and not isinstance(element, DoubleSlider) and isinstance(value, float):
                 value = int(value)
 
             set_ui_element(element, value)
 
-            logger.debug(f"set {type(value)} {parameter_name} slider to {value}")
+            logger.debug(f"set {type(value)} {parameter_name} {type(element).__name__} to {value}")
         self.nt_update_preview()
 
     @QtCore.pyqtSlot()
