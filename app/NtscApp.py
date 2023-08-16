@@ -96,7 +96,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.add_slider("_head_switching_speed", 0, 100)
 
         self.add_checkbox("_vhs_head_switching", (1, 1))
-        self.add_checkbox("_color_bleed_before", (1, 2), pro=True)
+        self.add_checkbox("_color_bleed_before", (6, 2), pro=True)
         self.add_checkbox("_enable_ringing2", (2, 1), pro=True)
         self.add_checkbox("_composite_in_chroma_lowpass", (2, 2), pro=True)
         self.add_checkbox("_composite_out_chroma_lowpass", (3, 1), pro=True)
