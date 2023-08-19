@@ -353,12 +353,10 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
                 frame.hide()
 
     def add_slider(self, param_name, min_val, max_val, slider_value_type: Union[int, float] = int, pro=False):
-        row_height = 36
         ly = QHBoxLayout()
         ly.setContentsMargins(0, 0, 0, 0)
         slider_frame = QtWidgets.QFrame()
         slider_frame.setLayout(ly)
-        slider_frame.setFixedHeight(row_height)
         label = QLabel()
 
         if slider_value_type is int:
@@ -400,20 +398,15 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         slider.blockSignals(False)
         box.blockSignals(False)
 
-        # label.setText(description or name)
         label.setText(self.strings[param_name])
-        #label.setAlignment(QtCore.QAlign)
-        label.setFixedHeight(row_height)
+        label.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
-        #ly.addWidget(label)
         ly.addWidget(slider)
-        # slider_layout.addWidget(box)
         ly.addWidget(box)
 
         self.nt_controls.append((param_name, slider))
         self.nt_controls.append((param_name, box))
         self.slidersLayout.addRow(label, slider_frame)
-        #self.slidersLayout.setLabelAlignment(QtCore.Qt.AlignRight)
 
     def get_current_video_frames(self):
         preview_h = self.renderHeightBox.value()
