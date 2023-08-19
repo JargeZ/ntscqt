@@ -176,6 +176,28 @@ class ComboBoxControl(Control[T]):
         self.widget.setCurrentIndex(self._values_to_indices.get(value, -1))
         self.widget.blockSignals(False)
 
+class GroupBoxControl(Control[bool]):
+    widget: QGroupBox
+
+    def __init__(self, param_name: str, text: str, on_change: Callable[[str, bool], Any], controls: Union["ControlForm", "ControlGrid"]):
+        super().__init__(param_name, on_change)
+
+        self.widget = QGroupBox(text)
+        self.widget.setCheckable(True)
+        self.widget.setObjectName(param_name)
+        self.widget.toggled.connect(self._on_value_change)
+        self.widget.setLayout(controls.layout)
+
+    def get_value(self):
+        return self.widget.isChecked()
+
+    def set_value(self, value, block_signals=False):
+        print("set_value on groupbox")
+        if block_signals:
+            self.widget.blockSignals(True)
+        self.widget.setChecked(bool(value))
+        self.widget.blockSignals(False)
+
 class ControlForm:
     """Helper class for laying out controls in a form style (label on the left, control on the right.)"""
     layout: QGridLayout
@@ -191,12 +213,17 @@ class ControlForm:
 
     def add_control(self, text: str, control: Control):
         label = QLabel(text)
-        label.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        label.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.MinimumExpanding)
         label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
 
         self.layout.addWidget(label, self._next_row, 0)
         self.layout.addWidget(control.widget, self._next_row, 1)
         self._rows.append((label, control))
+        self._next_row += 1
+
+    def add_group(self, child: GroupBoxControl):
+        # span both columns
+        self.layout.addWidget(child.widget, self._next_row, 0, 1, 2)
         self._next_row += 1
 
     def update_visibility(self, filter: Callable[[Control], bool]):
@@ -297,14 +324,17 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         }
         self.sliders = ControlForm(self.slidersLayout)
         self.checkboxes = ControlGrid(2, self.checkboxesLayout)
-        self.add_slider("_composite_preemphasis", 0, 10, float)
-        self.add_slider("_vhs_out_sharpen", 1, 5)
-        self.add_slider("_vhs_edge_wave", 0, 10)
+
+        vhs_controls = self.add_group("_emulating_vhs")
+        self.add_slider("_vhs_out_sharpen", 1, 5, parent=vhs_controls)
+        self.add_slider("_vhs_edge_wave", 0, 10, parent=vhs_controls)
         self.add_menu("_output_vhs_tape_speed", [
             (self.strings["_output_vhs_tape_speed_sp"], VHSSpeed.VHS_SP),
             (self.strings["_output_vhs_tape_speed_lp"], VHSSpeed.VHS_LP),
             (self.strings["_output_vhs_tape_speed_ep"], VHSSpeed.VHS_EP)
-        ])
+        ], parent=vhs_controls)
+
+        self.add_slider("_composite_preemphasis", 0, 10, float)
         self.add_slider("_ringing", 0, 1, float, pro=True)
         self.add_slider("_ringing_power", 0, 10)
         self.add_slider("_ringing_shift", 0, 3, float, pro=True)
@@ -327,7 +357,6 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.add_checkbox("_composite_in_chroma_lowpass", pro=True)
         self.add_checkbox("_composite_out_chroma_lowpass", pro=True)
         self.add_checkbox("_composite_out_chroma_lowpass_lite", pro=True)
-        self.add_checkbox("_emulating_vhs")
         self.add_checkbox("_nocolor_subcarrier", pro=True)
         self.add_checkbox("_vhs_chroma_vert_blend", pro=True)
         self.add_checkbox("_vhs_svideo_out", pro=True)
@@ -595,6 +624,17 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
 
         if pro:
             self.pro_mode_params.add(param_name)
+
+    def add_group(self, param_name, pro=False, parent: Union[None, ControlForm]=None) -> ControlForm:
+        controls = ControlForm()
+        group = GroupBoxControl(param_name, self.strings[param_name], self.value_changed, controls)
+        self.nt_controls[param_name] = group
+
+        if parent is None:
+            parent = self.sliders
+        parent.add_group(group)
+
+        return controls
 
     def get_current_video_frames(self):
         preview_h = self.renderHeightBox.value()
