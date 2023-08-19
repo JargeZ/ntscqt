@@ -1,7 +1,7 @@
 import math
 import random
 import sys
-from enum import Enum
+from enum import IntEnum
 from pathlib import Path
 from typing import List, Union
 
@@ -187,16 +187,19 @@ def composite_preemphasis(yiq: numpy.ndarray, field: int, composite_preemphasis:
         filtered = samples + highpassFilter(samples, composite_preemphasis_cut, 16.0) * composite_preemphasis
         fields[i] = filtered.astype(numpy.int32)
 
+# Needs to be an IntEnum so it can be saved in JSON
+class VHSSpeed(IntEnum):
+    VHS_SP = 0
+    VHS_LP = 1
+    VHS_EP = 2
 
-class VHSSpeed(Enum):
-    VHS_SP = (2400000.0, 320000.0, 9)
-    VHS_LP = (1900000.0, 300000.0, 12)
-    VHS_EP = (1400000.0, 280000.0, 14)
-
-    def __init__(self, luma_cut: float, chroma_cut: float, chroma_delay: int):
-        self.luma_cut = luma_cut
-        self.chroma_cut = chroma_cut
-        self.chroma_delay = chroma_delay
+    def __init__(self, num: int):
+        print(num)
+        self.luma_cut, self.chroma_cut, self.chroma_delay = [
+            (2400000.0, 320000.0, 9),
+            (1900000.0, 300000.0, 12),
+            (1400000.0, 280000.0, 14)
+        ][num]
 
 
 class Ntsc:

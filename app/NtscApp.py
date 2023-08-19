@@ -1,13 +1,14 @@
 import json
 from pathlib import Path
 from random import randint
-from typing import Tuple, Union, List, Dict, Any
+from typing import Tuple, Union, List, Dict, Any, TypeVar, Generic, Callable, Type
 import requests
 import cv2
 import numpy
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import QSlider, QHBoxLayout, QLabel, QCheckBox, QInputDialog, QPushButton, QSpinBox, QDoubleSpinBox, QComboBox
+from PyQt5.QtWidgets import QSlider, QHBoxLayout, QLabel, QCheckBox, QInputDialog, QPushButton, QSpinBox, QDoubleSpinBox, QComboBox, QFrame
 from numpy import ndarray
+from abc import abstractmethod
 
 from app.InterlacedRenderer import InterlacedRenderer
 from app.config_dialog import ConfigDialog
@@ -17,6 +18,186 @@ from app.funcs import resize_to_height, pick_save_file, trim_to_4width
 from app.ntsc import random_ntsc, Ntsc, VHSSpeed
 from ui import mainWindow
 from ui.DoubleSlider import DoubleSlider
+
+T = TypeVar("T")
+
+class Control(Generic[T]):
+    _param_name: str
+    _on_change: Callable[[str, T], Any]
+
+    def __init__(self, param_name: str, on_change: Callable[[str, T], Any]):
+        self._param_name = param_name
+        self._on_change = on_change
+
+    def _on_value_change(self):
+        self._on_change(self._param_name, self.get_value())
+
+    @abstractmethod
+    def get_value(self) -> T:
+        pass
+
+    @abstractmethod
+    def set_value(self, value: Any, block_signals=False) -> None:
+        pass
+
+    @abstractmethod
+    def set_visible(self, visible: bool) -> None:
+        pass
+
+
+class CheckboxControl(Control[bool]):
+    checkbox: QCheckBox
+
+    def __init__(self, param_name: str, text: str, on_change: Callable[[str, bool], Any]):
+        super().__init__(param_name, on_change)
+
+        self.checkbox = QCheckBox()
+        self.checkbox.setText(text)
+        self.checkbox.setObjectName(param_name)
+        self.checkbox.stateChanged.connect(self._on_value_change)
+
+    def get_value(self):
+        return self.checkbox.isChecked()
+
+    def set_value(self, value, block_signals=False):
+        if block_signals:
+            self.checkbox.blockSignals(True)
+        self.checkbox.setChecked(bool(value))
+        self.checkbox.blockSignals(False)
+
+    def set_visible(self, visible):
+        self.checkbox.setVisible(visible)
+
+
+Num = TypeVar("Num", bound=Union[int, float])
+
+class SliderControl(Control[Num]):
+    _slider_value_type: Type[Num]
+
+    label: QLabel
+    slider: Union[QSlider, DoubleSlider]
+    box: Union[QSpinBox, QDoubleSpinBox]
+    slider_frame: QFrame
+
+    def __init__(
+        self,
+        param_name: str,
+        text: str,
+        on_change: Callable[[str, Num], Any],
+        min_val: Num,
+        max_val: Num,
+        slider_value_type: Type[Num]
+    ):
+        super().__init__(param_name, on_change)
+
+        self._slider_value_type = slider_value_type
+
+        self.label = QLabel()
+        self.label.setText(text)
+        self.label.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+
+        ly = QHBoxLayout()
+        ly.setContentsMargins(0, 0, 0, 0)
+        self.slider_frame = QFrame()
+        self.slider_frame.setLayout(ly)
+
+        if slider_value_type is int:
+            self.slider = QSlider()
+            self.box = QSpinBox()
+        elif slider_value_type is float:
+            self.box = QDoubleSpinBox()
+            self.box.setSingleStep(0.1)
+            self.slider = DoubleSlider()
+        else:
+            raise ValueError(f"Invalid slider value type: {slider_value_type.__name__}")
+
+        self.slider.blockSignals(True)
+        self.box.blockSignals(True)
+
+        self.box.setMinimum(min_val)
+        self.box.setMaximum(max_val)
+        self.box.setFixedWidth(64)
+        self.slider.valueChanged.connect(self.box.setValue)
+        self.box.valueChanged.connect(self.slider.setValue)
+        self.slider.valueChanged.connect(self._on_value_change)
+
+        self.slider.setMaximum(max_val)
+        self.slider.setMinimum(min_val)
+        self.slider.setMouseTracking(False)
+        if max_val < 100 and slider_value_type == int:
+            self.slider.setTickPosition(QSlider.TicksLeft)
+            self.slider.setTickInterval(1)
+        self.slider.setOrientation(QtCore.Qt.Horizontal)
+        self.slider.setObjectName(param_name)
+
+        self.slider.blockSignals(False)
+        self.box.blockSignals(False)
+
+        ly.addWidget(self.slider)
+        ly.addWidget(self.box)
+
+    def get_value(self):
+        return self._slider_value_type(self.slider.value())
+
+    def set_value(self, value, block_signals=False):
+        if block_signals:
+            self.slider.blockSignals(True)
+            self.box.blockSignals(True)
+        self.slider.setValue(self._slider_value_type(value))
+        self.box.setValue(self._slider_value_type(value))
+        self.slider.blockSignals(False)
+        self.box.blockSignals(False)
+
+    def set_visible(self, visible):
+        self.label.setVisible(visible)
+        self.slider_frame.setVisible(visible)
+
+class ComboBoxControl(Control[T]):
+    _values: List[T]
+    _values_to_indices: Dict[T, int]
+
+    label: QLabel
+    box: QComboBox
+    slider_frame: QFrame
+
+    def __init__(
+        self,
+        param_name: str,
+        text: str,
+        on_change: Callable[[str, T], Any],
+        values: List[Tuple[str, T]]
+    ):
+        super().__init__(param_name, on_change)
+
+        self._values = [value[1] for value in values]
+
+        self.label = QLabel()
+        self.label.setText(text)
+        self.box = QComboBox()
+
+        # map values back to indices for use in sync_nt_to_sliders
+        self._values_to_indices = {}
+
+        for index, (text, data) in enumerate(values):
+            self.box.addItem(text, data)
+            self._values_to_indices[data] = index
+        self.box.setObjectName(param_name)
+
+        self.box.currentIndexChanged.connect(self._on_value_change)
+
+    def get_value(self):
+        index = self.box.currentIndex()
+        return None if index == -1 else self._values[index]
+
+    def set_value(self, value, block_signals=False):
+        if block_signals:
+            self.box.blockSignals(True)
+        self.box.setCurrentIndex(self._values_to_indices.get(value, -1))
+        self.box.blockSignals(False)
+
+    def set_visible(self, visible):
+        self.label.setVisible(visible)
+        self.box.setVisible(visible)
 
 
 class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
@@ -35,9 +216,9 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.lossless_mode: bool = False
         self.__video_output_suffix = ".mp4"  # or .mkv for FFV1
         self.ProcessAudio: bool = False
-        self.nt_controls = []
+        self.nt_controls: Dict[str, Control] = {}
         self.nt: Ntsc = None
-        self.pro_mode_elements = []
+        self.pro_mode_elements: List[Control] = []
         # Это здесь нужно для доступа к переменным, методам
         # и т.д. в файле design.py
         super().__init__()
@@ -300,155 +481,61 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         # todo: сделать реассигн параметров во время рендера
         self.presetSeedSpinBox.setEnabled(not is_render_active)
 
-        if is_render_active:
-            self.progressBar.show()
-        else:
-            self.progressBar.hide()
+        self.progressBar.setVisible(is_render_active)
 
         self.NearestUpScale.setEnabled(not is_render_active)
 
     def sync_nt_to_sliders(self):
-        for parameter_name, element, *rest in self.nt_controls:
+        for parameter_name, control in self.nt_controls.items():
             value = getattr(self.nt, parameter_name)
 
-            try:
-                element.blockSignals(True)
-                if isinstance(element, (DoubleSlider, QDoubleSpinBox)):
-                    element.setValue(float(value))
-                elif isinstance(element, (QSlider, QSpinBox)):
-                    element.setValue(int(value))
-                elif isinstance(element, QCheckBox):
-                    element.setChecked(bool(value))
-                elif isinstance(element, QComboBox):
-                    mapping = rest[0]
-                    index = mapping.get(value, -1)
-                    element.setCurrentIndex(index)
-                else:
-                    raise TypeError(f"Unsupported element type for {parameter_name}: {type(element).__name__}")
-            finally:
-                element.blockSignals(False)
-
-            logger.debug(f"set {type(value)} {parameter_name} {type(element).__name__} to {value}")
+            control.set_value(value, block_signals=True)
+            logger.debug(f"set {type(value)} {parameter_name} {type(control).__name__} to {value}")
         self.nt_update_preview()
 
-    @QtCore.pyqtSlot()
-    def value_changed_slot(self):
-        element = self.sender()
-        print(self.sender())
-        parameter_name = element.objectName()
-        if isinstance(element, (QSlider, DoubleSlider)):
-            value = element.value()
-        elif isinstance(element, QCheckBox):
-            value = element.isChecked()
-        elif isinstance(element, QComboBox):
-            value = element.currentData()
-        else:
-            raise ValueError(f"Tried to set {parameter_name} to {value}, but it's not supported")
-
+    def value_changed(self, parameter_name, value):
         logger.debug(f"Set {parameter_name} to {value}")
         setattr(self.nt, parameter_name, value)
         self.nt_update_preview()
 
     def add_checkbox(self, param_name, pos, pro=False):
-        checkbox = QCheckBox()
-        checkbox.setText(self.strings[param_name])
-        checkbox.setObjectName(param_name)
-        checkbox.stateChanged.connect(self.value_changed_slot)
-        # checkbox.mouseReleaseEvent(lambda: self.controls_set())
-        self.nt_controls.append((param_name, checkbox))
-        self.checkboxesLayout.addWidget(checkbox, pos[0], pos[1])
+        checkbox = CheckboxControl(param_name, self.strings[param_name], self.value_changed)
+        self.nt_controls[param_name] = checkbox
+        self.checkboxesLayout.addWidget(checkbox.checkbox, pos[0], pos[1])
 
         if pro:
             self.pro_mode_elements.append(checkbox)
-            checkbox.hide()
+            checkbox.set_visible(False)
 
     @QtCore.pyqtSlot(bool)
     def set_pro_mode(self, state):
         for frame in self.pro_mode_elements:
-            if state:
-                frame.show()
-            else:
-                frame.hide()
+            frame.set_visible(state)
 
     def add_menu(self, param_name, values: List[Tuple[str, Any]], pro=False):
-        label = QLabel()
-        label.setText(self.strings[param_name])
-        box = QComboBox()
-
-        # map values back to indices for use in sync_nt_to_sliders
-        mapping = {}
-
-        for index, (text, data) in enumerate(values):
-            box.addItem(text, data)
-            mapping[data] = index
-        box.setObjectName(param_name)
-
-        box.currentIndexChanged.connect(self.value_changed_slot)
-
-        self.nt_controls.append((param_name, box, mapping))
-        self.slidersLayout.addRow(label, box)
+        menu = ComboBoxControl(param_name, self.strings[param_name], self.value_changed, values)
+        self.nt_controls[param_name] = menu
+        self.slidersLayout.addRow(menu.label, menu.box)
 
         if pro:
-            self.pro_mode_elements.append(label)
-            self.pro_mode_elements.append(box)
-            label.hide()
-            box.hide()
+            self.pro_mode_elements.append(menu)
+            menu.set_visible(False)
 
-    def add_slider(self, param_name, min_val, max_val, slider_value_type: Union[int, float] = int, pro=False):
-        ly = QHBoxLayout()
-        ly.setContentsMargins(0, 0, 0, 0)
-        slider_frame = QtWidgets.QFrame()
-        slider_frame.setLayout(ly)
-        label = QLabel()
-
-        if slider_value_type is int:
-            slider = QSlider()
-            box = QSpinBox()
-        elif slider_value_type is float:
-            box = QDoubleSpinBox()
-            box.setSingleStep(0.1)
-            slider = DoubleSlider()
-        else:
-            raise ValueError
-
-        slider.blockSignals(True)
-        box.blockSignals(True)
-
-        box.setMinimum(min_val)
-        box.setMaximum(max_val)
-        box.setFixedWidth(64)
-        slider.valueChanged.connect(box.setValue)
-        box.valueChanged.connect(slider.setValue)
-        slider.valueChanged.connect(self.value_changed_slot)
+    def add_slider(self, param_name, min_val, max_val, slider_value_type: Union[Type[int], Type[float]] = int, pro=False):
+        slider = SliderControl(
+            param_name,
+            self.strings[param_name],
+            self.value_changed,
+            min_val,
+            max_val,
+            slider_value_type
+        )
+        self.nt_controls[param_name] = slider
+        self.slidersLayout.addRow(slider.label, slider.slider_frame)
 
         if pro:
-            self.pro_mode_elements.append(label)
-            self.pro_mode_elements.append(slider_frame)
-            label.hide()
-            slider_frame.hide()
-
-        slider.setEnabled(True)
-        slider.setMaximum(max_val)
-        slider.setMinimum(min_val)
-        slider.setMouseTracking(False)
-        if max_val < 100 and slider_value_type == int:
-            slider.setTickPosition(QSlider.TicksLeft)
-            slider.setTickInterval(1)
-        slider.setOrientation(QtCore.Qt.Horizontal)
-        slider.setObjectName(param_name)
-
-        slider.blockSignals(False)
-        box.blockSignals(False)
-
-        label.setText(self.strings[param_name])
-        label.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-
-        ly.addWidget(slider)
-        ly.addWidget(box)
-
-        self.nt_controls.append((param_name, slider))
-        self.nt_controls.append((param_name, box))
-        self.slidersLayout.addRow(label, slider_frame)
+            self.pro_mode_elements.append(slider)
+            slider.set_visible(False)
 
     def get_current_video_frames(self):
         preview_h = self.renderHeightBox.value()
@@ -559,18 +646,12 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
 
     def nt_get_config(self):
         values = {}
-        element: Union[QCheckBox, QSlider, DoubleSlider]
-        for parameter_name, element in self.nt_controls.items():
-            if isinstance(element, QCheckBox):
-                value = element.isChecked()
-            elif isinstance(element, (QSlider, DoubleSlider)):
-                value = element.value()
-
-            values[parameter_name] = value
+        for parameter_name, control in self.nt_controls.items():
+            values[parameter_name] = control.get_value()
 
         return values
 
-    def nt_set_config(self, values: List[Dict[str, Union[int, float]]]):
+    def nt_set_config(self, values: Dict[str, Union[int, float]]):
         for parameter_name, value in values.items():
             setattr(self.nt, parameter_name, value)
 
