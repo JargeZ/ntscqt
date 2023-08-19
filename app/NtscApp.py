@@ -1,20 +1,20 @@
 import json
 from pathlib import Path
 from random import randint
-from typing import Tuple, Union, List, Dict
+from typing import Tuple, Union, List, Dict, Any
 import requests
 import cv2
 import numpy
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import QSlider, QHBoxLayout, QLabel, QCheckBox, QInputDialog, QPushButton, QSpinBox, QDoubleSpinBox
+from PyQt5.QtWidgets import QSlider, QHBoxLayout, QLabel, QCheckBox, QInputDialog, QPushButton, QSpinBox, QDoubleSpinBox, QComboBox
 from numpy import ndarray
 
 from app.InterlacedRenderer import InterlacedRenderer
 from app.config_dialog import ConfigDialog
 from app.logs import logger
 from app.Renderer import DefaultRenderer
-from app.funcs import resize_to_height, pick_save_file, trim_to_4width, set_ui_element
-from app.ntsc import random_ntsc, Ntsc
+from app.funcs import resize_to_height, pick_save_file, trim_to_4width
+from app.ntsc import random_ntsc, Ntsc, VHSSpeed
 from ui import mainWindow
 from ui.DoubleSlider import DoubleSlider
 
@@ -49,6 +49,9 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             "_vhs_out_sharpen": self.tr("VHS out sharpen"),
             "_vhs_edge_wave": self.tr("Edge wave"),
             "_output_vhs_tape_speed": self.tr("VHS tape speed"),
+            "_output_vhs_tape_speed_sp": self.tr("SP (Standard Play)"),
+            "_output_vhs_tape_speed_lp": self.tr("LP (Long Play)"),
+            "_output_vhs_tape_speed_ep": self.tr("EP (Extended Play)"),
             "_ringing": self.tr("Ringing"),
             "_ringing_power": self.tr("Ringing power"),
             "_ringing_shift": self.tr("Ringing shift"),
@@ -79,7 +82,11 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.add_slider("_composite_preemphasis", 0, 10, float)
         self.add_slider("_vhs_out_sharpen", 1, 5)
         self.add_slider("_vhs_edge_wave", 0, 10)
-        # self.add_slider("_output_vhs_tape_speed", 0, 10)
+        self.add_menu("_output_vhs_tape_speed", [
+            (self.strings["_output_vhs_tape_speed_sp"], VHSSpeed.VHS_SP),
+            (self.strings["_output_vhs_tape_speed_lp"], VHSSpeed.VHS_LP),
+            (self.strings["_output_vhs_tape_speed_ep"], VHSSpeed.VHS_EP)
+        ])
         self.add_slider("_ringing", 0, 1, float, pro=True)
         self.add_slider("_ringing_power", 0, 10)
         self.add_slider("_ringing_shift", 0, 3, float, pro=True)
@@ -301,16 +308,25 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.NearestUpScale.setEnabled(not is_render_active)
 
     def sync_nt_to_sliders(self):
-        for parameter_name, element in self.nt_controls:
+        for parameter_name, element, *rest in self.nt_controls:
             value = getattr(self.nt, parameter_name)
 
-            # This is necessary because some parameters that have a real float type, but in the interface,
-            # the slide is simplified to int. However, when setting the initial parameters that occur here,
-            # you need to set from the initial parameters that float
-            if isinstance(element, (QSlider, QSpinBox)) and not isinstance(element, DoubleSlider) and isinstance(value, float):
-                value = int(value)
-
-            set_ui_element(element, value)
+            try:
+                element.blockSignals(True)
+                if isinstance(element, (DoubleSlider, QDoubleSpinBox)):
+                    element.setValue(float(value))
+                elif isinstance(element, (QSlider, QSpinBox)):
+                    element.setValue(int(value))
+                elif isinstance(element, QCheckBox):
+                    element.setChecked(bool(value))
+                elif isinstance(element, QComboBox):
+                    mapping = rest[0]
+                    index = mapping.get(value, -1)
+                    element.setCurrentIndex(index)
+                else:
+                    raise TypeError(f"Unsupported element type for {parameter_name}: {type(element).__name__}")
+            finally:
+                element.blockSignals(False)
 
             logger.debug(f"set {type(value)} {parameter_name} {type(element).__name__} to {value}")
         self.nt_update_preview()
@@ -324,8 +340,10 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             value = element.value()
         elif isinstance(element, QCheckBox):
             value = element.isChecked()
+        elif isinstance(element, QComboBox):
+            value = element.currentData()
         else:
-            value = None
+            raise ValueError(f"Tried to set {parameter_name} to {value}, but it's not supported")
 
         logger.debug(f"Set {parameter_name} to {value}")
         setattr(self.nt, parameter_name, value)
@@ -351,6 +369,30 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
                 frame.show()
             else:
                 frame.hide()
+
+    def add_menu(self, param_name, values: List[Tuple[str, Any]], pro=False):
+        label = QLabel()
+        label.setText(self.strings[param_name])
+        box = QComboBox()
+
+        # map values back to indices for use in sync_nt_to_sliders
+        mapping = {}
+
+        for index, (text, data) in enumerate(values):
+            box.addItem(text, data)
+            mapping[data] = index
+        box.setObjectName(param_name)
+
+        box.currentIndexChanged.connect(self.value_changed_slot)
+
+        self.nt_controls.append((param_name, box, mapping))
+        self.slidersLayout.addRow(label, box)
+
+        if pro:
+            self.pro_mode_elements.append(label)
+            self.pro_mode_elements.append(box)
+            label.hide()
+            box.hide()
 
     def add_slider(self, param_name, min_val, max_val, slider_value_type: Union[int, float] = int, pro=False):
         ly = QHBoxLayout()
@@ -393,7 +435,7 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             slider.setTickPosition(QSlider.TicksLeft)
             slider.setTickInterval(1)
         slider.setOrientation(QtCore.Qt.Horizontal)
-        slider.setObjectName(f"{param_name}")
+        slider.setObjectName(param_name)
 
         slider.blockSignals(False)
         box.blockSignals(False)
