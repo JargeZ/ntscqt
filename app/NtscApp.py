@@ -595,7 +595,13 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
                 return None
 
     def open_file(self):
-        file = QtWidgets.QFileDialog.getOpenFileName(self, "Select File")
+        image_filters, video_filters = (
+            " ".join(f"*{extension}" for extension in extension_list)
+                for extension_list
+                in (self.supported_image_type, self.supported_video_type)
+        )
+        filters = f"All supported files ({image_filters} {video_filters});;Images ({image_filters});;Videos ({video_filters});;All files (*)"
+        file = QtWidgets.QFileDialog.getOpenFileName(self, "Select File", filter=filters)
         if file:
             path = Path(file[0])
         else:
