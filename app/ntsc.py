@@ -559,7 +559,8 @@ class Ntsc:
         # Set random seed based on the noise seed and frame number
         self.random.seed(frameno)
         frame_dependent = self.random.nextInt()
-        self.random.seed((frame_dependent ^ self._noise_seed) & 0x7fffffff)
+        seed = (frame_dependent ^ self._noise_seed) & 0x7fffffff
+        self.random.seed(seed)
 
         if self._black_line_cut:
             cut_black_line_border(src)
@@ -572,7 +573,7 @@ class Ntsc:
             composite_lowpass(yiq, field, fieldno)
 
         if self._ringing != 1.0:
-            self.ringing(yiq, field)
+            self.ringing(yiq, field, seed)
 
         self.chroma_into_luma(yiq, field, fieldno, self._subcarrier_amplitude)
 
@@ -610,7 +611,7 @@ class Ntsc:
             self.color_bleed(yiq, field)
 
         # if self._ringing != 1.0:
-        #     self.ringing(yiq, field)
+        #     self.ringing(yiq, field, seed)
 
         Y, I, Q = yiq
 
@@ -625,15 +626,15 @@ class Ntsc:
         down2 = cv2.resize(chroma.astype(numpy.float32), (w // 2, h // 2), interpolation=cv2.INTER_LANCZOS4)
         return cv2.resize(down2, (w, h), interpolation=cv2.INTER_LANCZOS4).astype(numpy.int32)
 
-    def ringing(self, yiq: numpy.ndarray, field: int):
+    def ringing(self, yiq: numpy.ndarray, field: int, seed: int):
         Y, I, Q = yiq
         sz = self._freq_noise_size
         amp = self._freq_noise_amplitude
         shift = self._ringing_shift
         if not self._enable_ringing2:
-            Y[field::2] = ringing(Y[field::2], self._ringing, noiseSize=sz, noiseValue=amp, clip=False)
-            I[field::2] = ringing(I[field::2], self._ringing, noiseSize=sz, noiseValue=amp, clip=False)
-            Q[field::2] = ringing(Q[field::2], self._ringing, noiseSize=sz, noiseValue=amp, clip=False)
+            Y[field::2] = ringing(Y[field::2], self._ringing, noiseSize=sz, noiseValue=amp, clip=False, seed=seed)
+            I[field::2] = ringing(I[field::2], self._ringing, noiseSize=sz, noiseValue=amp, clip=False, seed=seed)
+            Q[field::2] = ringing(Q[field::2], self._ringing, noiseSize=sz, noiseValue=amp, clip=False, seed=seed)
         else:
             Y[field::2] = ringing2(Y[field::2], power=self._ringing_power, shift=shift, clip=False)
             I[field::2] = ringing2(I[field::2], power=self._ringing_power, shift=shift, clip=False)
