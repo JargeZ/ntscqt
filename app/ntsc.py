@@ -138,7 +138,7 @@ def yiq2bgr(yiq: numpy.ndarray, dst_bgr: Union[numpy.ndarray, None] = None, fiel
     return dst_bgr
 
 
-def cut_black_line_border(image: numpy.ndarray, bordersize: int = None) -> None:
+def cut_black_line_border(image: numpy.ndarray, bordersize: int = None) -> numpy.ndarray:
     h, w, _ = image.shape
     if bordersize is None:
         line_width = int(w * 0.017)  # 1.7%
@@ -146,6 +146,7 @@ def cut_black_line_border(image: numpy.ndarray, bordersize: int = None) -> None:
         line_width = bordersize  # TODO: value to settings
 
     image[:, -1*line_width:] = 0  # 0 set to black
+    return image
 
 
 def composite_lowpass(yiq: numpy.ndarray, field: int, fieldno: int):
@@ -563,7 +564,7 @@ class Ntsc:
         self.random.seed(seed)
 
         if self._black_line_cut:
-            cut_black_line_border(src)
+            src = cut_black_line_border(src.copy())
 
         yiq = bgr2yiq(src)
         if self._color_bleed_before and (self._color_bleed_vert != 0 or self._color_bleed_horiz != 0):
