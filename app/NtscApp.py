@@ -1,12 +1,16 @@
 import json
 from pathlib import Path
 from random import randint
-from typing import Tuple, Union, List, Dict, Any, TypeVar, Generic, Callable, Type
+from typing import Tuple, Union, List, Dict, Set, Any, TypeVar, Generic, Callable, Type
 import requests
 import cv2
 import numpy
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import QSlider, QHBoxLayout, QLabel, QCheckBox, QInputDialog, QPushButton, QSpinBox, QDoubleSpinBox, QComboBox, QFrame
+from PyQt5.QtWidgets import (
+    QHBoxLayout, QGridLayout,
+    QWidget, QSlider, QLabel, QCheckBox, QInputDialog, QPushButton, QSpinBox, QDoubleSpinBox, QComboBox,
+    QFrame, QGroupBox
+)
 from numpy import ndarray
 from abc import abstractmethod
 
@@ -22,15 +26,16 @@ from ui.DoubleSlider import DoubleSlider
 T = TypeVar("T")
 
 class Control(Generic[T]):
-    _param_name: str
+    param_name: str
     _on_change: Callable[[str, T], Any]
+    widget: QWidget
 
     def __init__(self, param_name: str, on_change: Callable[[str, T], Any]):
-        self._param_name = param_name
+        self.param_name = param_name
         self._on_change = on_change
 
     def _on_value_change(self):
-        self._on_change(self._param_name, self.get_value())
+        self._on_change(self.param_name, self.get_value())
 
     @abstractmethod
     def get_value(self) -> T:
@@ -40,49 +45,38 @@ class Control(Generic[T]):
     def set_value(self, value: Any, block_signals=False) -> None:
         pass
 
-    @abstractmethod
-    def set_visible(self, visible: bool) -> None:
-        pass
-
-
 class CheckboxControl(Control[bool]):
-    checkbox: QCheckBox
+    widget: QCheckBox
 
     def __init__(self, param_name: str, text: str, on_change: Callable[[str, bool], Any]):
         super().__init__(param_name, on_change)
 
-        self.checkbox = QCheckBox()
-        self.checkbox.setText(text)
-        self.checkbox.setObjectName(param_name)
-        self.checkbox.stateChanged.connect(self._on_value_change)
+        self.widget = QCheckBox()
+        self.widget.setText(text)
+        self.widget.setObjectName(param_name)
+        self.widget.stateChanged.connect(self._on_value_change)
 
     def get_value(self):
-        return self.checkbox.isChecked()
+        return self.widget.isChecked()
 
     def set_value(self, value, block_signals=False):
         if block_signals:
-            self.checkbox.blockSignals(True)
-        self.checkbox.setChecked(bool(value))
-        self.checkbox.blockSignals(False)
-
-    def set_visible(self, visible):
-        self.checkbox.setVisible(visible)
-
+            self.widget.blockSignals(True)
+        self.widget.setChecked(bool(value))
+        self.widget.blockSignals(False)
 
 Num = TypeVar("Num", bound=Union[int, float])
 
 class SliderControl(Control[Num]):
     _slider_value_type: Type[Num]
 
-    label: QLabel
     slider: Union[QSlider, DoubleSlider]
     box: Union[QSpinBox, QDoubleSpinBox]
-    slider_frame: QFrame
+    widget: QFrame
 
     def __init__(
         self,
         param_name: str,
-        text: str,
         on_change: Callable[[str, Num], Any],
         min_val: Num,
         max_val: Num,
@@ -92,14 +86,10 @@ class SliderControl(Control[Num]):
 
         self._slider_value_type = slider_value_type
 
-        self.label = QLabel()
-        self.label.setText(text)
-        self.label.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-
         ly = QHBoxLayout()
         ly.setContentsMargins(0, 0, 0, 0)
-        self.slider_frame = QFrame()
-        self.slider_frame.setLayout(ly)
+        self.widget = QFrame()
+        self.widget.setLayout(ly)
 
         if slider_value_type is int:
             self.slider = QSlider()
@@ -148,22 +138,15 @@ class SliderControl(Control[Num]):
         self.slider.blockSignals(False)
         self.box.blockSignals(False)
 
-    def set_visible(self, visible):
-        self.label.setVisible(visible)
-        self.slider_frame.setVisible(visible)
-
 class ComboBoxControl(Control[T]):
     _values: List[T]
     _values_to_indices: Dict[T, int]
 
-    label: QLabel
-    box: QComboBox
-    slider_frame: QFrame
+    widget: QComboBox
 
     def __init__(
         self,
         param_name: str,
-        text: str,
         on_change: Callable[[str, T], Any],
         values: List[Tuple[str, T]]
     ):
@@ -171,34 +154,85 @@ class ComboBoxControl(Control[T]):
 
         self._values = [value[1] for value in values]
 
-        self.label = QLabel()
-        self.label.setText(text)
-        self.box = QComboBox()
+        self.widget = QComboBox()
 
         # map values back to indices for use in sync_nt_to_sliders
         self._values_to_indices = {}
 
         for index, (text, data) in enumerate(values):
-            self.box.addItem(text, data)
+            self.widget.addItem(text, data)
             self._values_to_indices[data] = index
-        self.box.setObjectName(param_name)
+        self.widget.setObjectName(param_name)
 
-        self.box.currentIndexChanged.connect(self._on_value_change)
+        self.widget.currentIndexChanged.connect(self._on_value_change)
 
     def get_value(self):
-        index = self.box.currentIndex()
+        index = self.widget.currentIndex()
         return None if index == -1 else self._values[index]
 
     def set_value(self, value, block_signals=False):
         if block_signals:
-            self.box.blockSignals(True)
-        self.box.setCurrentIndex(self._values_to_indices.get(value, -1))
-        self.box.blockSignals(False)
+            self.widget.blockSignals(True)
+        self.widget.setCurrentIndex(self._values_to_indices.get(value, -1))
+        self.widget.blockSignals(False)
 
-    def set_visible(self, visible):
-        self.label.setVisible(visible)
-        self.box.setVisible(visible)
+class ControlForm:
+    """Helper class for laying out controls in a form style (label on the left, control on the right.)"""
+    layout: QGridLayout
+    _next_row: int
+    _rows: List[Tuple[QLabel, Control]]
 
+    def __init__(self, layout: Union[None, QGridLayout] = None):
+        self.layout = QGridLayout() if layout is None else layout
+        self.layout.setColumnStretch(1, 1)
+        self.layout.setVerticalSpacing(0)
+        self._next_row = 0
+        self._rows = []
+
+    def add_control(self, text: str, control: Control):
+        label = QLabel(text)
+        label.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+
+        self.layout.addWidget(label, self._next_row, 0)
+        self.layout.addWidget(control.widget, self._next_row, 1)
+        self._rows.append((label, control))
+        self._next_row += 1
+
+    def update_visibility(self, filter: Callable[[Control], bool]):
+        for label, control in self._rows:
+            is_visible = filter(control)
+            label.setVisible(is_visible)
+            control.widget.setVisible(is_visible)
+
+class ControlGrid:
+    """Helper class for laying out controls in a grid style, with a given number of columns before wrapping."""
+    layout: QGridLayout
+    _next_row: int
+    _next_column: int
+    _num_columns: int
+    _controls: List[Control]
+
+    def __init__(self, num_columns: int, layout: Union[None, QGridLayout] = None):
+        self.layout = QGridLayout() if layout is None else layout
+        self._num_columns = num_columns
+        self._next_row = 0
+        self._next_column = 0
+        self._controls = []
+
+    def add_control(self, control: Control):
+        self.layout.addWidget(control.widget, self._next_row, self._next_column)
+        self._next_column += 1
+        if self._next_column >= self._num_columns:
+            self._next_row += 1
+            self._next_column = 0
+        self._controls.append(control)
+
+    def update_visibility(self, filter: Callable[[Control], bool]):
+        for control in self._controls:
+            is_visible = filter(control)
+            control.widget.setVisible(is_visible)
+        # TODO: redo layout
 
 class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
     render_thread: QtCore.QThread
@@ -218,7 +252,8 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.ProcessAudio: bool = False
         self.nt_controls: Dict[str, Control] = {}
         self.nt: Ntsc = None
-        self.pro_mode_elements: List[Control] = []
+        self.pro_mode = False
+        self.pro_mode_params: Set[str] = set()
         # Это здесь нужно для доступа к переменным, методам
         # и т.д. в файле design.py
         super().__init__()
@@ -260,6 +295,8 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
             "_output_ntsc": self.tr("NTSC output"),
             "_black_line_cut": self.tr("Cut 2% black line"),
         }
+        self.sliders = ControlForm(self.slidersLayout)
+        self.checkboxes = ControlGrid(2, self.checkboxesLayout)
         self.add_slider("_composite_preemphasis", 0, 10, float)
         self.add_slider("_vhs_out_sharpen", 1, 5)
         self.add_slider("_vhs_edge_wave", 0, 10)
@@ -284,18 +321,20 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
 
         self.add_slider("_head_switching_speed", 0, 100)
 
-        self.add_checkbox("_vhs_head_switching", (1, 1))
-        self.add_checkbox("_color_bleed_before", (6, 2), pro=True)
-        self.add_checkbox("_enable_ringing2", (2, 1), pro=True)
-        self.add_checkbox("_composite_in_chroma_lowpass", (2, 2), pro=True)
-        self.add_checkbox("_composite_out_chroma_lowpass", (3, 1), pro=True)
-        self.add_checkbox("_composite_out_chroma_lowpass_lite", (3, 2), pro=True)
-        self.add_checkbox("_emulating_vhs", (4, 1))
-        self.add_checkbox("_nocolor_subcarrier", (4, 2), pro=True)
-        self.add_checkbox("_vhs_chroma_vert_blend", (5, 1), pro=True)
-        self.add_checkbox("_vhs_svideo_out", (5, 2), pro=True)
-        self.add_checkbox("_output_ntsc", (6, 1), pro=True)
-        self.add_checkbox("_black_line_cut", (1, 2), pro=False)
+        self.add_checkbox("_vhs_head_switching")
+        self.add_checkbox("_black_line_cut", pro=False)
+        self.add_checkbox("_enable_ringing2", pro=True)
+        self.add_checkbox("_composite_in_chroma_lowpass", pro=True)
+        self.add_checkbox("_composite_out_chroma_lowpass", pro=True)
+        self.add_checkbox("_composite_out_chroma_lowpass_lite", pro=True)
+        self.add_checkbox("_emulating_vhs")
+        self.add_checkbox("_nocolor_subcarrier", pro=True)
+        self.add_checkbox("_vhs_chroma_vert_blend", pro=True)
+        self.add_checkbox("_vhs_svideo_out", pro=True)
+        self.add_checkbox("_output_ntsc", pro=True)
+        self.add_checkbox("_color_bleed_before", pro=True)
+
+        self.set_pro_mode(False)
 
         self.renderHeightBox.valueChanged.connect(
             lambda: self.set_current_frames(*self.get_current_video_frames())
@@ -498,44 +537,64 @@ class NtscApp(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         setattr(self.nt, parameter_name, value)
         self.nt_update_preview()
 
-    def add_checkbox(self, param_name, pos, pro=False):
-        checkbox = CheckboxControl(param_name, self.strings[param_name], self.value_changed)
-        self.nt_controls[param_name] = checkbox
-        self.checkboxesLayout.addWidget(checkbox.checkbox, pos[0], pos[1])
-
-        if pro:
-            self.pro_mode_elements.append(checkbox)
-            checkbox.set_visible(False)
+    def pro_mode_filter(self, item: Control):
+        if self.pro_mode:
+            return True
+        return item.param_name not in self.pro_mode_params
 
     @QtCore.pyqtSlot(bool)
     def set_pro_mode(self, state):
-        for frame in self.pro_mode_elements:
-            frame.set_visible(state)
+        self.pro_mode = state
 
-    def add_menu(self, param_name, values: List[Tuple[str, Any]], pro=False):
-        menu = ComboBoxControl(param_name, self.strings[param_name], self.value_changed, values)
-        self.nt_controls[param_name] = menu
-        self.slidersLayout.addRow(menu.label, menu.box)
+        self.checkboxes.update_visibility(self.pro_mode_filter)
+        self.sliders.update_visibility(self.pro_mode_filter)
+
+    def add_checkbox(self, param_name, pro=False, parent: Union[None, ControlGrid]=None):
+        checkbox = CheckboxControl(param_name, self.strings[param_name], self.value_changed)
+        self.nt_controls[param_name] = checkbox
+
+        if parent is None:
+            parent = self.checkboxes
+        parent.add_control(checkbox)
 
         if pro:
-            self.pro_mode_elements.append(menu)
-            menu.set_visible(False)
+            self.pro_mode_params.add(param_name)
 
-    def add_slider(self, param_name, min_val, max_val, slider_value_type: Union[Type[int], Type[float]] = int, pro=False):
+    def add_menu(self, param_name, values: List[Tuple[str, Any]], pro=False, parent: Union[None, ControlForm]=None):
+        menu = ComboBoxControl(param_name, self.value_changed, values)
+        self.nt_controls[param_name] = menu
+
+        if parent is None:
+            parent = self.sliders
+        parent.add_control(self.strings[param_name], menu)
+
+        if pro:
+            self.pro_mode_params.add(param_name)
+
+    def add_slider(
+            self,
+            param_name,
+            min_val,
+            max_val,
+            slider_value_type: Union[Type[int], Type[float]] = int,
+            pro=False,
+            parent: Union[None, ControlForm]=None
+        ):
         slider = SliderControl(
             param_name,
-            self.strings[param_name],
             self.value_changed,
             min_val,
             max_val,
             slider_value_type
         )
         self.nt_controls[param_name] = slider
-        self.slidersLayout.addRow(slider.label, slider.slider_frame)
+
+        if parent is None:
+            parent = self.sliders
+        parent.add_control(self.strings[param_name], slider)
 
         if pro:
-            self.pro_mode_elements.append(slider)
-            slider.set_visible(False)
+            self.pro_mode_params.add(param_name)
 
     def get_current_video_frames(self):
         preview_h = self.renderHeightBox.value()

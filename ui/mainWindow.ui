@@ -84,10 +84,7 @@ p, li { white-space: pre-wrap; }
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_2">
             <item>
-             <layout class="QFormLayout" name="slidersLayout">
-              <property name="labelAlignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
+             <layout class="QGridLayout" name="slidersLayout">
               <property name="verticalSpacing">
                <number>0</number>
               </property>
