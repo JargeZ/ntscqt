@@ -16,6 +16,9 @@
 
 <div align="center">
 
+## Complete guide by Jonah Longoria
+[<img alt="Jonah Longoria s guide" src="https://i.imgur.com/ERBwB7N.png" height="257">](https://youtu.be/O9jpc5rySUI)
+
 ## Demo:
 [<img alt="Tutorial by Skittleology" src="https://i.imgur.com/5vJ3Pdb.png" height="157">](https://youtu.be/hV9IoedRe7I)
 [<img alt="GiyuGamer556 Comparing" src="https://i.imgur.com/gVBgqkO.png" height="157">](https://youtu.be/S6Qn-_wWuMc)
