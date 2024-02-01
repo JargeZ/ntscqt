@@ -1,15 +1,31 @@
 # [<img src="https://github.com/JargeZ/ntscqt/blob/master/docs/img/ntscqt_banner.png?raw=true">](https://0hz.ru/ntscqt/)
-#### <p align="center">AKA `Line maker 10.0`</p>
 
 <div align="center">
-
-[![Release version](https://img.shields.io/github/v/release/JargeZ/ntscqt?color=blue&label=&style=for-the-badge)](https://github.com/JargeZ/ntscqt/releases/latest)
+   
 [![Downloads](https://img.shields.io/github/downloads/JargeZ/ntscqt/total?style=for-the-badge&color=blue)](https://github.com/JargeZ/ntscqt/releases/latest)
-[![Commits](https://img.shields.io/github/commit-activity/m/JargeZ/ntscqt?label=commits&style=for-the-badge)](https://github.com/JargeZ/ntscqt/commits)
-[![Last Commit](https://img.shields.io/github/last-commit/JargeZ/ntscqt/master?label=&style=for-the-badge)](https://github.com/JargeZ/ntscqt/commits)
 [![Website](https://img.shields.io/badge/-WEBSITE-blue?label=&style=for-the-badge)](https://0hz.ru/ntscqt/)
 
+<!---
+[![Release version](https://img.shields.io/github/v/release/JargeZ/ntscqt?color=blue&label=&style=for-the-badge)](https://github.com/JargeZ/ntscqt/releases/latest)
+[![Commits](https://img.shields.io/github/commit-activity/m/JargeZ/ntscqt?label=commits&style=for-the-badge)](https://github.com/JargeZ/ntscqt/commits)
+[![Last Commit](https://img.shields.io/github/last-commit/JargeZ/ntscqt/master?label=&style=for-the-badge)](https://github.com/JargeZ/ntscqt/commits)
+-->
+
 </div>
+
+## Alternatives
+Thank you, everyone, so many stars 🌟 and uses are very much appreciated.\
+Nowadays this project has the latest working release, but will not be supported further
+- [NTSC-RS](https://github.com/valadaptive/ntsc-rs) is one of the promising ones, the algorithm is implemented in Rust and should be faster\
+  and [there are OpenFX or After Effects plugins available](https://github.com/valadaptive/ntsc-rs/releases)
+- [NtscQT+](https://github.com/rgm89git/ntscQTplus) is a fork modification of the current version
+- [valadaptive/ntscqt](https://github.com/valadaptive/ntscqt) is fork with fixes in current version
+- The Signal plugin for AE also exists, though it's a paid and quite expensive one. It's based on the same algorithm.\
+  Its complete replacement is [ntsc-rs-windows-afterfx.zip](https://github.com/valadaptive/ntsc-rs/releases)
+  
+You can also use [current version](https://github.com/JargeZ/ntscqt/releases/tag/v1.5.0) if it suits your purpose.
+
+
 
 [![Demo](demo.gif)](https://youtu.be/uqT3Z0kfF24)
 ![example](https://i.imgur.com/nn92Jmp.jpg)
@@ -146,6 +162,7 @@ You can open the video and experiment with all parameters
 # Presets
 <p align="center"><a href="https://github.com/rgm89git/rgms-ntscqt-presets">RGM's ntscQT presets <i>(by RGM)</i></a></p>
 
+#### <p align="center">AKA `Line maker 10.0`</p>
 - - -
 #
 ##### Original README (оригинальное описание)
