@@ -44,10 +44,70 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="ProMode">
+        <property name="text">
+         <string>Pro mode</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
        <layout class="QGridLayout" name="checkboxesLayout"/>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="slidersLayout"/>
+       <widget class="QScrollArea" name="scrollArea">
+        <property name="widgetResizable">
+         <bool>true</bool>
+        </property>
+        <widget class="QFrame" name="scrollAreaWidgetContents_2">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>461</width>
+           <height>716</height>
+          </rect>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_2">
+            <item>
+             <layout class="QGridLayout" name="slidersLayout">
+              <property name="verticalSpacing">
+               <number>0</number>
+              </property>
+             </layout>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="verticalSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </widget>
       </item>
       <item>
        <layout class="QHBoxLayout" name="templatesLayout">
@@ -150,47 +210,21 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item>
-         <widget class="QCheckBox" name="livePreviewCheckbox">
-          <property name="maximumSize">
-           <size>
-            <width>136</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string comment="When rendering, every frame is displayed. Otherwise, only every 10th" extracomment="фаыва"/>
-          </property>
-          <property name="text">
-           <string>LivePreview</string>
-          </property>
-         </widget>
-        </item>
        </layout>
       </item>
       <item>
        <layout class="QGridLayout" name="gridLayout_2">
-        <item row="1" column="1">
-         <widget class="QLabel" name="label_2">
+        <item row="2" column="5">
+         <widget class="QCheckBox" name="compareModeButton">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Split-screen between the original image and one with effects applied.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="text">
-           <string>Render height</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           <string>Compare mode</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="2">
-         <widget class="QSpinBox" name="renderHeightBox">
-          <property name="maximum">
-           <number>3000</number>
-          </property>
-          <property name="singleStep">
-           <number>120</number>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1">
+        <item row="2" column="2">
          <widget class="QCheckBox" name="NearestUpScale">
           <property name="text">
            <string>x2 Output by nearest-neighbor</string>
@@ -198,22 +232,6 @@ p, li { white-space: pre-wrap; }
          </widget>
         </item>
         <item row="2" column="4">
-         <widget class="QCheckBox" name="compareModeButton">
-          <property name="text">
-           <string>Compare mode</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="4">
-         <widget class="QSpinBox" name="seedSpinBox">
-          <property name="font">
-           <font>
-            <pointsize>13</pointsize>
-           </font>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="3">
          <widget class="QCheckBox" name="toggleMainEffect">
           <property name="text">
            <string>ON/OFF</string>
@@ -223,46 +241,132 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="2" column="2">
-         <widget class="QCheckBox" name="ProMode">
-          <property name="text">
-           <string>Pro mode</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="3">
-         <widget class="QLabel" name="seedLabel">
-          <property name="maximumSize">
-           <size>
-            <width>85</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="font">
-           <font>
-            <pointsize>15</pointsize>
-            <weight>75</weight>
-            <bold>true</bold>
-            <underline>false</underline>
-           </font>
-          </property>
-          <property name="autoFillBackground">
-           <bool>false</bool>
-          </property>
-          <property name="text">
-           <string>Seed</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="5">
+        <item row="2" column="6">
          <widget class="QCheckBox" name="LossLessCheckBox">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Export using the lossless FFV1 codec.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="text">
            <string>Lossless .mkv export</string>
           </property>
          </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <item>
+           <widget class="QLabel" name="renderHeightLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Render height</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="renderHeightBox">
+            <property name="whatsThis">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Defaults to the height of the input video. Decreasing this will decrease the output resolution, meaning the video will be processed faster.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="maximum">
+             <number>3000</number>
+            </property>
+            <property name="singleStep">
+             <number>120</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="Line" name="line">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_7">
+          <item>
+           <widget class="QLabel" name="noiseSeedLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Noise seed</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="noiseSeedSpinBox">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Change the random seed used for video noise.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="Line" name="line_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <item>
+           <widget class="QLabel" name="presetSeedLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="autoFillBackground">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Preset seed</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="presetSeedSpinBox"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="presetFromSeedButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Randomize the parameters from the given seed.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Preset from seed</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </item>
@@ -292,7 +396,13 @@ p, li { white-space: pre-wrap; }
          </widget>
         </item>
         <item>
-         <widget class="QToolButton" name="openImageUrlButton">
+         <widget class="QPushButton" name="openImageUrlButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="text">
            <string>Open image url</string>
           </property>
@@ -406,6 +516,28 @@ p, li { white-space: pre-wrap; }
           </property>
           <property name="text">
            <string>Stop Render</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="livePreviewCheckbox">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>136</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string comment="When rendering, every frame is displayed. Otherwise, only every 10th" extracomment="фаыва">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When enabled, display every frame during the rendering process. When disabled, only every 10th frame is shown.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="text">
+           <string>Live preview</string>
           </property>
          </widget>
         </item>

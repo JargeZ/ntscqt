@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QSlider
 
 class DoubleSlider(QSlider):
     mouseRelease = QtCore.pyqtSignal(object)
+    valueChanged = QtCore.pyqtSignal(float)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -15,6 +16,10 @@ class DoubleSlider(QSlider):
         self._min_value = 0.0
         self._max_value = 1.0
 
+        super().valueChanged.connect(self._value_changed_adapter)
+
+    def _value_changed_adapter(self):
+        self.valueChanged.emit(self.value())
 
     @property
     def _value_range(self):
